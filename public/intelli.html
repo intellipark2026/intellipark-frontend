@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INTELLIPARK</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            text-align: center;
+        }
+        .navbar {
+            background-color: purple;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .navbar a:hover img {
+            transform: scale(1.1);
+            transition: transform 0.3s;
+        }
+        .navbar a:hover {
+            opacity: 0.8;
+            transition: 0.3s;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 16px;
+        }
+        .menu-btn {
+            background-color: black;
+            color: white;
+            font-size: 24px;
+            padding: 8px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        /* Layout for main and policy sections */
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px;
+        }
+        .main-content {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+        }
+        .policy-section {
+            flex: 1;
+            background-color: #f8f8f8;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 40px;
+            font-weight: bold;
+        }
+        .sub-text {
+            font-size: 18px;
+            color: gray;
+            margin: 10px 0;
+        }
+        .btn {
+            background-color: purple;
+            color: white;
+            padding: 12px 25px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 5px;
+        }
+        .btn:hover {
+            background-color: darkviolet;
+        }
+        /* Policy Styling */
+        .policy-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .light {
+            text-align: center;
+            margin: 10px;
+        }
+        .light img {
+            width: 80px;
+            height: auto;
+        }
+        /* Text Color Styling */
+        .red-text {
+            color: red;
+            font-weight: bold;
+        }
+        .blue-text {
+            color: blue;
+            font-weight: bold;
+        }
+        .green-text {
+            color: green;
+            font-weight: bold;
+        }
+        .fines {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .fine-item {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .fine-item span {
+            color: red;
+            font-weight: bold;
+        }
+        .fine-item p {
+            font-size: 18px;
+            color: gray;
+        }
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                text-align: center;
+            }
+            .policy-section {
+                margin-top: 20px;
+            }
+        }
+        /* Dropdown menu styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            color: black;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+            z-index: 1001;
+        }
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+        .dropdown.show .dropdown-content {
+            display: block;
+        }
+        /* Responsive dropdown for mobile */
+        @media (max-width: 768px) {
+            .dropdown-content {
+                position: static;
+                box-shadow: none;
+                background-color: purple;
+            }
+            .dropdown-content a {
+                color: white;
+            }
+            .dropdown-content a:hover {
+                background-color: darkviolet;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar" style="display: flex; align-items: center; padding: 10px 20px; background-color: purple;">
+        <a id="homeBtn" href="intelli.html" style="display: flex; align-items: center; text-decoration: none; color: white;">
+            <img src="logo.png" alt="IntelliPark Logo" style="height: 40px; margin-right: 10px;">
+            <span style="font-size: 20px; font-weight: bold;">INTELLIPARK</span>
+        </a>
+        <div class="dropdown">
+            <button class="menu-btn" onclick="toggleDropdown()">☰</button>
+            <div class="dropdown-content" id="menuDropdown">
+                <a href="#">About us</a>
+                <a href="#">Parking Guide</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Main Section -->
+        <div class="main-content">
+            <h1>INTELLIPARK</h1>
+            <p class="sub-text">RESERVATIONS | PARKING SPOT NAVIGATION | CASHLESS PAYMENT</p>
+            <a id="bookBtn" href="levels.html" class="btn">BOOK NOW</a>
+        </div>
+
+        <!-- Policy Section -->
+        <div class="policy-section">
+            <h2>POLICY AND GUIDELINES</h2>
+            <div class="policy-container">
+                <div class="light">
+                    <img src="green.png" alt="Available Slot">
+                    <p>AVAILABLE SLOT</p>
+                    <p class="green-text">GREEN LIGHT</p>
+                </div>
+                <div class="light">
+                    <img src="red.png" alt="Occupied Spot">
+                    <p>OCCUPIED SPOT</p>
+                    <p class="red-text">RED LIGHT</p>
+                </div>
+                <div class="light">
+                    <img src="blue.png" alt="Reserved Spot">
+                    <p>RESERVED SPOT</p>
+                    <p class="blue-text">BLUE LIGHT</p>
+                </div>
+            </div>
+
+            <div class="fines">
+                <h3>FINES:</h3>
+                <div class="fine-item">
+                    <span>• LOST TICKET FINE:</span>
+                    <p>P500</p>
+                </div>
+                <div class="fine-item">
+                    <span>• UNAUTHORIZED USE OF RESERVED SPOT FINE:</span>
+                    <p>P400</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function toggleDropdown() {
+            document.querySelector('.dropdown').classList.toggle('show');
+        }
+
+        // Close dropdown if clicked outside
+        window.onclick = function(e) {
+            if (!e.target.matches('.menu-btn')) {
+                const dropdown = document.querySelector(".dropdown");
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        };
+
+        // --- AUTO-DETECT NAVIGATION ---
+        document.addEventListener("DOMContentLoaded", function() {
+            const navLinks = {
+                homeBtn: "intelli.html",
+                bookBtn: "levels.html"
+            };
+            let prefix = "";
+            if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+                prefix = "http://127.0.0.1:5500/public/";
+            }
+            for (const [id, page] of Object.entries(navLinks)) {
+                const btn = document.getElementById(id);
+                if (btn) btn.href = prefix + page;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    text-align: center;
+    background-color: #f8f8f8;
+    color: black;
+}
+
+/* Navigation Bar */
+.navbar {
+    background-color: #800080;
+    color: white;
+    padding: 15px 30px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 20px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Main Container */
+.container {
+    background-color: white;
+    width: 90%;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out;
+}
+
+.container:hover {
+    transform: scale(1.02);
+}
+
+/* Headings */
+h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #444;
+}
+
+/* Form Groups */
+.form-group {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-size: 18px;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 2px solid #800080;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.3s;
+}
+
+/* Focus Effect on Input */
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #6a0080;
+    box-shadow: 0px 0px 6px rgba(134, 101, 225, 0.6);
+}
+
+/* Error Input Highlight */
+.form-group input:invalid {
+    border-color: rgb(255, 87, 87);
+}
+
+/* Confirm Booking Button */
+.submit-btn {
+    display: inline-block;
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    color: white;
+    background-color: #800080;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    margin-top: 15px;
+    transition: 0.3s ease-in-out;
+}
+
+.submit-btn:hover {
+    background-color: #6a0080;
+    transform: scale(1.05);
+}
+
+.submit-btn:active {
+    background-color: #5a0070;
+    transform: scale(0.95);
+}
+
+/* Back Button */
+.back-btn {
+    display: inline-block;
+    margin-top: 15px;
+    font-size: 16px;
+    text-decoration: none;
+    color: #800080;
+    transition: 0.3s;
+}
+
+.back-btn:hover {
+    color: #5a0070;
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+    h2 {
+        font-size: 20px;
+    }
+    .form-group label {
+        font-size: 16px;
+    }
+    .submit-btn {
+        font-size: 16px;
+        padding: 10px;
+    }
+}

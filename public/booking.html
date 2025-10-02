@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Parking - INTELLIPARK</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="navbar" style="display: flex; align-items: center; padding: 10px 20px; background-color: purple;">
+    <a id="homeBtn" href="intelli.html" style="display: flex; align-items: center; text-decoration: none; color: white;">
+      <img src="logo.png" alt="IntelliPark Logo" style="height: 40px; margin-right: 10px;">
+      <span style="font-size: 20px; font-weight: bold;">INTELLIPARK</span>
+    </a>
+  </div>
+
+  <div class="container">
+    <h2>BOOK YOUR PARKING SPOT</h2>
+    <form id="bookingForm">
+      <div class="form-group">
+        <label for="name">NAME:</label>
+        <input type="text" id="name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">EMAIL:</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="form-group">
+        <label for="plate">PLATE NUMBER:</label>
+        <input type="text" id="plate" required>
+      </div>
+      <div class="form-group">
+        <label for="vehicle">VEHICLE TYPE:</label>
+        <select id="vehicle" required>
+          <option value="car">Car</option>
+          <option value="motorcycle">Motorcycle</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="time">PARKING TIME:</label>
+        <input type="time" id="time" required>
+      </div>
+      <button type="submit" class="submit-btn">Reserve Now</button>
+    </form>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
+      authDomain: "intellipark2025-327e9.firebaseapp.com",
+      databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
+      projectId: "intellipark2025-327e9",
+      storageBucket: "intellipark2025-327e9.appspot.com",
+      messagingSenderId: "126333727252",
+      appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const form = document.getElementById("bookingForm");
+
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const plate = document.getElementById("plate").value.trim();
+      const vehicle = document.getElementById("vehicle").value;
+      const time = document.getElementById("time").value;
+      const timestamp = new Date().toISOString();
+
+      try {
+        // pick available slot (simplified: slot1)
+        let slotId = "slot1";
+
+        // save as pending
+        await db.ref(`/pending/${slotId}`).set({ name, email, plate, vehicle, time, timestamp });
+
+        // call backend to create invoice
+        const res = await fetch("https://intellipark-backend-ar00.onrender.com/api/create-invoice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, slotId })
+        });
+
+        const result = await res.json();
+        if (result.invoice_url) {
+          window.location.href = result.invoice_url;
+        } else {
+          alert("Failed to generate payment link. Please try again.");
+        }
+      } catch (err) {
+        console.error("Reservation error:", err);
+        alert("Something went wrong. Please try again.");
+      }
+    });
+  </script>
+</body>
+</html>

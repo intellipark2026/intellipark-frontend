@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reservation Confirmed</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #3b0066 0%, #7c00a5 50%, #cc44cc 100%);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .header {
+      width: 100%;
+      padding: 3vh 0;
+      background-color: #4a1f68;
+      color: white;
+      font-size: 4.5vh;
+      font-weight: bold;
+      text-align: center;
+      text-shadow: 0 0 12px white;
+      box-shadow: 0 0 15px white;
+    }
+
+    .receipt-card {
+      background-color: #9f65b7;
+      border: 4px solid #2e1c8a;
+      border-radius: 20px;
+      box-shadow: 0 0 20px #2e1c8a;
+      padding: 40px 30px;
+      margin-top: 5vh;
+      width: 85vw;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .slot-box {
+      background-color: #221b3f;
+      color: white;
+      font-size: 4.2vh;
+      font-weight: bold;
+      padding: 20px 30px;
+      border-radius: 16px;
+      width: 100%;
+      text-align: left;
+      box-sizing: border-box;
+    }
+
+    canvas {
+      width: 180px !important;
+      height: 180px !important;
+    }
+
+    .qr-text {
+      font-size: 2.1vh;
+      text-align: center;
+      color: white;
+      text-shadow: 0 0 4px white;
+    }
+
+    .back-btn {
+      padding: 15px 30px;
+      font-size: 2.3vh;
+      background: white;
+      color: #800080;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">RESERVATION CONFIRMED!</div>
+
+  <div class="receipt-card">
+    <div class="slot-box">SLOT: <span id="slot">...</span></div>
+    <canvas id="qr"></canvas>
+    <div class="qr-text" id="qr-label">...</div>
+      <div style="margin-top:30px;">
+    <button class="button" onclick="location.href='kiosk-start.html'">🏠 Back to Start</button>
+    <button class="button" onclick="goToNav()">🗺️ Show Directions</button>
+  </div>
+
+  <script>
+    function goToNav() {
+      const params = new URLSearchParams(window.location.search);
+      const slot = params.get("slot") || "unknown";
+      window.location.href = `kiosk-navigation.html?slot=${slot}`;
+    }
+  </script>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const slot = params.get("slot") || "UNKNOWN";
+
+    document.getElementById("slot").textContent = slot.toUpperCase();
+
+    const qrValue = `https://intellipark2025-327e9.web.app/navigation.html?slot=${slot}`;
+    new QRious({
+      element: document.getElementById("qr"),
+      value: qrValue,
+      size: 180
+    });
+
+    document.getElementById("qr-label").textContent = `SCAN TO NAVIGATE SLOT: /navigation.html?slot=${slot}`;
+  </script>
+</body>
+</html>
