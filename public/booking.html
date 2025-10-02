@@ -27,7 +27,7 @@
       </div>
       <div class="form-group">
         <label for="plate">PLATE NUMBER:</label>
-        <input type="text" id="plate" required>
+        <input type="text" id="plate" required placeholder="e.g., ABC123" pattern="^[A-Za-z]{3}[0-9]{3}$">
       </div>
       <div class="form-group">
         <label for="vehicle">VEHICLE TYPE:</label>
@@ -42,6 +42,12 @@
       </div>
       <button type="submit" class="submit-btn">Reserve Now</button>
     </form>
+
+    <button id="resetButton" style="margin-top: 20px; background-color: red; color: white; padding: 10px 15px; border: none; cursor: pointer;">
+      Reset All Reservations (Admin)
+    </button>
+
+    <a id="backHomeBtn" href="intelli.html" class="back-btn">← Back to Home</a>
   </div>
 
   <!-- Firebase SDK -->
@@ -63,7 +69,35 @@
     const db = firebase.database();
 
     const form = document.getElementById("bookingForm");
+    const timeInput = document.getElementById("time");
 
+    // Helper: convert "HH:MM" to minutes
+    function timeToMinutes(t) {
+      const [h, m] = t.split(":").map(Number);
+      return h * 60 + m;
+    }
+
+    function normalize(date) {
+      date.setSeconds(0);
+      date.setMilliseconds(0);
+      return date;
+    }
+
+    // Limit booking time: now → +2 hours
+    function setMinMaxTime() {
+      const now = new Date();
+      const hhMin = String(now.getHours()).padStart(2, "0");
+      const mmMin = String(now.getMinutes()).padStart(2, "0");
+      timeInput.min = `${hhMin}:${mmMin}`;
+
+      now.setMinutes(now.getMinutes() + 120);
+      const hhMax = String(now.getHours()).padStart(2, "0");
+      const mmMax = String(now.getMinutes()).padStart(2, "0");
+      timeInput.max = `${hhMax}:${mmMax}`;
+    }
+    document.addEventListener("DOMContentLoaded", setMinMaxTime);
+
+    // Form Submission
     form.addEventListener("submit", async function(e) {
       e.preventDefault();
 
@@ -74,30 +108,87 @@
       const time = document.getElementById("time").value;
       const timestamp = new Date().toISOString();
 
+      // Plate validation
+      const platePattern = /^[A-Za-z]{3}[0-9]{3}$/;
+      if (!platePattern.test(plate)) {
+        return alert("Plate number must be in the format ABC123 (3 letters + 3 digits).");
+      }
+
+      // Time validation
+      const now = normalize(new Date());
+      const selectedTime = normalize(new Date());
+      const [hh, mm] = time.split(":").map(Number);
+      selectedTime.setHours(hh, mm, 0, 0);
+
+      const maxTime = normalize(new Date());
+      maxTime.setMinutes(maxTime.getMinutes() + 120);
+
+      if (selectedTime < now) return alert("You cannot book a time in the past.");
+      if (selectedTime > maxTime) return alert("You cannot book more than 2 hours from now.");
+
       try {
-        // pick available slot (simplified: slot1)
-        let slotId = "slot1";
+        // Check available slots
+        const statuses = await Promise.all([
+          db.ref("/slot1/status").get(),
+          db.ref("/slot2/status").get(),
+          db.ref("/slot3/status").get(),
+          db.ref("/slot4/status").get()
+        ]);
 
-        // save as pending
-        await db.ref(`/pending/${slotId}`).set({ name, email, plate, vehicle, time, timestamp });
+        let slotId = null;
+        if (statuses[0].exists() && statuses[0].val() === "Available") slotId = "slot1";
+        else if (statuses[1].exists() && statuses[1].val() === "Available") slotId = "slot2";
+        else if (statuses[2].exists() && statuses[2].val() === "Available") slotId = "slot3";
+        else if (statuses[3].exists() && statuses[3].val() === "Available") slotId = "slot4";
 
-        // call backend to create invoice
+        if (!slotId) return alert("All slots are currently reserved or occupied.");
+
+        // Call backend to create invoice
         const res = await fetch("https://intellipark-backend-ar00.onrender.com/api/create-invoice", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, slotId })
+          body: JSON.stringify({ name, email, plate, vehicle, time, slot: slotId })
         });
 
         const result = await res.json();
         if (result.invoice_url) {
           window.location.href = result.invoice_url;
         } else {
-          alert("Failed to generate payment link. Please try again.");
+          alert("Failed to create invoice. Please try again.");
         }
       } catch (err) {
         console.error("Reservation error:", err);
         alert("Something went wrong. Please try again.");
       }
+    });
+
+    // Reset All Reservations (Admin)
+    document.getElementById("resetButton").addEventListener("click", async () => {
+      if (!confirm("Are you sure you want to reset ALL reservations?")) return;
+
+      try {
+        await db.ref("reservations").remove();
+        await Promise.all([
+          db.ref("slot1").update({ status: "Available", reserved: false }),
+          db.ref("slot2").update({ status: "Available", reserved: false }),
+          db.ref("slot3").update({ status: "Available", reserved: false }),
+          db.ref("slot4").update({ status: "Available", reserved: false })
+        ]);
+        alert("All reservations have been cleared successfully.");
+      } catch (err) {
+        console.error("Failed to reset reservations:", err);
+        alert("Error resetting reservations. Check console.");
+      }
+    });
+
+    // Auto-detect navigation for home/back buttons
+    document.addEventListener("DOMContentLoaded", function() {
+      const isLocal = (location.hostname === "127.0.0.1" || location.hostname === "localhost");
+      const prefix = isLocal ? "http://127.0.0.1:5500/public/" : "";
+      const homeBtn = document.getElementById("homeBtn");
+      const backHomeBtn = document.getElementById("backHomeBtn");
+      if (homeBtn) homeBtn.href = prefix + "intelli.html";
+      if (backHomeBtn) backHomeBtn.href = prefix + "intelli.html";
     });
   </script>
 </body>
