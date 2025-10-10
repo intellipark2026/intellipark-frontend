@@ -52,8 +52,7 @@
       size: 200
     });
     const qrImage = qrCanvas.toDataURL("image/png");
-
-    // ✅ Send Email via EmailJS
+    // Send Email via EmailJS (without QR code in email)
     emailjs.send("service_ubjbmis", "template_x2h90up", {
       to_email: email,
       user_name: name,
@@ -61,12 +60,13 @@
       plate: plate,
       vehicle: vehicle,
       time: time,
-      timestamp: new Date(timestamp).toLocaleString(),
-      qr_code: qrImage
+      timestamp: new Date(timestamp).toLocaleString()
+      // Remove qr_code: qrImage
     }).then(
       response => console.log("✅ Email sent!", response.status, response.text),
       error => console.error("❌ Email failed:", error)
     );
+
 
     function goToReceipt() {
       window.location.href = `receipt.html?${params.toString()}`;
