@@ -160,15 +160,26 @@
             min-width: 160px;
             box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
             z-index: 1001;
+            border-radius: 5px;
+            overflow: hidden;
         }
         .dropdown-content a {
             color: black;
             padding: 12px 16px;
             text-decoration: none;
             display: block;
+            transition: 0.3s;
         }
         .dropdown-content a:hover {
             background-color: #ddd;
+        }
+        .dropdown-content a.admin-link {
+            background-color: purple;
+            color: white;
+            font-weight: bold;
+        }
+        .dropdown-content a.admin-link:hover {
+            background-color: darkviolet;
         }
         .dropdown.show .dropdown-content {
             display: block;
@@ -199,6 +210,7 @@
         <div class="dropdown">
             <button class="menu-btn" onclick="toggleDropdown()">☰</button>
             <div class="dropdown-content" id="menuDropdown">
+                <a href="#" class="admin-link" id="adminLink">🔐 Admin Login</a>
                 <a href="#">About us</a>
                 <a href="#">Parking Guide</a>
             </div>
@@ -266,8 +278,10 @@
         document.addEventListener("DOMContentLoaded", function() {
             const navLinks = {
                 homeBtn: "intelli.html",
-                bookBtn: "levels.html"
+                bookBtn: "levels.html",
+                adminLink: "admin-login.html"  // ✅ Changed to login page
             };
+
             let prefix = "";
             if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
                 prefix = "http://127.0.0.1:5500/public/";

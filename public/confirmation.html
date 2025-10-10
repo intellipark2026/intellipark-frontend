@@ -16,61 +16,106 @@
     </a>
   </div>
 
+
   <div class="container" style="text-align: center; margin-top: 40px;">
     <h2>✅ Reservation Confirmed</h2>
     <p>Your payment has been received and your parking slot is reserved.</p>
-    <p>A copy of your receipt has been sent to your email.</p>
+    <p id="emailStatus">Sending receipt to your email...</p>
     <p>You can also <strong>view and print your receipt</strong> here:</p>
+
 
     <button onclick="goToReceipt()" class="submit-btn" style="margin-top:20px;">
       View Receipt
     </button>
 
+
     <a href="intelli.html" class="back-btn" style="display:block; margin-top:20px;">← Back to Home</a>
   </div>
 
+
   <script>
-    // ✅ Initialize EmailJS
-    (function() {
-      emailjs.init("Jt7LWhzpR4vECWuKG"); // replace with your EmailJS public key
-    })();
+  // Initialize EmailJS
+  (function() {
+    emailjs.init("Jt7LWhzpR4vECWuKG");
+  })();
 
-    const params = new URLSearchParams(window.location.search);
-    const slot = params.get("slot") || "N/A";
-    const name = params.get("name") || "N/A";
-    const plate = params.get("plate") || "N/A";
-    const vehicle = params.get("vehicle") || "N/A";
-    const time = params.get("time") || "N/A";
-    const timestamp = params.get("timestamp") || new Date().toISOString();
-    const email = params.get("email") || "N/A";
 
-    // Generate QR Code as Base64
-    const qrCanvas = document.createElement("canvas");
-    new QRious({
-      element: qrCanvas,
-      value: `INTELLIPARK|SLOT:${slot}|PLATE:${plate}`,
-      size: 200
-    });
-    const qrImage = qrCanvas.toDataURL("image/png");
-    // Send Email via EmailJS (without QR code in email)
-    emailjs.send("service_ubjbmis", "template_x2h90up", {
+  // Get parameters from URL
+  const params = new URLSearchParams(window.location.search);
+  const slot = params.get("slot") || "N/A";
+  const name = params.get("name") || "N/A";
+  const plate = params.get("plate") || "N/A";
+  const vehicle = params.get("vehicle") || "N/A";
+  const time = params.get("time") || "N/A";
+  const timestamp = params.get("timestamp") || new Date().toISOString();
+  const email = params.get("email") || "";
+
+
+  // Debug: Log all parameters
+  console.log("Confirmation Page - All parameters:", { slot, name, plate, vehicle, time, timestamp, email });
+
+
+  // Generate QR Code as Base64
+  const qrCanvas = document.createElement("canvas");
+  new QRious({
+    element: qrCanvas,
+    value: `INTELLIPARK|SLOT:${slot}|PLATE:${plate}`,
+    size: 200
+  });
+  const qrImage = qrCanvas.toDataURL("image/png");
+
+
+  // Send Email via EmailJS
+  if (email && email !== "N/A" && email !== "") {
+    const emailParams = {
       to_email: email,
-      user_name: name,
+      email: email,
+      name: name,
       slot: slot,
       plate: plate,
       vehicle: vehicle,
+      time: time
+    };
+
+
+    console.log("Sending email with params:", emailParams);
+
+
+    emailjs.send("service_ubjbmis", "template_x2h90up", emailParams)
+      .then(
+        response => {
+          console.log("✅ Email sent successfully!", response);
+          document.getElementById("emailStatus").textContent = "A copy of your receipt has been sent to your email.";
+          document.getElementById("emailStatus").style.color = "green";
+        },
+        error => {
+          console.error("❌ Email failed:", error);
+          document.getElementById("emailStatus").textContent = "Failed to send email: " + (error.text || "Unknown error");
+          document.getElementById("emailStatus").style.color = "red";
+        }
+      );
+  } else {
+    console.error("❌ No valid email address");
+    document.getElementById("emailStatus").textContent = "No email address provided.";
+    document.getElementById("emailStatus").style.color = "red";
+  }
+
+
+  // ✅ FIXED: Include email in receipt URL
+  function goToReceipt() {
+    const receiptParams = new URLSearchParams({
+      slot: slot,
+      name: name,
+      plate: plate,
+      vehicle: vehicle,
       time: time,
-      timestamp: new Date(timestamp).toLocaleString()
-      // Remove qr_code: qrImage
-    }).then(
-      response => console.log("✅ Email sent!", response.status, response.text),
-      error => console.error("❌ Email failed:", error)
-    );
-
-
-    function goToReceipt() {
-      window.location.href = `receipt.html?${params.toString()}`;
-    }
-  </script>
+      timestamp: timestamp,
+      email: email  // ✅ NOW INCLUDED
+    });
+    
+    console.log("Redirecting to receipt with params:", receiptParams.toString());
+    window.location.href = `receipt.html?${receiptParams.toString()}`;
+  }
+</script>
 </body>
 </html>

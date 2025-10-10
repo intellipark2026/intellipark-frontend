@@ -15,6 +15,7 @@
     </a>
   </div>
 
+
   <div class="container" style="max-width: 600px; margin: 40px auto; padding: 20px; border: 2px solid #ccc; border-radius: 10px; text-align: center;">
     <h2>Parking Receipt</h2>
     <p><strong>Slot:</strong> <span id="slot"></span></p>
@@ -25,30 +26,50 @@
     <p><strong>Date Reserved:</strong> <span id="timestamp"></span></p>
     <p><strong>Email:</strong> <span id="email"></span></p>
 
+
     <h3 style="margin-top:20px;">QR Code for Entrance</h3>
     <canvas id="qrcode"></canvas>
+
 
     <button onclick="window.print()" class="submit-btn" style="margin-top:20px;">🖨 Print Receipt</button>
     <a href="intelli.html" class="back-btn" style="display:block; margin-top:20px;">← Back to Home</a>
   </div>
 
+
   <script>
     const params = new URLSearchParams(window.location.search);
+    
+    // ✅ Get all parameters with proper fallbacks
     const slot = params.get("slot") || "N/A";
     const name = params.get("name") || "N/A";
     const plate = params.get("plate") || "N/A";
     const vehicle = params.get("vehicle") || "N/A";
     const time = params.get("time") || "N/A";
-    const timestamp = params.get("timestamp") || new Date().toISOString();
     const email = params.get("email") || "N/A";
+    const timestamp = params.get("timestamp") || new Date().toISOString();
 
-    document.getElementById("slot").textContent = slot;
+    // Debug: Log to console
+    console.log("Receipt Parameters:", { slot, name, plate, vehicle, time, email, timestamp });
+
+    // ✅ Display all values
+    document.getElementById("slot").textContent = slot.toUpperCase();
     document.getElementById("name").textContent = name;
     document.getElementById("plate").textContent = plate;
-    document.getElementById("vehicle").textContent = vehicle;
+    document.getElementById("vehicle").textContent = vehicle.charAt(0).toUpperCase() + vehicle.slice(1);
     document.getElementById("time").textContent = time;
-    document.getElementById("timestamp").textContent = new Date(timestamp).toLocaleString();
     document.getElementById("email").textContent = email;
+    
+    // Format timestamp properly
+    try {
+      const date = new Date(timestamp);
+      if (!isNaN(date.getTime())) {
+        document.getElementById("timestamp").textContent = date.toLocaleString();
+      } else {
+        document.getElementById("timestamp").textContent = new Date().toLocaleString();
+      }
+    } catch(e) {
+      document.getElementById("timestamp").textContent = new Date().toLocaleString();
+    }
 
     // Generate QR code (slot + plate for kiosk scanning)
     const qr = new QRious({
