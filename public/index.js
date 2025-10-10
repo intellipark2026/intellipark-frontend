@@ -28,14 +28,44 @@ app.get("/", (req, res) => {
 // Create invoice (simplified version)
 app.post("/api/create-invoice", async (req, res) => {
   try {
+    console.log("Received request body:", req.body);
+    
     const { slot, name, plate, vehicle, email, time } = req.body;
 
-    if (!slot || !email) {
-      return res.status(400).json({ error: "Missing required fields" });
+    // Enhanced validation with specific error messages
+    if (!slot) {
+      console.error("Missing slot parameter");
+      return res.status(400).json({ error: "Missing slot parameter" });
+    }
+    
+    if (!email) {
+      console.error("Missing email parameter");
+      return res.status(400).json({ error: "Missing email parameter" });
+    }
+    
+    if (!name || !plate || !vehicle || !time) {
+      console.error("Missing required booking details");
+      return res.status(400).json({ error: "Missing required booking details: name, plate, vehicle, or time" });
     }
 
-    // Simulate invoice creation (replace with real Xendit call)
-    res.json({
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.error("Invalid email format");
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Validate plate format (ABC123)
+    const plateRegex = /^[A-Za-z]{3}[0-9]{3}$/;
+    if (!plateRegex.test(plate)) {
+      console.error("Invalid plate format");
+      return res.status(400).json({ error: "Plate number must be in format ABC123" });
+    }
+
+    console.log(`Creating invoice for ${email}, slot ${slot}`);
+
+    // Simulate invoice creation (replace with real Xendit call later)
+    const invoiceData = {
       invoice_url: "https://checkout.xendit.co/web/1234567890",
       slot,
       name,
@@ -43,48 +73,13 @@ app.post("/api/create-invoice", async (req, res) => {
       vehicle,
       email,
       time
-    });
+    };
+
+    console.log("Invoice created successfully:", invoiceData);
+    res.json(invoiceData);
+    
   } catch (error) {
     console.error("Error creating invoice:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error", details: error.message });
   }
-});
-
-// Confirm payment and save reservation
-app.post("/api/confirm-payment", async (req, res) => {
-  try {
-    const { slot, name, plate, vehicle, email, time } = req.body;
-
-    if (!slot || !email) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    // Generate QR code (encode slot + email for kiosk)
-    const qrData = JSON.stringify({ slot, email });
-    const qrImage = await QRCode.toDataURL(qrData);
-
-    // Save reservation in Firebase
-    await db.ref(`reservations/${slot}`).set({
-      name,
-      plate,
-      vehicle,
-      email,
-      time,
-      timestamp: Date.now(),
-      status: "confirmed",
-      qr: qrImage
-    });
-
-    // Also mark slot as reserved
-    await db.ref(`${slot}/status`).set("reserved");
-
-    res.json({ success: true, message: "Reservation confirmed and saved", qr: qrImage });
-  } catch (error) {
-    console.error("Error confirming reservation:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`✅ IntelliPark backend running on port ${PORT}`);
 });
