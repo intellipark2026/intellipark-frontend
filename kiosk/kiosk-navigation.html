@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drive to Your Slot</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to bottom, #4B0082, #800080);
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      padding: 20px;
+      font-size: 3vh;
+      text-shadow: 0 0 10px white;
+    }
+
+    .map-container {
+      position: relative;
+      max-width: 90vw;
+      margin: auto;
+    }
+
+    .map-image {
+      width: 100%;
+      border: 5px solid white;
+      border-radius: 12px;
+    }
+
+    .glow-rect {
+      position: absolute;
+      border-radius: 8px;
+      box-shadow: 0 0 30px 10px lime;
+      animation: pulse 1.5s infinite;
+      z-index: 5;
+      display: none;
+    }
+
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 10px 4px lime; }
+      50%  { box-shadow: 0 0 25px 8px lime; }
+      100% { box-shadow: 0 0 10px 4px lime; }
+    }
+
+    .slot-label {
+      position: absolute;
+      color: white;
+      background: #222a;
+      padding: 4px 14px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      z-index: 10;
+      pointer-events: none;
+      box-shadow: 0 0 4px #000b;
+      display: none;
+    }
+
+    .back-btn {
+      margin-top: 30px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background: white;
+      color: purple;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .back-btn:hover {
+      background: #eee;
+    }
+  </style>
+</head>
+<body>
+  <h1>Drive to Your Slot</h1>
+
+  <div class="map-container">
+    <img src="INTELLIPARK FLOOR PLAN.png" alt="Parking Map" class="map-image">
+
+    <!-- Floor 1 -->
+    <div id="glowSlot1" class="glow-rect" style="top: 10.7%; left: 65.9%; width: 9.4%; height: 31%;"></div>
+    <div id="label-slot1" class="slot-label" style="top: 49%; left: 72%;">SLOT 1</div>
+
+    <div id="glowSlot2" class="glow-rect" style="top: 10.7%; left: 44.2%; width: 9.4%; height: 31%;"></div>
+    <div id="label-slot2" class="slot-label" style="top: 49%; left: 47%;">SLOT 2</div>
+
+    <!-- Floor 2 -->
+    <div id="glowSlot3" class="glow-rect" style="top: 10.7%; left: 22.7%; width: 9.4%; height: 31%;"></div>
+    <div id="label-slot3" class="slot-label" style="top: 49%; left: 26%;">SLOT 3</div>
+
+    <div id="glowSlot4" class="glow-rect" style="top: 10.7%; left: 2.7%; width: 9.4%; height: 31%;"></div>
+    <div id="label-slot4" class="slot-label" style="top: 49%; left: 6%;">SLOT 4</div>
+  </div>
+
+  <button class="back-btn" onclick="window.location.href='kiosk-start.html'">🏠 Back to Start</button>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    let slot = params.get("slot");
+
+    // Normalize slot input (accepts "2" or "slot2")
+    if (slot && !slot.toLowerCase().startsWith("slot")) {
+      slot = "slot" + slot;
+    }
+
+    const glow = document.getElementById(`glow${slot.charAt(0).toUpperCase() + slot.slice(1)}`);
+    const label = document.getElementById(`label-${slot.toLowerCase()}`);
+
+    if (glow && label) {
+      glow.style.display = "block";
+      label.style.display = "block";
+    } else {
+      alert("No valid slot selected. Please check your reservation.");
+    }
+  </script>
+</body>
+</html>

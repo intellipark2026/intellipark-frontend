@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IntelliPark Entrance Receipt</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      background-image: radial-gradient(
+        circle at top left,
+        rgba(255, 255, 255, 0.1),
+        rgba(0, 0, 0, 0.9)
+      );
+    }
+
+    .receipt {
+      background: #f8f8f8;
+      color: #111;
+      width: 480px;
+      padding: 40px;
+      box-shadow: 0 0 20px #000;
+      border-radius: 12px;
+      text-align: left;
+      border-top: 8px dashed #aaa;
+      border-bottom: 8px dashed #aaa;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 30px;
+      margin: 0;
+      letter-spacing: 3px;
+    }
+
+    .header p {
+      font-size: 18px;
+      margin: 5px 0;
+    }
+
+    .line {
+      border-bottom: 2px dashed #aaa;
+      margin: 20px 0;
+    }
+
+    .info {
+      font-size: 20px;
+      line-height: 1.8;
+    }
+
+    .qr {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    #qrcode {
+      width: 180px;
+      height: 180px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 16px;
+    }
+
+    .footer p {
+      margin: 6px 0;
+    }
+
+    .small-text {
+      font-size: 14px;
+      text-align: center;
+      color: #555;
+      margin-top: 10px;
+    }
+
+    .nav-button {
+      display: inline-block;
+      background: #111;
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+
+    .nav-button:hover {
+      background: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <div class="header">
+      <h1>INTELLIPARK</h1>
+      <p>ENTRANCE RECEIPT</p>
+      <p id="date"></p>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="info">
+      SLOT: <span id="slotLabel"></span><br>
+      VEHICLE: <span id="vehicleLabel"></span><br>
+      CHECK-IN: <span id="checkinTime"></span>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="qr">
+      <canvas id="qrcode"></canvas>
+      <div class="small-text">Scan to Pay</div>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="footer">
+      <p><a id="navLink" class="nav-button" target="_blank">Navigate to Slot</a></p>
+      <p>Thank You for Choosing IntelliPark!</p>
+    </div>
+
+    <div class="small-text">www.intellipark.io</div>
+  </div>
+
+  <script>
+    // Get parameters from URL
+    const params = new URLSearchParams(window.location.search);
+    const slot = params.get("slot") || "N/A";
+    const vehicle = params.get("vehicle") || "N/A";
+    const paymentUrl = params.get("payment") || "https://xendit.co/pay";
+
+    document.getElementById("slotLabel").textContent = slot.toUpperCase();
+    document.getElementById("vehicleLabel").textContent = vehicle.toUpperCase();
+
+    // Show current date/time
+    const now = new Date();
+    const dateOptions = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    document.getElementById("date").textContent = now.toLocaleDateString('en-US', dateOptions);
+    document.getElementById("checkinTime").textContent = now.toLocaleTimeString();
+
+    // Generate QR for PAYMENT only
+    new QRious({
+      element: document.getElementById('qrcode'),
+      value: paymentUrl,
+      size: 180
+    });
+
+    // Clickable link for navigation
+    const navLink = document.getElementById("navLink");
+    navLink.href = `https://intellipark-navigation.web.app/kiosk_navigation.html?slot=${slot}`;
+  </script>
+</body>
+</html>

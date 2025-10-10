@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Select Vehicle Type - IntelliPark Kiosk</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(180deg, #111 0%, #1a1a1a 50%, #000 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.05);
+      box-shadow: inset 0 0 25px rgba(0,150,255,0.15);
+    }
+
+    /* Glowing header */
+    .header {
+      text-align: center;
+      font-size: 6vh;
+      font-weight: 900;
+      padding: 3vh 0;
+      margin-top: 2vh;
+      color: #ffffff;
+      background: linear-gradient(90deg, #ffffff, #f6f6f6, #eaeaea);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 25px;
+      width: 92%;
+      display: block;
+      box-shadow:
+        0 0 25px rgba(255,255,255,0.15),
+        0 0 40px rgba(255,255,255,0.25),
+        inset 0 0 20px rgba(255,255,255,0.1);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      animation: headerGlow 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes headerGlow {
+      0% {
+        box-shadow:
+          0 0 25px rgba(255,255,255,0.15),
+          0 0 40px rgba(255,255,255,0.25),
+          inset 0 0 20px rgba(255,255,255,0.1);
+      }
+      100% {
+        box-shadow:
+          0 0 40px rgba(255,255,255,0.4),
+          0 0 80px rgba(255,255,255,0.3),
+          inset 0 0 25px rgba(255,255,255,0.15);
+      }
+    }
+
+    .vehicle-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8vw;
+      margin-top: 8vh;
+      flex-wrap: wrap;
+    }
+
+    /* White glowing buttons */
+    .vehicle-btn {
+      position: relative;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 45px;
+      width: 42vw;
+      max-width: 340px;
+      aspect-ratio: 1 / 1.1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-evenly;
+      cursor: pointer;
+      border: 3px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow:
+        0 0 25px rgba(255,255,255,0.15),
+        0 0 35px rgba(255,255,255,0.25);
+      transition: all 0.25s ease-in-out;
+      animation: buttonPulse 3s ease-in-out infinite;
+      padding: 2vh;
+      overflow: hidden;
+    }
+
+    .vehicle-btn:hover {
+      transform: scale(1.07);
+      box-shadow:
+        0 0 35px rgba(255,255,255,0.3),
+        0 0 60px rgba(255,255,255,0.45);
+      border-color: rgba(255,255,255,0.6);
+    }
+
+    /* Whiter glowing icons */
+    .vehicle-btn img {
+      width: 60%;
+      height: auto;
+      max-height: 55%;
+      object-fit: contain;
+      filter: brightness(2.2) contrast(1.3)
+              drop-shadow(0 0 12px rgba(255,255,255,0.7))
+              drop-shadow(0 0 25px rgba(255,255,255,0.5));
+      transition: all 0.25s ease-in-out;
+    }
+
+    .vehicle-btn:hover img {
+      filter: brightness(2.6) contrast(1.4)
+              drop-shadow(0 0 25px rgba(255,255,255,0.8))
+              drop-shadow(0 0 40px rgba(255,255,255,0.6));
+      transform: scale(1.06);
+    }
+
+    /* Responsive label fitting */
+    .label {
+      width: 85%;
+      text-align: center;
+      font-size: clamp(2.4vh, 3.5vw, 4.2vh);
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(255,255,255,0.8);
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transform: scale(0.95);
+    }
+
+    /* Soft pulsing glow */
+    @keyframes buttonPulse {
+      0%, 100% {
+        box-shadow: 0 0 25px rgba(255,255,255,0.2);
+      }
+      50% {
+        box-shadow: 0 0 45px rgba(255,255,255,0.35);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .vehicle-btn {
+        width: 70vw;
+        aspect-ratio: 1 / 1.1;
+      }
+      .label {
+        font-size: clamp(2.2vh, 5vw, 3.6vh);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">SELECT VEHICLE TYPE</div>
+
+  <div class="vehicle-container">
+    <button class="vehicle-btn" onclick="selectVehicle('motorcycle')">
+      <img src="motorvehicle.png" alt="Motorcycle">
+      <div class="label">MOTORS</div>
+    </button>
+
+    <button class="vehicle-btn" onclick="selectVehicle('car')">
+      <img src="carvehicle.png" alt="Car">
+      <div class="label">CARS</div>
+    </button>
+  </div>
+
+  <script>
+    function selectVehicle(type) {
+      localStorage.setItem("vehicle", type);
+      window.location.href = "kiosk-levels.html";
+    }
+  </script>
+</body>
+</html>

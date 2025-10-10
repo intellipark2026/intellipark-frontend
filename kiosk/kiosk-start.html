@@ -1,0 +1,409 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliPark Kiosk Start</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <style> 
+
+    @keyframes glowText {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+
+      @keyframes pulse {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 20px rgba(255,255,255,0.1), 0 0 30px rgba(233, 236, 238, 0.2);
+    }
+    50% {
+      transform: scale(1.04);
+      box-shadow: 0 0 25px rgba(255,255,255,0.2), 0 0 40px rgba(240, 246, 248, 0.4);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 20px rgba(255,255,255,0.1), 0 0 30px rgba(235, 238, 240, 0.2);
+    }
+    
+  }
+
+  .bold-white-text {
+    font-size: 2.8vh;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    text-align: center;
+  }
+
+
+      body, button, a {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(180deg, #111 0%, #222 50%, #000 100%);
+        color: white;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+  .header {
+  text-align: center;
+  font-size: 6vh;
+  font-weight: 900;
+  padding: 4vh 0;
+  margin-top: 1vh;
+  color: #ffffff;
+  background: linear-gradient(90deg, #e1e9e8, #fafdff, #ffffff, #b6bebd);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* ✅ Full glowing border around header */
+  border: 3px solid rgba(252, 254, 255, 0.4);
+  border-radius: 25px;
+  width: 90%;
+  margin: 2vh auto;
+  display: block;
+  box-shadow:
+    0 0 25px rgba(254, 255, 255, 0.3),
+    0 0 40px rgba(255, 255, 255, 0.3),
+    inset 0 0 20px rgba(244, 246, 247, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: headerGlow 4s ease-in-out infinite alternate;
+}
+
+/* ✨ Animated glow for the header border */
+@keyframes headerGlow {
+  0% {
+    box-shadow:
+      0 0 25px rgba(249, 249, 255, 0.3),
+      0 0 40px rgba(249, 253, 255, 0.3),
+      inset 0 0 20px rgba(254, 255, 255, 0.2);
+  }
+  100% {
+    box-shadow:
+      0 0 40px rgba(255, 255, 255, 0.7),
+      0 0 80px rgba(255, 255, 255, 0.4),
+      inset 0 0 25px rgba(244, 246, 247, 0.3);
+  }
+}
+
+
+
+
+
+      .tap-message {
+      text-align: center;
+      font-size: 5vh;
+      font-weight: 800;
+      color: white;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+      margin: 3vh 0;
+      letter-spacing: px;
+      padding: 18px 30px;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+      animation: pulse 2s infinite ease-in-out;
+      box-shadow: 0 0 20px rgba(255,255,255,0.1), 0 0 30px rgba(0,150,255,0.2);
+      }
+
+
+      .main {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex: 1;
+      padding: 2vh 5vw;
+      gap: 5vw;
+      flex-wrap: wrap;
+      margin-top: -3vh; /* ✅ Add this line to lift up slightly */
+      }
+
+      /* Enlarged and clearer policy box */
+      .policy-box {
+        background: rgba(255,255,255,0.1);
+        color: white;
+        border-radius: 80px;
+        padding: 40px 50px;
+        width: 48vw;
+        max-width: 650px;
+        font-size: 2.8vh;  /* bigger font */
+        font-weight: 700;
+        text-align: center;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.7);
+        border: 3px solid rgba(255,255,255,0.3);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
+
+      .policy-box h2 {
+        font-size: 4vh;
+        font-weight: 900;
+        background: linear-gradient(90deg, #fefefe, #dddddd);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.15);
+        margin-bottom: 20px;
+        }
+
+      
+
+      .indicator-row {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 3vh 0;
+        gap: 30px;
+      }
+
+      /* Bigger indicator icons and text */
+      .indicator img {
+        height: 100px;
+        margin-bottom: 12px;
+        border-radius: 10%;
+        transition: all 0.3s ease-in-out;
+      }
+
+      /* Apply these with JavaScript or manually in HTML */
+      .indicator.green img {
+        box-shadow: 0 0 25px rgba(0,255,0,0.7), 0 0 40px rgba(0,255,0,0.4);
+      }
+
+      .indicator.red img {
+        box-shadow: 0 0 25px rgba(255,0,0,0.7), 0 0 40px rgba(255,0,0,0.4);
+        }
+
+      .indicator.blue img {
+        box-shadow: 0 0 25px rgba(0,150,255,0.7), 0 0 40px rgba(0,150,255,0.4);
+      }
+
+
+      .indicator div {
+        font-size: 2.8vh;
+        font-weight: 800;
+        color: #ffffff;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+        text-align: center;
+      }
+
+      
+
+      .scanner-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .scanner-frame {
+        width: 42vw;
+        max-width: 320px;
+        aspect-ratio: 1 / 1;
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 22px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+        background: rgba(255,255,255,0.05);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+      }
+
+      #reader {
+        width: 100%;
+        height: 100%;
+        border-radius: 22px;
+        object-fit: cover;
+      }
+
+      #reader video {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-radius: 22px !important;
+        transform: scaleX(-1); /* ✅ Mirror effect */
+      }
+
+      .qr-instruction {
+        margin-top: 1.5vh;
+        font-size: 2.2vh;
+        font-weight: 600;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+      }
+
+      #notification {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.8);
+        padding: 18px 26px;
+        border-radius: 12px;
+        font-size: 20px;
+        font-weight: bold;
+        color: white;
+        display: none;
+        z-index: 999;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+      }
+      #notification.success { background-color: #008000cc; }
+      #notification.error { background-color: #cc0000cc; }
+    </style>
+  </head>
+  <body onclick="proceed()">
+
+    <div class="header">Welcome to IntelliPark</div>
+    <div class="tap-message">
+    Tap Anywhere to Proceed
+    </div>
+
+
+    <div class="main">
+      <div class="policy-box">
+        <h2 class="bold-white-text" style="font-size: 4vh;">Policy and Guidelines</h2>
+        <div class="indicator-row">
+          <div class="indicator">
+            <img src="green.png" alt="Green" />
+            <div>Available Slot<br><span style="color:lightgreen">Green Light</span></div>
+          </div>
+          <div class="indicator">
+            <img src="red.png" alt="Red" />
+            <div>Occupied Spot<br><span style="color:#ff6b6b">Red Light</span></div>
+          </div>
+          <div class="indicator">
+            <img src="blue.png" alt="Blue" />
+            <div>Reserved Spot<br><span style="color:skyblue">Blue Light</span></div>
+          </div>
+        </div>
+        <div class="fines">
+    <div class="bold-white-text" style="color: #fdec00; margin-top: 6px;">
+      Vehicles that exceed the allotted reserved parking time will be subjected to clamping.
+    </div>
+        <div class="bold-white-text" style="margin-top: 12px;">Fines:</div>
+      <div class="bold-white-text">• Lost Ticket Fine: ₱500</div>
+    <div class="bold-white-text">• Unauthorized Use of Reserved Spot: ₱400</div>
+  </div>
+      </div>
+
+      <div class="scanner-wrapper">
+        <div class="scanner-frame">
+          <div id="reader"></div>
+        </div>
+        <div class="qr-instruction">Scan your QR Reservation here</div>
+      </div>
+    </div>
+
+
+    <div id="notification"></div>
+
+    <audio id="successSound" src="success.mp3" preload="auto"></audio>
+    <audio id="failSound" src="fail.mp3" preload="auto"></audio>
+    <audio id="qrDetectedPrompt" src="scan_prompt.mp3" preload="auto"></audio>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
+        authDomain: "intellipark2025-327e9.firebaseapp.com",
+        databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
+        projectId: "intellipark2025-327e9",
+        storageBucket: "intellipark2025-327e9.appspot.com",
+        messagingSenderId: "126333727252",
+        appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+
+      const reader = new Html5Qrcode("reader");
+      const notif = document.getElementById("notification");
+      const successSound = document.getElementById("successSound");
+      const failSound = document.getElementById("failSound");
+      const qrDetectedPrompt = document.getElementById("qrDetectedPrompt");
+
+      let scannedRecently = false;
+
+      function showNotification(message, type = "success") {
+        notif.textContent = message;
+        notif.className = type;
+        notif.style.display = "block";
+
+        if (type === "success") successSound.play();
+        else failSound.play();
+      }
+
+      function onScanSuccess(decodedText) {
+        if (scannedRecently) return;
+        scannedRecently = true;
+
+        qrDetectedPrompt.play();
+        reader.pause();
+
+        try {
+          const url = new URL(decodedText);
+          const slot = url.searchParams.get("slot");
+          const plate = url.searchParams.get("plate");
+          const vehicle = url.searchParams.get("vehicle") || "N/A";
+          const name = url.searchParams.get("name") || "KioskUser";
+          const time = new Date().toLocaleTimeString();
+          const timestamp = new Date().toISOString();
+
+          if (!slot || !plate) return showNotification("❌ Invalid QR format", "error");
+
+          db.ref(`/reservations/${slot}`).get().then(snapshot => {
+            if (snapshot.exists() && snapshot.val().plate === plate) {
+              showNotification("✅ QR Verified! Redirecting…", "success");
+              setTimeout(() => {
+                window.location.href = `kiosk-receipt.html?slot=${slot}&name=${name}&plate=${plate}&vehicle=${vehicle}&time=${time}&timestamp=${encodeURIComponent(timestamp)}`;
+              }, 2000);
+            } else {
+              showNotification("❌ No matching reservation", "error");
+              scannedRecently = false;
+              reader.resume();
+            }
+          });
+        } catch (e) {
+          console.error(e);
+          showNotification("❌ Failed to read QR", "error");
+          scannedRecently = false;
+          reader.resume();
+        }
+      }
+
+      function proceed() {
+        window.location.href = "kiosk-vehicle.html";
+      }
+
+      window.onload = () => {
+        reader.start({ facingMode: "environment" }, { fps: 10, qrbox: 180 }, onScanSuccess)
+        .catch(err => {
+          console.error("Camera error:", err);
+          showNotification("❌ Unable to access camera", "error");
+        });
+      };
+    </script>
+  </body>
+  </html>
