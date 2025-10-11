@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IntelliPark Entrance Receipt</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
     body {
       margin: 0;
@@ -61,14 +60,33 @@
       line-height: 1.8;
     }
 
-    .qr {
-      text-align: center;
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
       margin-top: 30px;
     }
 
-    #qrcode {
-      width: 180px;
-      height: 180px;
+    .action-button {
+      display: inline-block;
+      width: 80%;
+      background: #111;
+      color: #fff;
+      text-decoration: none;
+      padding: 14px 0;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 18px;
+      text-align: center;
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .action-button:hover {
+      background: #333;
+      transform: scale(1.03);
     }
 
     .footer {
@@ -87,22 +105,6 @@
       color: #555;
       margin-top: 10px;
     }
-
-    .nav-button {
-      display: inline-block;
-      background: #111;
-      color: #fff;
-      text-decoration: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 16px;
-      transition: background 0.3s;
-    }
-
-    .nav-button:hover {
-      background: #333;
-    }
   </style>
 </head>
 <body>
@@ -118,21 +120,20 @@
     <div class="info">
       SLOT: <span id="slotLabel"></span><br>
       VEHICLE: <span id="vehicleLabel"></span><br>
-      PLATE: <span id="plateLabel"></span><br>
+      PLATE NO.: <span id="plateLabel"></span><br>
       CHECK-IN: <span id="checkinTime"></span>
     </div>
 
     <div class="line"></div>
 
-    <div class="qr">
-      <canvas id="qrcode"></canvas>
-      <div class="small-text">Scan to Pay</div>
+    <div class="buttons">
+      <a id="payLink" class="action-button" target="_blank">💳 CLICK HERE TO PAY</a>
+      <a id="navLink" class="action-button" target="_blank">📍 CLICK FOR DIRECTION</a>
     </div>
 
     <div class="line"></div>
 
     <div class="footer">
-      <p><a id="navLink" class="nav-button" target="_blank">Navigate to Slot</a></p>
       <p>Thank You for Choosing IntelliPark!</p>
     </div>
 
@@ -144,12 +145,12 @@
     const params = new URLSearchParams(window.location.search);
     const slot = params.get("slot") || "N/A";
     const vehicle = params.get("vehicle") || "N/A";
-    const plate = params.get("plate") || "N/A"; // New parameter
+    const plate = params.get("plate") || "N/A";
     const paymentUrl = params.get("payment") || "https://xendit.co/pay";
 
     document.getElementById("slotLabel").textContent = slot.toUpperCase();
     document.getElementById("vehicleLabel").textContent = vehicle.toUpperCase();
-    document.getElementById("plateLabel").textContent = plate.toUpperCase(); // Display plate
+    document.getElementById("plateLabel").textContent = plate.toUpperCase();
 
     // Show current date/time
     const now = new Date();
@@ -157,16 +158,9 @@
     document.getElementById("date").textContent = now.toLocaleDateString('en-US', dateOptions);
     document.getElementById("checkinTime").textContent = now.toLocaleTimeString();
 
-    // Generate QR for PAYMENT only
-    new QRious({
-      element: document.getElementById('qrcode'),
-      value: paymentUrl,
-      size: 180
-    });
-
-    // Clickable link for navigation
-    const navLink = document.getElementById("navLink");
-    navLink.href = `https://intellipark-navigation.web.app/kiosk_navigation.html?slot=${slot}`;
+    // Set clickable links
+    document.getElementById("payLink").href = paymentUrl;
+    document.getElementById("navLink").href = `https://intellipark-navigation.web.app/kiosk_navigation.html?slot=${slot}`;
   </script>
 </body>
 </html>
