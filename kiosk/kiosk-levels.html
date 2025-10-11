@@ -21,7 +21,6 @@
       box-shadow: inset 0 0 35px rgba(255,255,255,0.08);
     }
 
-    /* White Glowing Header */
     .header {
       text-align: center;
       font-size: 5.5vh;
@@ -55,7 +54,6 @@
       }
     }
 
-    /* Floors Container */
     .floors-container {
       display: flex;
       justify-content: center;
@@ -65,7 +63,6 @@
       flex-wrap: wrap;
     }
 
-    /* Each Floor Box (modern glass style) */
     .floor-box {
       background: rgba(255,255,255,0.05);
       border-radius: 35px;
@@ -84,7 +81,7 @@
       -webkit-backdrop-filter: blur(12px);
       transition: all 0.3s ease-in-out;
       animation: boxPulse 3s ease-in-out infinite;
-      cursor: pointer; /* Entire box clickable */
+      cursor: pointer;
     }
 
     .floor-box:hover {
@@ -132,7 +129,6 @@
     .dot.reserved  { background: #00bfff; color: #00bfff; }
     .dot.occupied  { background: #ff4d4d; color: #ff4d4d; }
 
-    /* Glows based on availability */
     .glow-available {
       border-color: #00ff99 !important;
       box-shadow: 0 0 45px 10px #00ff99;
@@ -266,15 +262,18 @@
           try {
             await db.ref(`/reservations/${slotId}`).set(data);
             await db.ref(`/${slotId}`).update({ status: "Reserved", reserved: true });
+
+            // Auto-release after 30 seconds if not checked-in
             setTimeout(async () => {
-              const slotStatusSnapshot = await db.ref(`/${slotId}/status`).get();
-              const currentStatus = slotStatusSnapshot.val();
-              if (currentStatus === "Reserved") {
+              const snap = await db.ref(`/${slotId}/status`).get();
+              if (snap.val() === "Reserved") {
                 await db.ref(`/${slotId}`).update({ status: "Available", reserved: false });
                 await db.ref(`/reservations/${slotId}`).remove();
               }
             }, 30000);
-            window.location.href = `kiosk-receipt.html?slot=${slotId}&name=KioskUser&plate=N/A&vehicle=${vehicle}&time=${data.time}&timestamp=${encodeURIComponent(timestamp)}`;
+
+            // Redirect to kiosk-qr.html (mobile receipt link generator)
+            window.location.href = `kiosk-qr.html?slot=${slotId}&vehicle=${vehicle}&plate=N/A`;
             return;
           } catch (err) {
             console.error("Error making reservation:", err);
