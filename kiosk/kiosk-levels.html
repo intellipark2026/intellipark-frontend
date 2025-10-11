@@ -84,6 +84,7 @@
       -webkit-backdrop-filter: blur(12px);
       transition: all 0.3s ease-in-out;
       animation: boxPulse 3s ease-in-out infinite;
+      cursor: pointer; /* Entire box clickable */
     }
 
     .floor-box:hover {
@@ -184,24 +185,24 @@
   <div class="header">SELECT PARKING LEVEL</div>
 
   <div class="floors-container">
-    <div class="floor-box" id="floor1-box">
+    <div class="floor-box" id="floor1-box" onclick="handleLevelSelect('1')">
       <div class="floor-title">1ST FLOOR</div>
       <div class="counts-row">
         <div class="count-label"><span class="dot available"></span>Available: <span id="floor1-available">0</span></div>
         <div class="count-label"><span class="dot reserved"></span>Reserved: <span id="floor1-reserved">0</span></div>
         <div class="count-label"><span class="dot occupied"></span>Occupied: <span id="floor1-occupied">0</span></div>
       </div>
-      <button class="select-btn" id="floor1-btn" onclick="handleLevelSelect('1')">SELECT 1ST FLOOR</button>
+      <button class="select-btn" id="floor1-btn" onclick="event.stopPropagation(); handleLevelSelect('1')">SELECT 1ST FLOOR</button>
     </div>
 
-    <div class="floor-box" id="floor2-box">
+    <div class="floor-box" id="floor2-box" onclick="handleLevelSelect('2')">
       <div class="floor-title">2ND FLOOR</div>
       <div class="counts-row">
         <div class="count-label"><span class="dot available"></span>Available: <span id="floor2-available">0</span></div>
         <div class="count-label"><span class="dot reserved"></span>Reserved: <span id="floor2-reserved">0</span></div>
         <div class="count-label"><span class="dot occupied"></span>Occupied: <span id="floor2-occupied">0</span></div>
       </div>
-      <button class="select-btn" id="floor2-btn" onclick="handleLevelSelect('2')">SELECT 2ND FLOOR</button>
+      <button class="select-btn" id="floor2-btn" onclick="event.stopPropagation(); handleLevelSelect('2')">SELECT 2ND FLOOR</button>
     </div>
   </div>
 
