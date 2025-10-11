@@ -118,6 +118,7 @@
     <div class="info">
       SLOT: <span id="slotLabel"></span><br>
       VEHICLE: <span id="vehicleLabel"></span><br>
+      PLATE: <span id="plateLabel"></span><br>
       CHECK-IN: <span id="checkinTime"></span>
     </div>
 
@@ -143,10 +144,12 @@
     const params = new URLSearchParams(window.location.search);
     const slot = params.get("slot") || "N/A";
     const vehicle = params.get("vehicle") || "N/A";
+    const plate = params.get("plate") || "N/A"; // New parameter
     const paymentUrl = params.get("payment") || "https://xendit.co/pay";
 
     document.getElementById("slotLabel").textContent = slot.toUpperCase();
     document.getElementById("vehicleLabel").textContent = vehicle.toUpperCase();
+    document.getElementById("plateLabel").textContent = plate.toUpperCase(); // Display plate
 
     // Show current date/time
     const now = new Date();
