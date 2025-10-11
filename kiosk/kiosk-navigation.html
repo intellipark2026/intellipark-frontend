@@ -81,16 +81,15 @@
   <h1>Drive to Your Slot</h1>
 
   <div class="map-container">
-    <img src="INTELLIPARK FLOOR PLAN.png" alt="Parking Map" class="map-image">
+    <img id="floorImage" src="FIRST_FLOOR.png" alt="Parking Map" class="map-image">
 
-    <!-- Floor 1 -->
+    <!-- Slot Highlights (same coordinates, adjustable later if needed) -->
     <div id="glowSlot1" class="glow-rect" style="top: 10.7%; left: 65.9%; width: 9.4%; height: 31%;"></div>
     <div id="label-slot1" class="slot-label" style="top: 49%; left: 72%;">SLOT 1</div>
 
     <div id="glowSlot2" class="glow-rect" style="top: 10.7%; left: 44.2%; width: 9.4%; height: 31%;"></div>
     <div id="label-slot2" class="slot-label" style="top: 49%; left: 47%;">SLOT 2</div>
 
-    <!-- Floor 2 -->
     <div id="glowSlot3" class="glow-rect" style="top: 10.7%; left: 22.7%; width: 9.4%; height: 31%;"></div>
     <div id="label-slot3" class="slot-label" style="top: 49%; left: 26%;">SLOT 3</div>
 
@@ -109,6 +108,15 @@
       slot = "slot" + slot;
     }
 
+    // Select floor image automatically
+    const floorImage = document.getElementById("floorImage");
+    if (["slot1", "slot2", "slot3"].includes(slot.toLowerCase())) {
+      floorImage.src = "FIRST_FLOOR.png";
+    } else {
+      floorImage.src = "SECOND_FLOOR.png";
+    }
+
+    // Highlight correct slot
     const glow = document.getElementById(`glow${slot.charAt(0).toUpperCase() + slot.slice(1)}`);
     const label = document.getElementById(`label-${slot.toLowerCase()}`);
 
