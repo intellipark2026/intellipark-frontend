@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - INTELLIPARK</title>
+    
+    <!-- PDF Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -18,7 +23,6 @@
             color: #fff;
         }
 
-        /* Glass navbar */
         .navbar {
             background: rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
@@ -47,7 +51,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 20px auto;
             padding: 0 20px;
         }
@@ -59,7 +63,6 @@
             text-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
-        /* Glass stat cards */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -161,10 +164,11 @@
             border-collapse: collapse;
             margin-top: 15px;
             color: #fff;
+            font-size: 13px;
         }
 
         th, td {
-            padding: 12px;
+            padding: 12px 8px;
             text-align: left;
             border-bottom: 1px solid rgba(255,255,255,0.2);
         }
@@ -190,6 +194,7 @@
         .status-paid { background-color: rgba(0,255,153,0.2); color: #00ff99; }
         .status-pending { background-color: rgba(255,204,0,0.2); color: #ffcc00; }
         .status-cancelled { background-color: rgba(255,77,77,0.2); color: #ff4d4d; }
+        .status-completed { background-color: rgba(0,191,255,0.2); color: #00bfff; }
 
         .btn {
             background-color: rgba(255,255,255,0.1);
@@ -212,14 +217,33 @@
         .btn-danger { background-color: rgba(255,77,77,0.2); color: #ff4d4d; }
         .btn-success { background-color: rgba(0,255,153,0.2); color: #00ff99; }
 
-        .filters input, .filters select {
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filters label {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .filters input[type="date"], .filters select {
             padding: 8px 12px;
             border: 1px solid rgba(255,255,255,0.3);
             border-radius: 10px;
             font-size: 14px;
             background: rgba(255,255,255,0.05);
-            color: #000000;
+            color: #fff !important;
             backdrop-filter: blur(5px);
+        }
+
+        .filters input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
         }
 
         .empty-state {
@@ -237,7 +261,7 @@
                 flex-direction: column;
             }
             table {
-                font-size: 12px;
+                font-size: 11px;
             }
         }
     </style>
@@ -258,7 +282,6 @@
     <div class="container">
         <h1>📊 Dashboard Overview</h1>
 
-        <!-- Statistics Cards -->
         <div class="dashboard-grid">
             <div class="stat-card">
                 <div class="stat-label">Total Reservations Today</div>
@@ -278,27 +301,32 @@
             </div>
         </div>
 
-        <!-- Real-time Slot Status -->
         <div class="section">
             <h2 class="section-title">🚗 Real-time Slot Status</h2>
-            <div class="slots-grid" id="slotsGrid">
-                <!-- Slots will be populated here -->
-            </div>
+            <div class="slots-grid" id="slotsGrid"></div>
         </div>
 
-        <!-- Activity Logs -->
         <div class="section">
-            <h2 class="section-title">📋 Activity Logs & Reservations</h2>
+            <h2 class="section-title">🚗 Parking Log & Reservations</h2>
             
             <div class="filters">
-                <input type="date" id="filterDate" onchange="filterLogs()">
+                <label>From:</label>
+                <input type="date" id="filterDateFrom" onchange="filterLogs()">
+                
+                <label>To:</label>
+                <input type="date" id="filterDateTo" onchange="filterLogs()">
+                
                 <select id="filterStatus" onchange="filterLogs()">
                     <option value="">All Status</option>
                     <option value="Paid">Paid</option>
                     <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
                     <option value="Cancelled">Cancelled</option>
                 </select>
-                <button class="btn btn-success" onclick="exportToCSV()">📥 Export to CSV</button>
+                
+                <button class="btn" onclick="clearFilters()">🔄 Clear Filters</button>
+                <button class="btn btn-success" onclick="fixPendingStatuses()">🔧 Fix Pending Status</button>
+                <button class="btn btn-success" onclick="exportToPDF()">📥 Export to PDF</button>
                 <button class="btn btn-danger" onclick="clearAllReservations()">🗑️ Clear All Reservations</button>
             </div>
 
@@ -306,26 +334,23 @@
                 <table id="logsTable">
                     <thead>
                         <tr>
-                            <th>Time</th>
+                            <th>Time In</th>
+                            <th>Time Out</th>
+                            <th>Duration</th>
                             <th>Slot</th>
                             <th>Name</th>
-                            <th>Email</th>
                             <th>Plate</th>
                             <th>Vehicle</th>
                             <th>Status</th>
                             <th>Amount</th>
-                            <th>Invoice ID</th>
                         </tr>
                     </thead>
-                    <tbody id="logsTableBody">
-                        <!-- Logs will be populated here -->
-                    </tbody>
+                    <tbody id="logsTableBody"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
@@ -340,7 +365,6 @@
             appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
         };
 
-        // ✅ Authentication check
         (function() {
             const isLoggedIn = sessionStorage.getItem('intellipark_admin_logged_in');
             const loginTime = sessionStorage.getItem('intellipark_admin_login_time');
@@ -368,6 +392,7 @@
         let slotStatuses = {};
 
         function initDashboard() {
+            console.log('🚀 Initializing dashboard...');
             loadSlotStatuses();
             loadReservations();
 
@@ -379,7 +404,14 @@
                 });
             });
 
+            // ✅ FIXED: Listen to value changes (includes exitTime updates)
             db.ref('/reservations').on('value', snapshot => {
+                console.log('📊 Reservations data updated');
+                loadReservations();
+            });
+            
+            db.ref('/walk-in-bookings').on('value', snapshot => {
+                console.log('📊 Walk-in bookings updated');
                 loadReservations();
             });
         }
@@ -423,45 +455,93 @@
         }
 
         function loadReservations() {
-            db.ref('/reservations').once('value').then(snapshot => {
+            const reservationsPromise = db.ref('/reservations').once('value');
+            const walkinsPromise = db.ref('/walk-in-bookings').once('value');
+            
+            Promise.all([reservationsPromise, walkinsPromise]).then(([reservationsSnapshot, walkinsSnapshot]) => {
                 allReservations = [];
-                const data = snapshot.val();
-                if (data) {
-                    Object.keys(data).forEach(slotId => {
-                        allReservations.push({slot: slotId, ...data[slotId]});
+                
+                const reservationsData = reservationsSnapshot.val();
+                if (reservationsData) {
+                    Object.keys(reservationsData).forEach(slotId => {
+                        const res = reservationsData[slotId];
+                        allReservations.push({
+                            slot: slotId,
+                            ...res,
+                            // ✅ Ensure exitTime is included
+                            exitTime: res.exitTime || null
+                        });
                     });
                 }
+                
+                const walkinsData = walkinsSnapshot.val();
+                if (walkinsData) {
+                    Object.keys(walkinsData).forEach(bookingId => {
+                        const booking = walkinsData[bookingId];
+                        allReservations.push({
+                            slot: booking.slot,
+                            ...booking,
+                            exitTime: booking.exitTime || null
+                        });
+                    });
+                }
+                
+                console.log('📋 Loaded reservations:', allReservations.length);
                 allReservations.sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp));
                 displayLogs(allReservations);
                 updateStatistics();
             });
         }
 
+        // ✅ FIXED: Display Time Out and Duration correctly
         function displayLogs(logs) {
             const tbody = document.getElementById('logsTableBody');
             tbody.innerHTML = '';
-            if(logs.length===0){
+            
+            if(logs.length === 0){
                 tbody.innerHTML='<tr><td colspan="9" class="empty-state">No reservations found</td></tr>';
                 return;
             }
+            
             logs.forEach(log=>{
-                const row=document.createElement('tr');
-                const time=new Date(log.timestamp).toLocaleString();
-                const status=log.status||'Pending';
-                const amount=log.amount||50;
+                const row = document.createElement('tr');
+                
+                // Time In
+                const timeIn = log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A';
+                
+                // ✅ Time Out - check if exitTime exists
+                const timeOut = log.exitTime ? new Date(log.exitTime).toLocaleString() : '-';
+                
+                // ✅ Duration - calculate if both timestamps exist
+                let duration = '-';
+                if (log.timestamp && log.exitTime) {
+                    const entryTime = new Date(log.timestamp);
+                    const exitTime = new Date(log.exitTime);
+                    const diffMs = exitTime - entryTime;
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const hours = Math.floor(diffMins / 60);
+                    const mins = diffMins % 60;
+                    duration = `${hours}h ${mins}m`;
+                }
+                
+                const status = log.status || 'Pending';
+                const amount = log.amount || 50;
+                
                 row.innerHTML=`
-                    <td>${time}</td>
+                    <td>${timeIn}</td>
+                    <td>${timeOut}</td>
+                    <td><strong>${duration}</strong></td>
                     <td><strong>${log.slot.toUpperCase()}</strong></td>
-                    <td>${log.name||'N/A'}</td>
-                    <td>${log.email||'N/A'}</td>
-                    <td>${log.plate||'N/A'}</td>
-                    <td>${log.vehicle||'N/A'}</td>
+                    <td>${log.name || 'Walk-In'}</td>
+                    <td>${log.plate || 'N/A'}</td>
+                    <td>${log.vehicle || 'N/A'}</td>
                     <td><span class="status-badge status-${status.toLowerCase()}">${status}</span></td>
                     <td>₱${amount}</td>
-                    <td style="font-size: 11px;">${log.invoiceId||'N/A'}</td>
                 `;
                 tbody.appendChild(row);
             });
+            
+            console.log('✅ Displayed', logs.length, 'logs');
         }
 
         function updateStatistics() {
@@ -478,28 +558,251 @@
         }
 
         function filterLogs() {
-            const dateFilter=document.getElementById('filterDate').value;
-            const statusFilter=document.getElementById('filterStatus').value;
+            const dateFrom = document.getElementById('filterDateFrom').value;
+            const dateTo = document.getElementById('filterDateTo').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+            
             let filtered = allReservations;
-            if(dateFilter){
-                filtered = filtered.filter(r=>new Date(r.timestamp).toDateString()===new Date(dateFilter).toDateString());
+            
+            if (dateFrom && dateTo) {
+                const fromDate = new Date(dateFrom);
+                const toDate = new Date(dateTo);
+                toDate.setHours(23, 59, 59, 999);
+                
+                filtered = filtered.filter(r => {
+                    const reservationDate = new Date(r.timestamp);
+                    return reservationDate >= fromDate && reservationDate <= toDate;
+                });
+            } else if (dateFrom) {
+                const fromDate = new Date(dateFrom);
+                filtered = filtered.filter(r => new Date(r.timestamp) >= fromDate);
+            } else if (dateTo) {
+                const toDate = new Date(dateTo);
+                toDate.setHours(23, 59, 59, 999);
+                filtered = filtered.filter(r => new Date(r.timestamp) <= toDate);
             }
-            if(statusFilter){
-                filtered = filtered.filter(r=>(r.status||'Pending')===statusFilter);
+            
+            if (statusFilter) {
+                filtered = filtered.filter(r => (r.status || 'Pending') === statusFilter);
             }
+            
             displayLogs(filtered);
+            updateFilterSummary(filtered.length, dateFrom, dateTo, statusFilter);
         }
 
-        function exportToCSV() {
-            if(allReservations.length===0){ alert('No data to export'); return; }
-            let csv='Timestamp,Slot,Name,Email,Plate,Vehicle,Status,Amount,Invoice ID\n';
-            allReservations.forEach(r=>{
-                csv+=`"${new Date(r.timestamp).toLocaleString()}","${r.slot}","${r.name||'N/A'}","${r.email||'N/A'}","${r.plate||'N/A'}","${r.vehicle||'N/A'}","${r.status||'Pending'}","${r.amount||50}","${r.invoiceId||'N/A'}"\n`;
-            });
-            const blob=new Blob([csv],{type:'text/csv'});
-            const url=URL.createObjectURL(blob);
-            const a=document.createElement('a'); a.href=url; a.download='intellipark_reservations.csv'; a.click();
-            URL.revokeObjectURL(url);
+        function clearFilters() {
+            document.getElementById('filterDateFrom').value = '';
+            document.getElementById('filterDateTo').value = '';
+            document.getElementById('filterStatus').value = '';
+            displayLogs(allReservations);
+            updateFilterSummary(allReservations.length, '', '', '');
+        }
+
+        function updateFilterSummary(count, dateFrom, dateTo, status) {
+            let summaryText = `Showing ${count} reservation(s)`;
+            
+            if (dateFrom && dateTo) {
+                summaryText += ` from ${dateFrom} to ${dateTo}`;
+            } else if (dateFrom) {
+                summaryText += ` from ${dateFrom} onwards`;
+            } else if (dateTo) {
+                summaryText += ` up to ${dateTo}`;
+            }
+            
+            if (status) {
+                summaryText += ` with status: ${status}`;
+            }
+            
+            let summaryEl = document.getElementById('filterSummary');
+            if (!summaryEl) {
+                summaryEl = document.createElement('div');
+                summaryEl.id = 'filterSummary';
+                summaryEl.style.cssText = 'color: rgba(255,255,255,0.7); font-size: 14px; margin: 10px 0; font-style: italic;';
+                document.getElementById('logsContainer').insertBefore(summaryEl, document.getElementById('logsTable'));
+            }
+            
+            summaryEl.textContent = summaryText;
+        }
+
+        async function fixPendingStatuses() {
+            if (!confirm('Fix all "Pending" entries to "Paid"?')) return;
+            
+            try {
+                const snapshot = await db.ref('/reservations').once('value');
+                const reservations = snapshot.val();
+                
+                if (!reservations) {
+                    alert('No reservations found');
+                    return;
+                }
+                
+                let updateCount = 0;
+                
+                for (const [slot, reservation] of Object.entries(reservations)) {
+                    if (reservation.status === 'Pending' || !reservation.status) {
+                        await db.ref(`/reservations/${slot}`).update({ status: 'Paid' });
+                        updateCount++;
+                    }
+                }
+                
+                alert(`✅ Updated ${updateCount} reservation(s) to "Paid" status`);
+                refreshData();
+                
+            } catch (error) {
+                console.error('Error fixing statuses:', error);
+                alert('Failed to update statuses');
+            }
+        }
+
+        function exportToPDF() {
+            if(allReservations.length === 0) { 
+                alert('No data to export'); 
+                return; 
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('landscape');
+
+                const dateFrom = document.getElementById('filterDateFrom').value;
+                const dateTo = document.getElementById('filterDateTo').value;
+                const statusFilter = document.getElementById('filterStatus').value;
+
+                let dataToExport = allReservations;
+                
+                if (dateFrom && dateTo) {
+                    const fromDate = new Date(dateFrom);
+                    const toDate = new Date(dateTo);
+                    toDate.setHours(23, 59, 59, 999);
+                    dataToExport = dataToExport.filter(r => {
+                        const reservationDate = new Date(r.timestamp);
+                        return reservationDate >= fromDate && reservationDate <= toDate;
+                    });
+                } else if (dateFrom) {
+                    const fromDate = new Date(dateFrom);
+                    dataToExport = dataToExport.filter(r => new Date(r.timestamp) >= fromDate);
+                } else if (dateTo) {
+                    const toDate = new Date(dateTo);
+                    toDate.setHours(23, 59, 59, 999);
+                    dataToExport = dataToExport.filter(r => new Date(r.timestamp) <= toDate);
+                }
+                
+                if (statusFilter) {
+                    dataToExport = dataToExport.filter(r => (r.status || 'Pending') === statusFilter);
+                }
+
+                doc.setFontSize(18);
+                doc.setTextColor(0, 0, 0);
+                doc.text('IntelliPark - Parking Log Report', 14, 20);
+
+                doc.setFontSize(11);
+                doc.setTextColor(100);
+                doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28);
+                
+                let yPos = 34;
+                if (dateFrom && dateTo) {
+                    doc.text(`Period: ${dateFrom} to ${dateTo}`, 14, yPos);
+                    yPos += 6;
+                } else if (dateFrom) {
+                    doc.text(`Period: From ${dateFrom}`, 14, yPos);
+                    yPos += 6;
+                } else if (dateTo) {
+                    doc.text(`Period: Up to ${dateTo}`, 14, yPos);
+                    yPos += 6;
+                }
+                
+                if (statusFilter) {
+                    doc.text(`Status Filter: ${statusFilter}`, 14, yPos);
+                    yPos += 6;
+                }
+                
+                doc.text(`Total Reservations: ${dataToExport.length}`, 14, yPos);
+                yPos += 6;
+
+                const totalRevenue = dataToExport.reduce((sum, r) => sum + (r.amount || 50), 0);
+                doc.text(`Total Revenue: ₱${totalRevenue}`, 14, yPos);
+
+                const tableData = dataToExport.map(r => {
+                    const timeIn = r.timestamp ? new Date(r.timestamp).toLocaleString() : 'N/A';
+                    const timeOut = r.exitTime ? new Date(r.exitTime).toLocaleString() : '-';
+                    
+                    let duration = '-';
+                    if (r.timestamp && r.exitTime) {
+                        const entryTime = new Date(r.timestamp);
+                        const exitTime = new Date(r.exitTime);
+                        const diffMs = exitTime - entryTime;
+                        const diffMins = Math.floor(diffMs / 60000);
+                        const hours = Math.floor(diffMins / 60);
+                        const mins = diffMins % 60;
+                        duration = `${hours}h ${mins}m`;
+                    }
+                    
+                    return [
+                        timeIn,
+                        timeOut,
+                        duration,
+                        r.slot.toUpperCase(),
+                        r.name || 'Walk-In',
+                        r.plate || 'N/A',
+                        r.vehicle || 'N/A',
+                        r.status || 'Pending',
+                        `₱${r.amount || 50}`
+                    ];
+                });
+
+                doc.autoTable({
+                    head: [['Time In', 'Time Out', 'Duration', 'Slot', 'Name', 'Plate', 'Vehicle', 'Status', 'Amount']],
+                    body: tableData,
+                    startY: yPos + 8,
+                    theme: 'grid',
+                    styles: { fontSize: 7, cellPadding: 2 },
+                    headStyles: {
+                        fillColor: [0, 0, 0],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        fontSize: 8
+                    },
+                    alternateRowStyles: { fillColor: [245, 245, 245] },
+                    columnStyles: {
+                        0: { cellWidth: 35 },
+                        1: { cellWidth: 35 },
+                        2: { cellWidth: 20 },
+                        3: { cellWidth: 15 },
+                        4: { cellWidth: 30 },
+                        5: { cellWidth: 20 },
+                        6: { cellWidth: 20 },
+                        7: { cellWidth: 18 },
+                        8: { cellWidth: 18 }
+                    }
+                });
+
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(9);
+                    doc.setTextColor(150);
+                    doc.text(
+                        `Page ${i} of ${pageCount}`,
+                        doc.internal.pageSize.getWidth() / 2,
+                        doc.internal.pageSize.getHeight() - 10,
+                        { align: 'center' }
+                    );
+                }
+
+                let filename = 'IntelliPark_ParkingLog';
+                if (dateFrom && dateTo) {
+                    filename += `_${dateFrom}_to_${dateTo}`;
+                } else {
+                    filename += `_${new Date().toISOString().split('T')[0]}`;
+                }
+                filename += '.pdf';
+                
+                doc.save(filename);
+                console.log('✅ PDF exported successfully');
+            } catch (error) {
+                console.error('❌ Error generating PDF:', error);
+                alert('Failed to generate PDF. Please try again.');
+            }
         }
 
         function clearAllReservations(){
@@ -511,14 +814,12 @@
             }
         }
 
-        // ✅ NEW: Reset All Slots Function
         async function resetAllSlots() {
-            if (!confirm('⚠️ Are you sure you want to reset ALL slots to Available?\n\nThis will:\n• Clear all reservations\n• Set all slots to Available\n• Remove all slot data\n• Clear walk-in bookings\n\nThis action cannot be undone!')) {
+            if (!confirm('⚠️ Are you sure you want to reset ALL slots to Available?\n\nThis will:\n• Set all slots to Available status\n• Keep all reservation logs for records\n\nSlots will be ready for new bookings.')) {
                 return;
             }
 
             try {
-                // Reset all slot statuses
                 await db.ref("/").update({
                     slot1: { status: "Available", reserved: false },
                     slot2: { status: "Available", reserved: false },
@@ -526,15 +827,7 @@
                     slot4: { status: "Available", reserved: false }
                 });
 
-                // Clear all reservations
-                await db.ref('/reservations').remove();
-
-                // Clear walk-in bookings (if they exist)
-                await db.ref('/walk-in-bookings').remove();
-
-                alert('✅ All slots have been reset successfully!');
-                
-                // Refresh the dashboard
+                alert('✅ All slots have been reset to Available!\n\n📝 Reservation logs are preserved for records.');
                 refreshData();
 
             } catch (error) {
@@ -544,6 +837,7 @@
         }
 
         function refreshData(){
+            console.log('🔄 Refreshing data...');
             loadSlotStatuses();
             loadReservations();
         }

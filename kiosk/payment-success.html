@@ -3,148 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment Successful</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <title>Payment Success</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <style>
     body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      font-family: 'Segoe UI', sans-serif;
-      color: #fff;
+      margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center;
+      background: linear-gradient(135deg, #667eea, #764ba2); font-family: 'Segoe UI', sans-serif; color: #fff;
     }
-
-    .success-container {
-      text-align: center;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 50px;
-      border-radius: 20px;
-      backdrop-filter: blur(10px);
-      max-width: 500px;
+    .container {
+      text-align: center; background: rgba(255, 255, 255, 0.1); padding: 40px;
+      border-radius: 20px; backdrop-filter: blur(10px); max-width: 500px;
     }
-
-    .checkmark {
-      font-size: 80px;
-      margin-bottom: 20px;
-    }
-
-    h1 {
-      font-size: 36px;
-      margin: 20px 0;
-    }
-
-    p {
-      font-size: 20px;
-      margin: 10px 0;
-    }
-
-    .slot-info {
-      font-size: 24px;
-      font-weight: bold;
-      margin: 30px 0;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
-    }
-
-    .qr-container {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      margin: 30px auto;
-      display: inline-block;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    #qrcode {
-      margin: 0 auto;
-    }
-
-    .qr-instruction {
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: 600;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 15px;
-      border-radius: 10px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .parking-details {
-      text-align: left;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 20px;
-      font-size: 16px;
-    }
-
-    .parking-details p {
-      margin: 8px 0;
-      font-size: 16px;
-    }
-
-    .parking-details strong {
-      display: inline-block;
-      width: 120px;
-    }
+    .checkmark { font-size: 80px; }
+    h1 { font-size: 32px; margin: 20px 0; }
+    .slot { font-size: 24px; font-weight: bold; margin: 20px 0;
+            padding: 15px; background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+    .details { text-align: left; background: rgba(255, 255, 255, 0.1);
+               padding: 15px; border-radius: 10px; margin: 20px 0; }
+    .qr-box { background: white; padding: 25px; border-radius: 15px; margin: 20px auto; display: inline-block; }
+    #qr { display: block; }
+    .ticket-id { font-family: monospace; font-size: 11px; color: #000; margin-top: 10px; }
+    .info { background: rgba(255, 193, 7, 0.2); border: 2px solid #fc3;
+            border-radius: 10px; padding: 12px; margin-top: 15px; font-size: 14px; }
   </style>
 </head>
 <body>
-  <div class="success-container">
+  <div class="container">
     <div class="checkmark">✅</div>
     <h1>Payment Successful!</h1>
-    <p>Your parking slot has been confirmed</p>
-    
-    <div class="slot-info">
-      Slot: <span id="slotNumber"></span>
+    <div class="slot">Slot: <span id="slotNum"></span></div>
+    <div class="details">
+      <p><strong>Plate:</strong> <span id="plateNum"></span></p>
+      <p><strong>Vehicle:</strong> <span id="vehicleType"></span></p>
+      <p><strong>Amount:</strong> ₱50</p>
     </div>
-
-    <div class="parking-details" id="parkingDetails"></div>
-
-    <div class="qr-container">
-      <div id="qrcode"></div>
+    <div class="qr-box">
+      <canvas id="qr"></canvas>
+      <div class="ticket-id">Ticket: <span id="ticketDisplay"></span></div>
     </div>
-
-    <div class="qr-instruction">
-      📱 Show this QR code at the exit kiosk to open the gate
-    </div>
+    <div class="info">📱 <strong>ONE-TIME USE QR CODE</strong><br>Scan at exit to open gate</div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <script>
-    // Get parameters from URL
+    const firebaseConfig = {
+      apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
+      authDomain: "intellipark2025-327e9.firebaseapp.com",
+      databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
+      projectId: "intellipark2025-327e9",
+      storageBucket: "intellipark2025-327e9.appspot.com",
+      messagingSenderId: "126333727252",
+      appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const params = new URLSearchParams(window.location.search);
-    const slot = params.get("slot") || "N/A";
-    const vehicle = params.get("vehicle") || "Unknown";
-    const plate = params.get("plate") || "UNKNOWN";
-    const checkin = params.get("checkin") || new Date().toISOString();
+    const slot = params.get("slot") || "slot1";
+    const plate = params.get("plate") || "ABC123";
+    const vehicle = params.get("vehicle") || "Car";
 
-    // Display slot number
-    document.getElementById("slotNumber").textContent = slot.toUpperCase();
+    document.getElementById("slotNum").textContent = slot.toUpperCase();
+    document.getElementById("plateNum").textContent = plate.toUpperCase();
+    document.getElementById("vehicleType").textContent = vehicle;
 
-    // Display parking details
-    const detailsHtml = `
-      <p><strong>Plate No:</strong> ${plate.toUpperCase()}</p>
-      <p><strong>Vehicle Type:</strong> ${vehicle}</p>
-      <p><strong>Check-in:</strong> ${new Date(checkin).toLocaleString()}</p>
-    `;
-    document.getElementById("parkingDetails").innerHTML = detailsHtml;
+    // ✅ Generate unique ticket ID
+    const ticketId = `TK-${slot.toUpperCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    document.getElementById("ticketDisplay").textContent = ticketId;
 
-    // Generate QR code with parking information URL
-    // This URL will be scanned by the exit kiosk
-    const qrData = `${window.location.origin}/kiosk_exit.html?slot=${encodeURIComponent(slot)}&vehicle=${encodeURIComponent(vehicle)}&plate=${encodeURIComponent(plate)}&checkin=${encodeURIComponent(checkin)}`;
-
-    new QRCode(document.getElementById("qrcode"), {
-      text: qrData,
-      width: 200,
-      height: 200,
-      colorDark: "#000000",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.H
+    // ✅ Save ticket to Firebase as "unused"
+    db.ref(`/tickets/${ticketId}`).set({
+      slot: slot,
+      plate: plate,
+      vehicle: vehicle,
+      createdAt: new Date().toISOString(),
+      used: false
+    }).then(() => {
+      console.log('✅ Ticket saved to Firebase');
     });
+
+    // QR format: TICKET_ID|SLOT|PLATE
+    const qrData = `${ticketId}|${slot}|${plate}`;
+    
+    new QRious({
+      element: document.getElementById('qr'),
+      value: qrData,
+      size: 280
+    });
+
+    console.log('QR generated:', qrData);
   </script>
 </body>
 </html>
