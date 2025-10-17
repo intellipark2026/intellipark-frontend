@@ -1,296 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INTELLIPARK</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        body {
-            text-align: center;
-        }
-        .navbar {
-            background-color: purple;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .navbar a:hover img {
-            transform: scale(1.1);
-            transition: transform 0.3s;
-        }
-        .navbar a:hover {
-            opacity: 0.8;
-            transition: 0.3s;
-        }
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-            font-size: 16px;
-        }
-        .menu-btn {
-            background-color: black;
-            color: white;
-            font-size: 24px;
-            padding: 8px 15px;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        /* Layout for main and policy sections */
-        .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 40px;
-        }
-        .main-content {
-            flex: 1;
-            text-align: center;
-            padding: 20px;
-        }
-        .policy-section {
-            flex: 1;
-            background-color: #f8f8f8;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        h1 {
-            font-size: 40px;
-            font-weight: bold;
-        }
-        .sub-text {
-            font-size: 18px;
-            color: gray;
-            margin: 10px 0;
-        }
-        .btn {
-            background-color: purple;
-            color: white;
-            padding: 12px 25px;
-            font-size: 16px;
-            border: none;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: 0.3s;
-            text-decoration: none;
-            display: inline-block;
-            border-radius: 5px;
-        }
-        .btn:hover {
-            background-color: darkviolet;
-        }
-        /* Policy Styling */
-        .policy-container {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .light {
-            text-align: center;
-            margin: 10px;
-        }
-        .light img {
-            width: 80px;
-            height: auto;
-        }
-        /* Text Color Styling */
-        .red-text {
-            color: red;
-            font-weight: bold;
-        }
-        .blue-text {
-            color: blue;
-            font-weight: bold;
-        }
-        .green-text {
-            color: green;
-            font-weight: bold;
-        }
-        .fines {
-            margin-top: 20px;
-            text-align: left;
-        }
-        .fine-item {
-            margin: 10px 0;
-            font-size: 16px;
-        }
-        .fine-item span {
-            color: red;
-            font-weight: bold;
-        }
-        .fine-item p {
-            font-size: 18px;
-            color: gray;
-        }
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                text-align: center;
-            }
-            .policy-section {
-                margin-top: 20px;
-            }
-        }
-        /* Dropdown menu styles */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: white;
-            color: black;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-            z-index: 1001;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        .dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            transition: 0.3s;
-        }
-        .dropdown-content a:hover {
-            background-color: #ddd;
-        }
-        .dropdown-content a.admin-link {
-            background-color: purple;
-            color: white;
-            font-weight: bold;
-        }
-        .dropdown-content a.admin-link:hover {
-            background-color: darkviolet;
-        }
-        .dropdown.show .dropdown-content {
-            display: block;
-        }
-        /* Responsive dropdown for mobile */
-        @media (max-width: 768px) {
-            .dropdown-content {
-                position: static;
-                box-shadow: none;
-                background-color: purple;
-            }
-            .dropdown-content a {
-                color: white;
-            }
-            .dropdown-content a:hover {
-                background-color: darkviolet;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INTELLIPARK</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'SF Pro Display', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #000000 0%, #1a1a1a 30%, #f2f2f2 100%);
+      color: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 50px;
+      background: rgba(20, 20, 20, 0.6);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 2px 25px rgba(0, 0, 0, 0.4);
+      border-bottom: 2px solid rgb(145, 142, 142); /* 💜 kept purple accent */
+      z-index: 100;
+    }
+
+    .navbar a {
+      text-decoration: none;
+      color: white;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .navbar img {
+      height: 42px;
+      filter: drop-shadow(0 0 3px rgba(255,255,255,0.3));
+    }
+
+    .dropdown {
+      position: relative;
+    }
+
+    .menu-btn {
+      background: transparent;
+      border: 2px solid white;
+      color: white;
+      padding: 6px 12px;
+      font-size: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .menu-btn:hover {
+      background: white;
+      color: black;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .dropdown.show .dropdown-content {
+      display: block;
+    }
+
+    .dropdown-content a {
+      display: block;
+      padding: 12px 20px;
+      color: black;
+      text-decoration: none;
+      font-weight: 500;
+      text-align: center;
+      transition: background 0.2s;
+    }
+
+    .dropdown-content a:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 150px 60px 80px;
+      flex-wrap: wrap;
+      gap: 50px;
+    }
+
+    .left-section {
+      flex: 1;
+      min-width: 340px;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 70px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 25px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+    }
+
+    .subtitle {
+      font-size: 20px;
+      color: #ccc;
+      margin-bottom: 50px;
+    }
+
+    .btn {
+      display: inline-block;
+      background: linear-gradient(90deg, #000000, #444);
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 16px 48px;
+      border-radius: 50px;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+      transition: 0.3s;
+      font-size: 18px;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      background: linear-gradient(90deg, #222, #666);
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+    }
+
+    /* POLICY BOX */
+    .policy {
+      flex: 1.2;
+      min-width: 420px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 50px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+
+    .policy h2 {
+      margin-bottom: 35px;
+      color: white;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      font-size: 30px;
+      letter-spacing: 0.5px;
+    }
+
+    .lights {
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .light {
+      text-align: center;
+    }
+
+    .light img {
+      width: 75px;
+      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+    }
+
+    .green { color: #00ff9d; font-weight: bold; }
+    .red { color: #ff5555; font-weight: bold; }
+    .blue { color: #66aaff; font-weight: bold; }
+
+    .fines {
+      text-align: left;
+      font-size: 18px;
+      line-height: 1.8;
+      color: #ddd;
+      margin: auto;
+      max-width: 600px;
+    }
+
+    .fines span {
+      color: #000000;
+      font-weight: bold;
+    }
+
+    @media (max-width: 900px) {
+      .main-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 120px 30px 60px;
+      }
+
+      .left-section, .policy {
+        width: 100%;
+      }
+
+      .title {
+        font-size: 52px;
+      }
+
+      .subtitle {
+        font-size: 18px;
+      }
+
+      .policy {
+        margin-top: 30px;
+        padding: 35px 25px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="navbar" style="display: flex; align-items: center; padding: 10px 20px; background-color: purple;">
-        <a id="homeBtn" href="intelli.html" style="display: flex; align-items: center; text-decoration: none; color: white;">
-            <img src="logo.png" alt="IntelliPark Logo" style="height: 40px; margin-right: 10px;">
-            <span style="font-size: 20px; font-weight: bold;">INTELLIPARK</span>
-        </a>
-        <div class="dropdown">
-            <button class="menu-btn" onclick="toggleDropdown()">☰</button>
-            <div class="dropdown-content" id="menuDropdown">
-                <a href="#" class="admin-link" id="adminLink">🔐 Admin Login</a>
-                <a href="#">About us</a>
-                <a href="#">Parking Guide</a>
-            </div>
-        </div>
+  <div class="navbar">
+    <a href="intelli.html"><img src="logo.png" alt="IntelliPark Logo"></a>
+    <div class="dropdown">
+      <button class="menu-btn" onclick="toggleDropdown()">☰</button>
+      <div class="dropdown-content" id="menuDropdown">
+        <a href="#" id="adminLink">Admin Login</a>
+        <a href="#">About Us</a>
+        <a href="#">Parking Guide</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="left-section">
+      <div class="title">INTELLIPARK</div>
+      <div class="subtitle">Reservations | Parking Spot Navigation | Cashless Payment</div>
+      <a href="levels.html" class="btn">BOOK NOW</a>
     </div>
 
-    <div class="container">
-        <!-- Main Section -->
-        <div class="main-content">
-            <h1>INTELLIPARK</h1>
-            <p class="sub-text">RESERVATIONS | PARKING SPOT NAVIGATION | CASHLESS PAYMENT</p>
-            <a id="bookBtn" href="levels.html" class="btn">BOOK NOW</a>
+    <div class="policy">
+      <h2>POLICY AND GUIDELINES</h2>
+      <div class="lights">
+        <div class="light">
+          <img src="green.png" alt="Available Slot">
+          <p>Available Slot</p>
+          <p class="green">Green Light</p>
         </div>
-
-        <!-- Policy Section -->
-        <div class="policy-section">
-            <h2>POLICY AND GUIDELINES</h2>
-            <div class="policy-container">
-                <div class="light">
-                    <img src="green.png" alt="Available Slot">
-                    <p>AVAILABLE SLOT</p>
-                    <p class="green-text">GREEN LIGHT</p>
-                </div>
-                <div class="light">
-                    <img src="red.png" alt="Occupied Spot">
-                    <p>OCCUPIED SPOT</p>
-                    <p class="red-text">RED LIGHT</p>
-                </div>
-                <div class="light">
-                    <img src="blue.png" alt="Reserved Spot">
-                    <p>RESERVED SPOT</p>
-                    <p class="blue-text">BLUE LIGHT</p>
-                </div>
-            </div>
-
-            <div class="fines">
-                <h3>FINES:</h3>
-                <div class="fine-item">
-                    <span>• LOST TICKET FINE:</span>
-                    <p>P500</p>
-                </div>
-                <div class="fine-item">
-                    <span>• UNAUTHORIZED USE OF RESERVED SPOT FINE:</span>
-                    <p>P400</p>
-                </div>
-            </div>
+        <div class="light">
+          <img src="red.png" alt="Occupied Slot">
+          <p>Occupied Slot</p>
+          <p class="red">Red Light</p>
         </div>
+        <div class="light">
+          <img src="blue.png" alt="Reserved Slot">
+          <p>Reserved Slot</p>
+          <p class="blue">Blue Light</p>
+        </div>
+      </div>
+
+      <div class="fines">
+        <p><span>• LOST TICKET FINE:</span> ₱500</p>
+        <p><span>• UNAUTHORIZED USE OF RESERVED SPOT FINE:</span> ₱400</p>
+      </div>
     </div>
-    <script>
-        function toggleDropdown() {
-            document.querySelector('.dropdown').classList.toggle('show');
+  </div>
+
+  <script>
+    function toggleDropdown() {
+      document.querySelector('.dropdown').classList.toggle('show');
+    }
+
+    window.onclick = function(e) {
+      if (!e.target.matches('.menu-btn')) {
+        const dropdown = document.querySelector(".dropdown");
+        if (dropdown.classList.contains('show')) {
+          dropdown.classList.remove('show');
         }
+      }
+    };
 
-        // Close dropdown if clicked outside
-        window.onclick = function(e) {
-            if (!e.target.matches('.menu-btn')) {
-                const dropdown = document.querySelector(".dropdown");
-                if (dropdown.classList.contains('show')) {
-                    dropdown.classList.remove('show');
-                }
-            }
-        };
-
-        // --- AUTO-DETECT NAVIGATION ---
-        document.addEventListener("DOMContentLoaded", function() {
-            const navLinks = {
-                homeBtn: "intelli.html",
-                bookBtn: "levels.html",
-                adminLink: "admin-login.html"  // ✅ Changed to login page
-            };
-
-            let prefix = "";
-            if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
-                prefix = "http://127.0.0.1:5500/public/";
-            }
-            for (const [id, page] of Object.entries(navLinks)) {
-                const btn = document.getElementById(id);
-                if (btn) btn.href = prefix + page;
-            }
-        });
-    </script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const links = { adminLink: "admin-login.html" };
+      let prefix = "";
+      if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+        prefix = "http://127.0.0.1:5500/public/";
+      }
+      for (const [id, page] of Object.entries(links)) {
+        const el = document.getElementById(id);
+        if (el) el.href = prefix + page;
+      }
+    });
+  </script>
 </body>
 </html>

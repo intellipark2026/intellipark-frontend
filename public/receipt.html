@@ -3,43 +3,193 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Parking Receipt - INTELLIPARK</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Parking Receipt - IntelliPark</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0a0a0a, #1c1c1c);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 60px;
+      font-family: 'SF Pro Display', 'Poppins', sans-serif;
+      color: #222;
+    }
+
+    .receipt-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      width: 90%;
+      max-width: 380px;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(255, 255, 255, 0.1), 0 2px 10px rgba(0, 0, 0, 0.4);
+      padding: 30px 25px;
+      position: relative;
+      text-align: center;
+      animation: fadeIn 0.8s ease;
+    }
+
+    .receipt-container::before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: repeating-linear-gradient(
+        90deg,
+        white,
+        white 8px,
+        transparent 8px,
+        transparent 16px
+      );
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-size: 13px;
+      color: #666;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .date-line {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 16px;
+    }
+
+    .divider {
+      border-top: 1px dashed #ccc;
+      margin: 16px 0;
+    }
+
+    .info-section {
+      text-align: left;
+      font-family: "Courier New", monospace;
+      font-size: 14px;
+      color: #333;
+      margin: 6px 0;
+    }
+
+    .info-row {
+      margin: 6px 0;
+    }
+
+    .info-row strong {
+      display: inline-block;
+      width: 120px; /* fixed width for labels */
+      color: #222;
+    }
+
+    canvas {
+      display: block;
+      margin: 20px auto;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      padding: 6px;
+    }
+
+    .button {
+      display: block;
+      width: 100%;
+      padding: 12px 0;
+      background: #000;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: "Courier New", monospace;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.2s ease;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    }
+
+    .button:hover {
+      background: #222;
+      transform: translateY(-1px);
+    }
+
+    a.back-link {
+      display: inline-block;
+      margin-top: 16px;
+      text-decoration: none;
+      font-size: 13px;
+      color: #555;
+      transition: 0.2s;
+    }
+
+    a.back-link:hover {
+      color: #000;
+    }
+
+    .footer {
+      margin-top: 18px;
+      font-size: 11px;
+      color: #777;
+      text-align: center;
+      font-family: "Courier New", monospace;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
+
 <body>
-  <div class="navbar" style="display: flex; align-items: center; padding: 10px 20px; background-color: purple;">
-    <a href="intelli.html" style="display: flex; align-items: center; text-decoration: none; color: white;">
-      <img src="logo.png" alt="IntelliPark Logo" style="height: 40px; margin-right: 10px;">
-      <span style="font-size: 20px; font-weight: bold;">INTELLIPARK</span>
-    </a>
+  <div class="receipt-container">
+    <h1>INTELLIPARK</h1>
+    <h2>ENTRANCE RECEIPT</h2>
+    <div class="date-line" id="receiptDate"></div>
+
+    <div class="divider"></div>
+
+    <div class="info-section">
+      <div class="info-row"><strong>SLOT:</strong> <span id="slot">N/A</span></div>
+      <div class="info-row"><strong>NAME:</strong> <span id="name">N/A</span></div>
+      <div class="info-row"><strong>PLATE NO.:</strong> <span id="plate">N/A</span></div>
+      <div class="info-row"><strong>VEHICLE TYPE:</strong> <span id="vehicle">N/A</span></div>
+      <div class="info-row"><strong>RESERVED TIME:</strong> <span id="time">N/A</span></div>
+      <div class="info-row"><strong>EMAIL:</strong> <span id="email">N/A</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <canvas id="qrcode" width="150" height="150"></canvas>
+
+    <button onclick="window.print()" class="button">🖨 PRINT RECEIPT</button>
+    <a href="intelli.html" class="back-link">← Back to Home</a>
+
+    <div class="divider"></div>
+    <div class="footer">
+      Thank You for Choosing IntelliPark!<br>
+      www.intellipark.io
+    </div>
   </div>
 
-
-  <div class="container" style="max-width: 600px; margin: 40px auto; padding: 20px; border: 2px solid #ccc; border-radius: 10px; text-align: center;">
-    <h2>Parking Receipt</h2>
-    <p><strong>Slot:</strong> <span id="slot"></span></p>
-    <p><strong>Name:</strong> <span id="name"></span></p>
-    <p><strong>Plate Number:</strong> <span id="plate"></span></p>
-    <p><strong>Vehicle Type:</strong> <span id="vehicle"></span></p>
-    <p><strong>Reserved Time:</strong> <span id="time"></span></p>
-    <p><strong>Date Reserved:</strong> <span id="timestamp"></span></p>
-    <p><strong>Email:</strong> <span id="email"></span></p>
-
-
-    <h3 style="margin-top:20px;">QR Code for Entrance</h3>
-    <canvas id="qrcode"></canvas>
-
-
-    <button onclick="window.print()" class="submit-btn" style="margin-top:20px;">🖨 Print Receipt</button>
-    <a href="intelli.html" class="back-btn" style="display:block; margin-top:20px;">← Back to Home</a>
-  </div>
-
-
-  <script>
+ <script>
+    // URL parameters
     const params = new URLSearchParams(window.location.search);
-    
-    // ✅ Get all parameters with proper fallbacks
     const slot = params.get("slot") || "N/A";
     const name = params.get("name") || "N/A";
     const plate = params.get("plate") || "N/A";
@@ -48,35 +198,27 @@
     const email = params.get("email") || "N/A";
     const timestamp = params.get("timestamp") || new Date().toISOString();
 
-    // Debug: Log to console
-    console.log("Receipt Parameters:", { slot, name, plate, vehicle, time, email, timestamp });
-
-    // ✅ Display all values
+    // Display values
     document.getElementById("slot").textContent = slot.toUpperCase();
     document.getElementById("name").textContent = name;
     document.getElementById("plate").textContent = plate;
     document.getElementById("vehicle").textContent = vehicle.charAt(0).toUpperCase() + vehicle.slice(1);
     document.getElementById("time").textContent = time;
     document.getElementById("email").textContent = email;
-    
-    // Format timestamp properly
-    try {
-      const date = new Date(timestamp);
-      if (!isNaN(date.getTime())) {
-        document.getElementById("timestamp").textContent = date.toLocaleString();
-      } else {
-        document.getElementById("timestamp").textContent = new Date().toLocaleString();
-      }
-    } catch(e) {
-      document.getElementById("timestamp").textContent = new Date().toLocaleString();
-    }
 
-    // Generate QR code (slot + plate for kiosk scanning)
-    const qr = new QRious({
+    // Format timestamp
+    const dateObj = new Date(timestamp);
+    document.getElementById("receiptDate").textContent =
+      !isNaN(dateObj) ? dateObj.toLocaleString() : new Date().toLocaleString();
+
+    // ✅ Generate QR with proper URL for kiosk scanning
+    const qrUrl = `https://intellipark-kiosk.web.app/verify?slot=${encodeURIComponent(slot)}&plate=${encodeURIComponent(plate)}&vehicle=${encodeURIComponent(vehicle)}&name=${encodeURIComponent(name)}&time=${encodeURIComponent(time)}&type=reservation`;
+    
+    new QRious({
       element: document.getElementById("qrcode"),
-      value: `INTELLIPARK|SLOT:${slot}|PLATE:${plate}`,
-      size: 200
+      value: qrUrl,
+      size: 150
     });
-  </script>
+</script>
 </body>
 </html>

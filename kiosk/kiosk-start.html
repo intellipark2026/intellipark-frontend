@@ -356,42 +356,92 @@
       }
 
       function onScanSuccess(decodedText) {
-        if (scannedRecently) return;
-        scannedRecently = true;
+  if (scannedRecently) return;
+  scannedRecently = true;
 
-        qrDetectedPrompt.play();
-        reader.pause();
+  qrDetectedPrompt.play();
+  reader.pause();
 
-        try {
-          const url = new URL(decodedText);
-          const slot = url.searchParams.get("slot");
-          const plate = url.searchParams.get("plate");
-          const vehicle = url.searchParams.get("vehicle") || "N/A";
-          const name = url.searchParams.get("name") || "KioskUser";
-          const time = new Date().toLocaleTimeString();
-          const timestamp = new Date().toISOString();
+  console.log("🔍 QR Scanned:", decodedText);
 
-          if (!slot || !plate) return showNotification("❌ Invalid QR format", "error");
+  try {
+    const url = new URL(decodedText);
+    const slot = url.searchParams.get("slot");
+    const plate = url.searchParams.get("plate");
+    const vehicle = url.searchParams.get("vehicle") || "N/A";
+    const name = url.searchParams.get("name") || "Guest";
+    const time = url.searchParams.get("time") || new Date().toLocaleTimeString();
+    const qrType = url.searchParams.get("type");
 
-          db.ref(`/reservations/${slot}`).get().then(snapshot => {
-            if (snapshot.exists() && snapshot.val().plate === plate) {
-              showNotification("✅ QR Verified! Redirecting…", "success");
-              setTimeout(() => {
-                window.location.href = `kiosk-receipt.html?slot=${slot}&name=${name}&plate=${plate}&vehicle=${vehicle}&time=${time}&timestamp=${encodeURIComponent(timestamp)}`;
-              }, 2000);
-            } else {
-              showNotification("❌ No matching reservation", "error");
+    console.log("📋 Extracted data:", { slot, plate, vehicle, name, time, qrType });
+
+    if (!slot || !plate) {
+      console.error("❌ Missing slot or plate");
+      showNotification("❌ Invalid QR format", "error");
+      setTimeout(() => {
+        scannedRecently = false;
+        reader.resume();
+      }, 2000);
+      return;
+    }
+
+    if (qrType === 'reservation') {
+      console.log("🔍 Verifying reservation for slot:", slot);
+      
+      db.ref(`/reservations/${slot}`).get().then(snapshot => {
+        if (snapshot.exists()) {
+          const reservation = snapshot.val();
+          console.log("📦 Firebase reservation data:", reservation);
+          
+          if (reservation.plate === plate && reservation.status === "Paid") {
+            console.log("✅ Reservation verified successfully!");
+            showNotification("✅ Reservation Verified! Opening gate...", "success");
+            
+            setTimeout(() => {
+              window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
+            }, 2000);
+          } else {
+            console.error("❌ Plate mismatch or not paid");
+            showNotification("❌ Invalid reservation or payment not confirmed", "error");
+            setTimeout(() => {
               scannedRecently = false;
               reader.resume();
-            }
-          });
-        } catch (e) {
-          console.error(e);
-          showNotification("❌ Failed to read QR", "error");
+            }, 3000);
+          }
+        } else {
+          console.error("❌ No reservation found for slot:", slot);
+          showNotification("❌ No reservation found for this slot", "error");
+          setTimeout(() => {
+            scannedRecently = false;
+            reader.resume();
+          }, 3000);
+        }
+      }).catch(error => {
+        console.error("❌ Firebase error:", error);
+        showNotification("❌ Database error. Please try again", "error");
+        setTimeout(() => {
           scannedRecently = false;
           reader.resume();
-        }
-      }
+        }, 3000);
+      });
+    } else {
+      console.error("❌ Not a valid reservation QR");
+      showNotification("❌ Invalid QR code. Please use reservation QR", "error");
+      setTimeout(() => {
+        scannedRecently = false;
+        reader.resume();
+      }, 2000);
+    }
+  } catch (e) {
+    console.error("❌ QR parsing error:", e);
+    showNotification("❌ Failed to read QR code", "error");
+    setTimeout(() => {
+      scannedRecently = false;
+      reader.resume();
+    }, 2000);
+  }
+}
+
 
       function proceed() {
         window.location.href = "kiosk-vehicle.html";

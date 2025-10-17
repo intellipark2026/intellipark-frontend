@@ -3,34 +3,260 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Book Parking - INTELLIPARK</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Book Parking - IntelliPark</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #0d0d0d;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #fff;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      width: 100%;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      background: rgba(30, 30, 30, 0.6);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05);
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+
+    .navbar a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
+
+    .navbar img {
+      height: 40px;
+      margin-right: 10px;
+      filter: brightness(1.2);
+    }
+
+    /* FORM CONTAINER */
+    .container {
+      background: rgba(200,200,200,0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 40px 50px;
+      margin-top: 60px;
+      width: 95%;
+      max-width: 520px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.15);
+      text-align: center;
+      color: #fff;
+    }
+
+    h2 {
+      font-size: 26px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+      color: #fff;
+      text-shadow:
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px #fff,
+        0 0 30px rgba(255,255,255,0.4),
+        0 0 40px rgba(255,255,255,0.3),
+        0 0 50px rgba(255,255,255,0.2);
+      animation: glowPulse 2s infinite alternate;
+    }
+
+    @keyframes glowPulse {
+      0% { text-shadow: 0 0 5px #fff,0 0 10px #fff,0 0 20px #fff,0 0 30px rgba(255,255,255,0.4),0 0 40px rgba(255,255,255,0.3),0 0 50px rgba(255,255,255,0.2);}
+      100% { text-shadow:0 0 10px #fff,0 0 20px #fff,0 0 30px #fff,0 0 40px rgba(255,255,255,0.5),0 0 50px rgba(255,255,255,0.4),0 0 60px rgba(255,255,255,0.3);}
+    }
+
+    p {
+      font-size: 16px;
+      margin-bottom: 25px;
+      color: #ccc;
+    }
+
+    /* FORM ELEMENTS */
+    .form-group {
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #ddd;
+      font-size: 15px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 15px;
+      font-family: 'Poppins', sans-serif;
+      outline: none;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.05);
+      transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus {
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 0 15px rgba(255,255,255,0.15);
+      backdrop-filter: blur(18px);
+    }
+
+    /* TERMS BOX */
+    .terms-box {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 15px;
+      margin-top: 25px;
+      font-size: 13px;
+      color: #bbb;
+      text-align: left;
+      line-height: 1.6;
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+    }
+
+    .terms-box strong { color: #fff; }
+
+    /* CHECKBOX (clickable) */
+    .terms-check label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #ddd;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .terms-check input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid #888;
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-block;
+      position: relative;
+      vertical-align: middle;
+    }
+
+    .terms-check input[type="checkbox"]:checked {
+      border-color: #fff;
+      background: #fff;
+    }
+
+    .terms-check input[type="checkbox"]:checked::after {
+      content: "✔";
+      color: #000;
+      font-size: 14px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    /* BUTTONS */
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-weight: 600;
+      font-size: 17px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 15px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      backdrop-filter: blur(12px);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+      backdrop-filter: blur(18px);
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 25px;
+      text-decoration: none;
+      color: #aaa;
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    .back-btn:hover { color: #fff; }
+
+    @media (max-width: 600px) {
+      .container { padding: 30px 25px; }
+      h2 { font-size: 22px; }
+    }
+  </style>
 </head>
+
 <body>
-  <div class="navbar" style="display: flex; align-items: center; padding: 10px 20px; background-color: purple;">
-    <a id="homeBtn" href="intelli.html" style="display: flex; align-items: center; text-decoration: none; color: white;">
-      <img src="logo.png" alt="IntelliPark Logo" style="height: 40px; margin-right: 10px;">
-      <span style="font-size: 20px; font-weight: bold;">INTELLIPARK</span>
+  <div class="navbar">
+    <a id="homeBtn" href="intelli.html">
+      <img src="logo.png" alt="IntelliPark Logo">
+      <span>INTELLIPARK</span>
     </a>
   </div>
 
-
   <div class="container">
     <h2>BOOK YOUR PARKING SPOT</h2>
-    <p><strong>Selected Slot:</strong> <span id="selectedSlot" style="color: green; font-weight: bold;"></span></p>
+    <p><strong>Selected Slot:</strong> <span id="selectedSlot" style="color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.3);"></span></p>
+
     <form id="bookingForm">
       <div class="form-group">
         <label for="name">NAME:</label>
         <input type="text" id="name" required>
       </div>
+
       <div class="form-group">
         <label for="email">EMAIL:</label>
         <input type="email" id="email" required>
       </div>
+
       <div class="form-group">
         <label for="plate">PLATE NUMBER:</label>
         <input type="text" id="plate" required placeholder="e.g., ABC123" pattern="^[A-Za-z]{3}[0-9]{3}$">
       </div>
+
       <div class="form-group">
         <label for="vehicle">VEHICLE TYPE:</label>
         <select id="vehicle" required>
@@ -38,27 +264,32 @@
           <option value="motorcycle">Motorcycle</option>
         </select>
       </div>
+
       <div class="form-group">
         <label for="time">PARKING TIME:</label>
         <input type="time" id="time" required>
       </div>
-      <button type="submit" class="submit-btn">Reserve Now</button>
+
+      <div class="terms-box">
+        By continuing to book, I authorize <strong>IntelliPark</strong> to collect and process my information, including my vehicle plate number, for parking verification, slot reservation, billing, and security monitoring in accordance with the Data Privacy Act of 2012. Unauthorized use of a reserved slot or exceeding the reserved time may result in vehicle clamping and applicable penalties.
+      </div>
+
+      <div class="terms-check">
+        <label>
+          <input type="checkbox" id="agreeTerms">
+          I agree to the Terms and Conditions
+        </label>
+      </div>
+
+      <button type="submit" class="submit-btn" id="reserveBtn" disabled>Reserve Now</button>
     </form>
-
-
-    <button id="resetButton" style="margin-top: 20px; background-color: red; color: white; padding: 10px 15px; border: none; cursor: pointer;">
-      Reset All Reservations (Admin)
-    </button>
-
 
     <a id="backHomeBtn" href="intelli.html" class="back-btn">← Back to Home</a>
   </div>
 
-
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
 
   <script>
     const firebaseConfig = {
@@ -71,33 +302,25 @@
       appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
     };
 
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // ✅ GET SLOT FROM URL PARAMETER
     const params = new URLSearchParams(window.location.search);
     const selectedSlot = params.get("slot");
-
-    // Validate that slot exists
     if (!selectedSlot) {
-      alert("No slot selected. Redirecting to slot selection...");
+      alert("No slot selected. Redirecting...");
       window.location.href = "levels.html";
     }
-
-    // Display selected slot to user
     document.getElementById("selectedSlot").textContent = selectedSlot.toUpperCase();
 
     const form = document.getElementById("bookingForm");
     const timeInput = document.getElementById("time");
+    const agreeTerms = document.getElementById("agreeTerms");
+    const reserveBtn = document.getElementById("reserveBtn");
 
-
-    // Helper: convert "HH:MM" to minutes
-    function timeToMinutes(t) {
-      const [h, m] = t.split(":").map(Number);
-      return h * 60 + m;
-    }
-
+    agreeTerms.addEventListener("change", () => {
+      reserveBtn.disabled = !agreeTerms.checked;
+    });
 
     function normalize(date) {
       date.setSeconds(0);
@@ -105,15 +328,11 @@
       return date;
     }
 
-
-    // Limit booking time: now → +2 hours
     function setMinMaxTime() {
       const now = new Date();
       const hhMin = String(now.getHours()).padStart(2, "0");
       const mmMin = String(now.getMinutes()).padStart(2, "0");
       timeInput.min = `${hhMin}:${mmMin}`;
-
-
       now.setMinutes(now.getMinutes() + 120);
       const hhMax = String(now.getHours()).padStart(2, "0");
       const mmMax = String(now.getMinutes()).padStart(2, "0");
@@ -121,105 +340,97 @@
     }
     document.addEventListener("DOMContentLoaded", setMinMaxTime);
 
-
-    // Form Submission
-    form.addEventListener("submit", async function(e) {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-
+      if (!agreeTerms.checked) {
+        alert("Please agree to the Terms and Conditions first.");
+        return;
+      }
 
       const name = document.getElementById("name").value.trim();
       const email = document.getElementById("email").value.trim();
-      const plate = document.getElementById("plate").value.trim();
+      const plate = document.getElementById("plate").value.trim().toUpperCase();
       const vehicle = document.getElementById("vehicle").value;
       const time = document.getElementById("time").value;
-      const timestamp = new Date().toISOString();
 
-
-      // Plate validation
       const platePattern = /^[A-Za-z]{3}[0-9]{3}$/;
       if (!platePattern.test(plate)) {
-        return alert("Plate number must be in the format ABC123 (3 letters + 3 digits).");
+        alert("Plate format must be ABC123 (3 letters + 3 numbers).");
+        return;
       }
 
-
-      // Time validation
       const now = normalize(new Date());
       const selectedTime = normalize(new Date());
       const [hh, mm] = time.split(":").map(Number);
       selectedTime.setHours(hh, mm, 0, 0);
-
-
       const maxTime = normalize(new Date());
       maxTime.setMinutes(maxTime.getMinutes() + 120);
+      if (selectedTime < now) {
+        alert("You cannot book in the past.");
+        return;
+      }
+      if (selectedTime > maxTime) {
+        alert("You cannot book more than 2 hours ahead.");
+        return;
+      }
 
-
-      if (selectedTime < now) return alert("You cannot book a time in the past.");
-      if (selectedTime > maxTime) return alert("You cannot book more than 2 hours from now.");
-
+      // Disable button during processing
+      reserveBtn.disabled = true;
+      reserveBtn.textContent = "Creating Invoice...";
 
       try {
-        // ✅ VERIFY THE SELECTED SLOT IS STILL AVAILABLE
         const slotStatus = await db.ref(`/${selectedSlot}/status`).get();
-        
         if (!slotStatus.exists() || slotStatus.val() !== "Available") {
-          alert(`Sorry, ${selectedSlot} is no longer available. Redirecting to slot selection...`);
+          alert(`Sorry, ${selectedSlot} is no longer available.`);
           window.location.href = "levels.html";
           return;
         }
 
-        // ✅ USE THE SELECTED SLOT (NOT RE-QUERY)
-        const slotId = selectedSlot;
+        console.log("📤 Sending to backend:", { name, email, plate, vehicle, time, slot: selectedSlot });
 
-        // Call backend to create invoice
         const res = await fetch("https://intellipark-backend-ar00.onrender.com/api/create-invoice", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, plate, vehicle, time, slot: slotId })
+          body: JSON.stringify({ 
+            name, 
+            email, 
+            plate, 
+            vehicle, 
+            time, 
+            slot: selectedSlot 
+          })
         });
 
+        console.log("📥 Response status:", res.status);
+        console.log("📥 Response OK:", res.ok);
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error("❌ Backend error:", errorText);
+          throw new Error(`Server returned ${res.status}: ${errorText}`);
+        }
 
         const result = await res.json();
-        if (result.invoice_url) {
-          window.location.href = result.invoice_url;
+        console.log("📦 Response data:", result);
+
+        // Check both possible response formats
+        const invoiceUrl = result.invoice_url || result.invoiceUrl;
+        
+        if (invoiceUrl) {
+          console.log("✅ Redirecting to:", invoiceUrl);
+          window.location.href = invoiceUrl;
         } else {
-          alert("Failed to create invoice. Please try again.");
+          console.error("❌ No invoice URL found in response:", result);
+          throw new Error("No invoice URL received from server");
         }
       } catch (err) {
-        console.error("Reservation error:", err);
-        alert("Something went wrong. Please try again.");
+        console.error("❌ Full error:", err);
+        alert("Failed to create invoice:\n\n" + err.message + "\n\nPlease check:\n• Your internet connection\n• Plate format (ABC123)\n• Backend service status\n\nTry again in a moment.");
+        
+        // Re-enable button
+        reserveBtn.disabled = !agreeTerms.checked;
+        reserveBtn.textContent = "Reserve Now";
       }
-    });
-
-
-    // Reset All Reservations (Admin)
-    document.getElementById("resetButton").addEventListener("click", async () => {
-      if (!confirm("Are you sure you want to reset ALL reservations?")) return;
-
-
-      try {
-        await db.ref("reservations").remove();
-        await Promise.all([
-          db.ref("slot1").update({ status: "Available", reserved: false }),
-          db.ref("slot2").update({ status: "Available", reserved: false }),
-          db.ref("slot3").update({ status: "Available", reserved: false }),
-          db.ref("slot4").update({ status: "Available", reserved: false })
-        ]);
-        alert("All reservations have been cleared successfully.");
-      } catch (err) {
-        console.error("Failed to reset reservations:", err);
-        alert("Error resetting reservations. Check console.");
-      }
-    });
-
-
-    // Auto-detect navigation for home/back buttons
-    document.addEventListener("DOMContentLoaded", function() {
-      const isLocal = (location.hostname === "127.0.0.1" || location.hostname === "localhost");
-      const prefix = isLocal ? "http://127.0.0.1:5500/public/" : "";
-      const homeBtn = document.getElementById("homeBtn");
-      const backHomeBtn = document.getElementById("backHomeBtn");
-      if (homeBtn) homeBtn.href = prefix + "intelli.html";
-      if (backHomeBtn) backHomeBtn.href = prefix + "intelli.html";
     });
   </script>
 </body>

@@ -1,154 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Available Slots - INTELLIPARK</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Parking Level - IntelliPark</title>
 
-  <link rel="stylesheet" href="style.css">
   <style>
-    body {
-      background-color: #f8f8f8;
-      text-align: center;
-      font-family: Arial, sans-serif;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'SF Pro Display', sans-serif;
     }
 
+    body {
+      background: linear-gradient(135deg, #000000 0%, #1a1a1a 40%, #f2f2f2 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(20, 20, 20, 0.6);
+      backdrop-filter: blur(10px);
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      border-bottom: 2px solid rgb(124, 120, 120);
+      z-index: 1000;
+    }
+
+    .navbar a {
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar img {
+      height: 40px;
+      margin-right: 10px;
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+    }
+
+    /* Title */
+    h2 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-top: 120px;
+      margin-bottom: 40px;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+      color: #f8f8f8;
+    }
+
+    /* Container */
     .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
       width: 90%;
-      max-width: 600px;
-      background: white;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
-      margin: 50px auto;
+      max-width: 700px;
     }
 
     .floor-container {
-      background: #e6e6fa;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 35px;
+      text-align: left;
+      box-shadow: 0 10px 40px rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(15px);
+      transition: all 0.3s ease;
       cursor: pointer;
-      transition: background 0.3s, box-shadow 0.4s, border 0.3s;
-      border: 4px solid transparent;
-      position: relative;
+      color: #eee;
     }
 
     .floor-container:hover:not(.disabled) {
-      background-color: #dcdcff;
-    }
-
-    .glow-available {
-      box-shadow: 0 0 24px 6px #00ff99, 0 0 10px #00ff99;
-      border-color: #00ff99 !important;
-      animation: glowAvailable 1.7s infinite alternate;
-    }
-    .glow-occupied {
-      box-shadow: 0 0 24px 6px #ff4d4d, 0 0 10px #ff4d4d;
-      border-color: #ff4d4d !important;
-      animation: glowOccupied 1.7s infinite alternate;
-    }
-    @keyframes glowAvailable {
-      from { box-shadow: 0 0 24px 6px #00ff9970, 0 0 10px #00ff99; }
-      to   { box-shadow: 0 0 36px 16px #00ff99cc, 0 0 16px #00ff99; }
-    }
-    @keyframes glowOccupied {
-      from { box-shadow: 0 0 24px 6px #ff4d4d70, 0 0 10px #ff4d4d; }
-      to   { box-shadow: 0 0 36px 16px #ff4d4dcc, 0 0 16px #ff4d4d; }
+      transform: scale(1.02);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
     }
 
     .disabled {
-      opacity: 0.6;
+      opacity: 0.4;
       cursor: not-allowed;
       pointer-events: none;
-      /* Remove hover glow for disabled */
-      animation: none !important;
     }
 
+    /* Titles & Counts */
     .floor-title {
-      font-size: 20px;
-      font-weight: bold;
-      color: #4b0082;
-      margin-bottom: 10px;
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 18px;
     }
 
     .counts-row {
       display: flex;
       flex-direction: column;
-      gap: 13px;
-      margin-bottom: 0;
-      width: 100%;
-      align-items: flex-start;
-      justify-content: center;
+      gap: 12px;
+      font-size: 16px;
+      color: #ccc;
+      font-family: "Courier New", monospace;
     }
+
     .count-label {
-      font-size: 18px;
-      font-weight: bold;
       display: flex;
       align-items: center;
       gap: 10px;
     }
+
     .dot {
-      width: 16px;
-      height: 16px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
-      display: inline-block;
-      border: 2px solid white;
-      box-shadow: 0 0 8px 2px currentColor;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
     }
-    .dot.available { background: #00ff99; color: #00ff99; }
-    .dot.reserved  { background: #00bfff; color: #00bfff; }
-    .dot.occupied  { background: #ff4d4d; color: #ff4d4d; }
+
+    .available { color: #3eff5e; }
+    .reserved { color: #2b39ff; }
+    .occupied { color: #ff4343; }
+
+    /* Glow Styles */
+    .glow-available {
+      border-color: #3eff5e;
+      box-shadow: 0 0 25px #3eff5e80, inset 0 0 10px #3eff5e40;
+      animation: pulse-green 1.8s infinite alternate;
+    }
+
+    .glow-occupied {
+      border-color: #ff4343;
+      box-shadow: 0 0 25px #ff434380, inset 0 0 10px #ff434340;
+      animation: pulse-red 1.8s infinite alternate;
+    }
+
+    @keyframes pulse-green {
+      from { box-shadow: 0 0 25px #3eff5e80, inset 0 0 10px #3eff5e40; }
+      to { box-shadow: 0 0 50px #3eff5eff, inset 0 0 20px #3eff5e80; }
+    }
+
+    @keyframes pulse-red {
+      from { box-shadow: 0 0 25px #ff434380, inset 0 0 10px #ff434340; }
+      to { box-shadow: 0 0 50px #ff4343ff, inset 0 0 20px #ff434380; }
+    }
+
+    @media (max-width: 768px) {
+      .floor-container {
+        padding: 25px;
+      }
+      h2 { font-size: 28px; }
+      .floor-title { font-size: 20px; }
+    }
   </style>
 </head>
 
 <body>
 
-  <div class="navbar" style="display: flex; align-items: center; padding: 10px 20px; background-color: purple;">
-    <a id="homeBtn" href="intelli.html" style="display: flex; align-items: center; text-decoration: none; color: white;">
-      <img src="logo.png" alt="IntelliPark Logo" style="height: 40px; margin-right: 10px;">
-      <span style="font-size: 20px; font-weight: bold;">INTELLIPARK</span>
+  <div class="navbar">
+    <a id="homeBtn" href="intelli.html">
+      <img src="logo.png" alt="IntelliPark Logo">
+      <span>INTELLIPARK</span>
     </a>
   </div>
 
-  <div class="container">
-    <h2>Available Parking Slots</h2>
+  <h2>Select Parking Level</h2>
 
+  <div class="container">
     <div class="floor-container" id="floor1" onclick="attemptBooking('1st Floor')">
       <div class="floor-title">1st Floor</div>
       <div class="counts-row">
-        <div class="count-label">
-          <span class="dot available"></span>
-          Available: <span id="floor1-available">0</span>
-        </div>
-        <div class="count-label">
-          <span class="dot reserved"></span>
-          Reserved: <span id="floor1-reserved">0</span>
-        </div>
-        <div class="count-label">
-          <span class="dot occupied"></span>
-          Occupied: <span id="floor1-occupied">0</span>
-        </div>
+        <div class="count-label"><span class="dot available"></span> Available: <span id="floor1-available">0</span></div>
+        <div class="count-label"><span class="dot reserved"></span> Reserved: <span id="floor1-reserved">0</span></div>
+        <div class="count-label"><span class="dot occupied"></span> Occupied: <span id="floor1-occupied">0</span></div>
       </div>
     </div>
 
     <div class="floor-container" id="floor2" onclick="attemptBooking('2nd Floor')">
       <div class="floor-title">2nd Floor</div>
       <div class="counts-row">
-        <div class="count-label">
-          <span class="dot available"></span>
-          Available: <span id="floor2-available">0</span>
-        </div>
-        <div class="count-label">
-          <span class="dot reserved"></span>
-          Reserved: <span id="floor2-reserved">0</span>
-        </div>
-        <div class="count-label">
-          <span class="dot occupied"></span>
-          Occupied: <span id="floor2-occupied">0</span>
-        </div>
+        <div class="count-label"><span class="dot available"></span> Available: <span id="floor2-available">0</span></div>
+        <div class="count-label"><span class="dot reserved"></span> Reserved: <span id="floor2-reserved">0</span></div>
+        <div class="count-label"><span class="dot occupied"></span> Occupied: <span id="floor2-occupied">0</span></div>
       </div>
     </div>
   </div>
@@ -181,7 +227,7 @@
       slot3: "Loading...", slot4: "Loading..."
     };
 
-    // Listen for slot status changes and update counters & glows
+    // Real-time slot monitoring
     Object.keys(slotStatuses).forEach(slotId => {
       db.ref(`/${slotId}/status`).on("value", snap => {
         slotStatuses[slotId] = snap.val();
@@ -189,46 +235,52 @@
       });
     });
 
+    // Update counts + glow effect
     function updateCountsAndGlow() {
-      [1,2].forEach(floorNum => {
+      [1, 2].forEach(floorNum => {
         const slots = floorSlots[floorNum];
         let available = 0, reserved = 0, occupied = 0;
+
         slots.forEach(slotId => {
           const s = slotStatuses[slotId];
           if (s === "Available") available++;
           else if (s === "Reserved") reserved++;
           else if (s === "Occupied") occupied++;
         });
+
         document.getElementById(`floor${floorNum}-available`).textContent = available;
-        document.getElementById(`floor${floorNum}-reserved`).textContent  = reserved;
-        document.getElementById(`floor${floorNum}-occupied`).textContent  = occupied;
+        document.getElementById(`floor${floorNum}-reserved`).textContent = reserved;
+        document.getElementById(`floor${floorNum}-occupied`).textContent = occupied;
 
         const floorDiv = document.getElementById(`floor${floorNum}`);
-        floorDiv.classList.remove('glow-available','glow-occupied','disabled');
+        floorDiv.classList.remove('glow-available', 'glow-occupied', 'disabled');
+
         if (available > 0) {
           floorDiv.classList.add('glow-available');
         } else {
-          floorDiv.classList.add('glow-occupied','disabled');
+          floorDiv.classList.add('glow-occupied', 'disabled');
         }
       });
     }
 
+    // Booking logic
     function attemptBooking(floorName) {
       let slotToBook = null;
       if (floorName === "1st Floor") {
         if (slotStatuses["slot1"] === "Available") slotToBook = "slot1";
         else if (slotStatuses["slot2"] === "Available") slotToBook = "slot2";
-      } else { // 2nd Floor
+      } else {
         if (slotStatuses["slot3"] === "Available") slotToBook = "slot3";
         else if (slotStatuses["slot4"] === "Available") slotToBook = "slot4";
       }
-      if (!slotToBook) return; // Click does nothing if floor is disabled/occupied
+
+      if (!slotToBook) return;
       if (confirm(`Do you want to reserve a slot on ${floorName}?`)) {
         window.location.href = `booking.html?slot=${slotToBook}`;
       }
     }
 
-    // --- AUTO-DETECT NAVIGATION for HOME BTN ONLY ---
+    // Home link adjuster
     document.addEventListener("DOMContentLoaded", function() {
       const btn = document.getElementById("homeBtn");
       if (btn) {
@@ -237,19 +289,6 @@
           : "intelli.html";
       }
     });
-    
   </script>
-  <button id="resetSlots">Reset All Slots</button>
-<script>
-document.getElementById("resetSlots").addEventListener("click", async () => {
-  await db.ref("/").update({
-    slot1: { status: "Available", reserved: false },
-    slot2: { status: "Available", reserved: false },
-    slot3: { status: "Available", reserved: false },
-    slot4: { status: "Available", reserved: false }
-  });
-  alert("All slots reset to Available!");
-});
-</script>
 </body>
 </html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entry Confirmed - IntelliPark</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+    }
+
+    .confirmation-container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 60px 80px;
+      border-radius: 25px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .checkmark {
+      font-size: 100px;
+      margin-bottom: 20px;
+      animation: scaleIn 0.5s ease;
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0); }
+      to { transform: scale(1); }
+    }
+
+    h1 {
+      font-size: 42px;
+      margin: 20px 0;
+      font-weight: 800;
+    }
+
+    .info-box {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 25px;
+      border-radius: 15px;
+      margin: 25px 0;
+      font-size: 20px;
+    }
+
+    .info-row {
+      margin: 12px 0;
+      font-weight: 600;
+    }
+
+    .gate-message {
+      font-size: 24px;
+      font-weight: 700;
+      margin-top: 25px;
+      color: #ffeb3b;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .countdown {
+      font-size: 18px;
+      margin-top: 30px;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="confirmation-container">
+    <div class="checkmark">✅</div>
+    <h1>Entry Confirmed!</h1>
+    <div class="info-box">
+      <div class="info-row">Slot: <strong id="slot"></strong></div>
+      <div class="info-row">Name: <strong id="name"></strong></div>
+      <div class="info-row">Plate: <strong id="plate"></strong></div>
+      <div class="info-row">Vehicle: <strong id="vehicle"></strong></div>
+    </div>
+    <div class="gate-message">🚧 Gate Opening... Please Proceed 🚧</div>
+    <div class="countdown" id="countdown">Returning to start in 10 seconds...</div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("slot").textContent = params.get("slot")?.toUpperCase() || "N/A";
+    document.getElementById("name").textContent = params.get("name") || "N/A";
+    document.getElementById("plate").textContent = params.get("plate") || "N/A";
+    document.getElementById("vehicle").textContent = params.get("vehicle") || "N/A";
+
+    let timeLeft = 10;
+    const countdownEl = document.getElementById("countdown");
+    const timer = setInterval(() => {
+      timeLeft--;
+      countdownEl.textContent = `Returning to start in ${timeLeft} seconds...`;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        window.location.href = "kiosk-start.html";
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

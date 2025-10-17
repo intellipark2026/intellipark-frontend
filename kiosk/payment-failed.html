@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Failed</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+    }
+
+    .error-container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 50px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .error-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin: 20px 0;
+    }
+
+    p {
+      font-size: 20px;
+      margin: 10px 0;
+    }
+
+    .retry-button {
+      margin-top: 30px;
+      padding: 15px 40px;
+      background: #fff;
+      color: #f5576c;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 18px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="error-container">
+    <div class="error-icon">❌</div>
+    <h1>Payment Failed</h1>
+    <p>Unfortunately, your payment could not be processed</p>
+    <p>Please try again or contact support</p>
+    <a href="kiosk-start.html" class="retry-button">Return to Start</a>
+  </div>
+</body>
+</html>

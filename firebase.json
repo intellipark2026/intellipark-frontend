@@ -1,16 +1,28 @@
 {
-  "hosting": {
-    "public": "public",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "/",
-        "destination": "/intelli.html"
-      }
-    ]
-  }
+  "hosting": [
+    {
+      "target": "main-site",
+      "public": "public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "/",
+          "destination": "/intelli.html"
+        }
+      ]
+    },
+    {
+      "target": "kiosk-site",
+      "public": "kiosk",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    }
+  ]
 }
