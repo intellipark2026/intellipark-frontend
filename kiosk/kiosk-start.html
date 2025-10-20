@@ -355,7 +355,7 @@
         else failSound.play();
       }
 
-      function onScanSuccess(decodedText) {
+  function onScanSuccess(decodedText) {
   if (scannedRecently) return;
   scannedRecently = true;
 
@@ -366,6 +366,7 @@
 
   try {
     const url = new URL(decodedText);
+    const ticketId = url.searchParams.get("ticketId");
     const slot = url.searchParams.get("slot");
     const plate = url.searchParams.get("plate");
     const vehicle = url.searchParams.get("vehicle") || "N/A";
@@ -373,10 +374,10 @@
     const time = url.searchParams.get("time") || new Date().toLocaleTimeString();
     const qrType = url.searchParams.get("type");
 
-    console.log("📋 Extracted data:", { slot, plate, vehicle, name, time, qrType });
+    console.log("📋 Data:", { ticketId, slot, plate, vehicle, name, time, qrType });
 
     if (!slot || !plate) {
-      console.error("❌ Missing slot or plate");
+      console.error("❌ Missing data");
       showNotification("❌ Invalid QR format", "error");
       setTimeout(() => {
         scannedRecently = false;
@@ -386,63 +387,100 @@
     }
 
     if (qrType === 'reservation') {
-      console.log("🔍 Verifying reservation for slot:", slot);
+      console.log("🔍 Verifying...");
       
-      db.ref(`/reservations/${slot}`).get().then(snapshot => {
-        if (snapshot.exists()) {
-          const reservation = snapshot.val();
-          console.log("📦 Firebase reservation data:", reservation);
+      if (ticketId) {
+        db.ref(`/tickets/${ticketId}`).get().then(ticketSnapshot => {
+          if (!ticketSnapshot.exists()) {
+            console.error("❌ Invalid ticket");
+            showNotification("❌ Invalid ticket", "error");
+            setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
+            return;
+          }
+
+          const ticket = ticketSnapshot.val();
           
-          if (reservation.plate === plate && reservation.status === "Paid") {
-            console.log("✅ Reservation verified successfully!");
-            showNotification("✅ Reservation Verified! Opening gate...", "success");
-            
+          if (ticket.used) {
+            console.error("❌ Already used");
+            showNotification("❌ This ticket was already used", "error");
+            setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
+            return;
+          }
+
+          if (ticket.entryVerified) {
+            console.warn("⚠️ Already checked in");
+            showNotification("⚠️ Already checked in. Proceed to slot", "success");
             setTimeout(() => {
               window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
             }, 2000);
-          } else {
-            console.error("❌ Plate mismatch or not paid");
-            showNotification("❌ Invalid reservation or payment not confirmed", "error");
-            setTimeout(() => {
-              scannedRecently = false;
-              reader.resume();
-            }, 3000);
+            return;
           }
-        } else {
-          console.error("❌ No reservation found for slot:", slot);
-          showNotification("❌ No reservation found for this slot", "error");
-          setTimeout(() => {
-            scannedRecently = false;
-            reader.resume();
-          }, 3000);
-        }
-      }).catch(error => {
-        console.error("❌ Firebase error:", error);
-        showNotification("❌ Database error. Please try again", "error");
-        setTimeout(() => {
-          scannedRecently = false;
-          reader.resume();
-        }, 3000);
-      });
+
+          console.log("✅ Ticket valid");
+
+          db.ref(`/reservations/${slot}`).get().then(snapshot => {
+            if (snapshot.exists()) {
+              const reservation = snapshot.val();
+              console.log("📦 Reservation:", reservation);
+              
+              if (reservation.plate === plate && reservation.status === "Paid") {
+                console.log("✅ Verified!");
+                
+                db.ref(`/tickets/${ticketId}`).update({
+                  entryVerified: true,
+                  entryTime: new Date().toISOString()
+                });
+
+                showNotification("✅ Welcome! Opening gate...", "success");
+                
+                setTimeout(() => {
+                  window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
+                }, 2000);
+              } else {
+                console.error("❌ Invalid");
+                showNotification("❌ Invalid reservation", "error");
+                setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
+              }
+            } else {
+              console.error("❌ Not found");
+              showNotification("❌ No reservation found", "error");
+              setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
+            }
+          });
+        }).catch(error => {
+          console.error("❌ Error:", error);
+          showNotification("❌ Verification failed", "error");
+          setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
+        });
+      } else {
+        db.ref(`/reservations/${slot}`).get().then(snapshot => {
+          if (snapshot.exists()) {
+            const reservation = snapshot.val();
+            if (reservation.plate === plate && reservation.status === "Paid") {
+              showNotification("✅ Verified! Opening gate...", "success");
+              setTimeout(() => {
+                window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
+              }, 2000);
+            } else {
+              showNotification("❌ Invalid reservation", "error");
+              setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
+            }
+          } else {
+            showNotification("❌ No reservation found", "error");
+            setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
+          }
+        });
+      }
     } else {
-      console.error("❌ Not a valid reservation QR");
-      showNotification("❌ Invalid QR code. Please use reservation QR", "error");
-      setTimeout(() => {
-        scannedRecently = false;
-        reader.resume();
-      }, 2000);
+      showNotification("❌ Invalid QR type", "error");
+      setTimeout(() => { scannedRecently = false; reader.resume(); }, 2000);
     }
   } catch (e) {
-    console.error("❌ QR parsing error:", e);
-    showNotification("❌ Failed to read QR code", "error");
-    setTimeout(() => {
-      scannedRecently = false;
-      reader.resume();
-    }, 2000);
+    console.error("❌ Parse error:", e);
+    showNotification("❌ Failed to read QR", "error");
+    setTimeout(() => { scannedRecently = false; reader.resume(); }, 2000);
   }
 }
-
-
       function proceed() {
         window.location.href = "kiosk-vehicle.html";
       }

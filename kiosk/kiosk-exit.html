@@ -107,83 +107,103 @@
     }
 
     async function processQR(qrData) {
-      if (!scanning) return;
-      scanning = false;
+  if (!scanning) return;
+  scanning = false;
 
-      try {
-        log('QR: ' + qrData.substring(0, 50));
-        
-        if (!qrData.includes('|')) {
-          throw new Error('Invalid QR format');
-        }
+  try {
+    log('QR: ' + qrData.substring(0, 50));
+    
+    let ticketId, slot, plate;
 
-        const parts = qrData.split('|');
-        if (parts.length < 3) throw new Error('Invalid QR format');
-        
-        const [ticketId, slot, plate] = parts;
-        log('Ticket: ' + ticketId);
-        log('Slot: ' + slot + ', Plate: ' + plate);
-
-        document.getElementById('loading').style.display = 'block';
-
-        // ✅ Check if ticket exists and is unused
-        const ticketSnapshot = await db.ref(`/tickets/${ticketId}`).once('value');
-        
-        if (!ticketSnapshot.exists()) {
-          throw new Error('Invalid ticket - not found');
-        }
-
-        const ticketData = ticketSnapshot.val();
-        
-        if (ticketData.used) {
-          throw new Error('This QR code has already been used');
-        }
-
-        log('Ticket valid, marking as used...');
-
-        // ✅ Mark ticket as used
-        await db.ref(`/tickets/${ticketId}`).update({
-          used: true,
-          usedAt: new Date().toISOString()
-        });
-
-        log('Calling backend...');
-
-        const response = await fetch(`${BACKEND}/api/exit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slot, plate, exitTime: new Date().toISOString(), ticketId })
-        });
-
-        log('Response: ' + response.status);
-
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.error || 'Backend error');
-        }
-
-        log('Gate opened!');
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('success').style.display = 'block';
-
-        let count = 10;
-        const interval = setInterval(() => {
-          document.getElementById('countdown').textContent = `Closing in ${count--}s`;
-          if (count < 0) {
-            clearInterval(interval);
-            location.reload();
-          }
-        }, 1000);
-
-      } catch (error) {
-        log('Error: ' + error.message);
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('error').style.display = 'block';
-        document.getElementById('errMsg').textContent = error.message;
-        setTimeout(() => location.reload(), 7000);
-      }
+    // Check format
+    if (qrData.includes('intellipark-kiosk.web.app/verify') || qrData.includes('intellipark2025-327e9.web.app')) {
+      const url = new URL(qrData);
+      ticketId = url.searchParams.get('ticketId');
+      slot = url.searchParams.get('slot');
+      plate = url.searchParams.get('plate');
+      log('URL format');
+    } else if (qrData.includes('|')) {
+      const parts = qrData.split('|');
+      if (parts.length < 3) throw new Error('Invalid QR format');
+      [ticketId, slot, plate] = parts;
+      log('Pipe format');
+    } else {
+      throw new Error('Unsupported QR format');
     }
 
+    if (!ticketId || !slot || !plate) {
+      throw new Error('Missing data');
+    }
+
+    log('Ticket: ' + ticketId);
+    log('Slot: ' + slot + ', Plate: ' + plate);
+
+    document.getElementById('loading').style.display = 'block';
+
+    // Check if ticket exists
+    const ticketSnapshot = await db.ref(`/tickets/${ticketId}`).once('value');
+    
+    if (!ticketSnapshot.exists()) {
+      throw new Error('Invalid ticket');
+    }
+
+    const ticketData = ticketSnapshot.val();
+    log('Ticket: ' + JSON.stringify(ticketData));
+    
+    if (ticketData.used) {
+      throw new Error('Already used');
+    }
+
+    if (!ticketData.entryVerified) {
+      throw new Error('Check in at entrance first');
+    }
+
+    log('Ticket valid, calling backend...');
+
+    // ✅ FIXED: Call backend FIRST (it will mark ticket as used)
+    const response = await fetch(`${BACKEND}/api/exit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        slot, 
+        plate, 
+        exitTime: new Date().toISOString(), 
+        ticketId 
+      })
+    });
+
+    log('Response: ' + response.status);
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'Backend error');
+    }
+
+    const result = await response.json();
+    log('Gate opened! Duration: ' + result.duration);
+
+    // ✅ Backend already marked ticket as used, no need to do it here
+    
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('success').style.display = 'block';
+
+    let count = 10;
+    const interval = setInterval(() => {
+      document.getElementById('countdown').textContent = `Closing in ${count--}s`;
+      if (count < 0) {
+        clearInterval(interval);
+        location.reload();
+      }
+    }, 1000);
+
+  } catch (error) {
+    log('Error: ' + error.message);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display = 'block';
+    document.getElementById('errMsg').textContent = error.message;
+    setTimeout(() => location.reload(), 7000);
+  }
+}
     log('Starting camera...');
     reader.start(
       { facingMode: "user" },
