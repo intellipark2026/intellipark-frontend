@@ -341,10 +341,12 @@
                             <th>Name</th>
                             <th>Plate</th>
                             <th>Vehicle</th>
+                            <th>Source</th> <!-- New column -->
                             <th>Status</th>
                             <th>Amount</th>
                         </tr>
                     </thead>
+
                     <tbody id="logsTableBody"></tbody>
                 </table>
             </div>
@@ -527,6 +529,7 @@
                 const status = log.status || 'Pending';
                 const amount = log.amount || 50;
                 
+                // In your displayLogs() function, modify the row.innerHTML to include:
                 row.innerHTML=`
                     <td>${timeIn}</td>
                     <td>${timeOut}</td>
@@ -535,9 +538,11 @@
                     <td>${log.name || 'Walk-In'}</td>
                     <td>${log.plate || 'N/A'}</td>
                     <td>${log.vehicle || 'N/A'}</td>
+                    <td><span class="status-badge">${log.reservedVia || 'Kiosk'}</span></td>
                     <td><span class="status-badge status-${status.toLowerCase()}">${status}</span></td>
                     <td>₱${amount}</td>
                 `;
+
                 tbody.appendChild(row);
             });
             
