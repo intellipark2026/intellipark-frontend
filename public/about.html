@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us - IntelliPark</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', 'SF Pro Display', sans-serif;
+      background: linear-gradient(135deg, #000000 0%, #1a1a1a 30%, #f2f2f2 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 50px;
+      background: rgba(20, 20, 20, 0.6);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 2px 25px rgba(0, 0, 0, 0.4);
+      border-bottom: 2px solid rgb(145, 142, 142);
+      z-index: 100;
+    }
+
+    .navbar a {
+      text-decoration: none;
+      color: white;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .navbar img {
+      height: 42px;
+      filter: drop-shadow(0 0 3px rgba(255,255,255,0.3));
+    }
+
+    .content {
+      padding: 130px 60px 60px;
+      max-width: 1100px;
+      margin: auto;
+      line-height: 1.8;
+    }
+
+    h1 {
+      font-size: 52px;
+      text-align: center;
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-top: 40px;
+      color: #ddd;
+      border-left: 5px solid white;
+      padding-left: 15px;
+    }
+
+    p {
+      font-size: 18px;
+      color: #eaeaea;
+      text-align: justify;
+      margin-top: 15px;
+    }
+
+    .team {
+      margin-top: 50px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    .member {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 15px;
+      padding: 25px;
+      width: 240px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
+    }
+
+    .member h3 {
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    /* Contact Section */
+    .contact {
+      text-align: center;
+      margin-top: 60px;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    .contact h2 {
+      border-left: none;
+      font-size: 28px;
+      margin-bottom: 15px;
+      color: white;
+    }
+
+    .contact p {
+      text-align: center;
+      font-size: 18px;
+      color: #ddd;
+      margin-bottom: 10px;
+    }
+
+    .contact .info {
+      font-size: 18px;
+      color: white;
+      margin-top: 5px;
+    }
+
+    .contact .info a {
+      color: white;
+      text-decoration: none;
+    }
+
+    .contact .info a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        padding: 120px 25px 40px;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+
+      .contact .info {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <a href="intelli.html"><img src="logo.png" alt="IntelliPark Logo"></a>
+    <a href="index.html">Home</a>
+  </div>
+
+  <div class="content">
+    <h1>About IntelliPark</h1>
+    <p><strong>IntelliPark</strong> is a Smart QR-Based Parking Navigation System with Real-Time Slot Monitoring and Online Reservations — a capstone project developed by Computer Engineering students from <strong>STI College Caloocan</strong>. The system is designed to modernize and simplify the parking experience using Internet of Things (IoT) technology, enabling users to reserve parking slots, navigate directly to them, and pay through cashless QR-based transactions.</p>
+
+    <h2>Our Mission</h2>
+    <p>To revolutionize parking management by integrating intelligent automation, real-time monitoring, and user-friendly digital tools — reducing congestion, saving time, and promoting sustainable urban mobility.</p>
+
+    <h2>Our Vision</h2>
+    <p>To become a leading smart parking innovation that enhances the efficiency, accessibility, and convenience of parking systems across cities and commercial establishments in the Philippines.</p>
+
+    <h2>System Overview</h2>
+    <p>IntelliPark combines the power of IoT, sensors, and web-based technologies to deliver a seamless parking experience. Ultrasonic sensors monitor slot availability, while kiosks equipped with touchscreens and QR scanners handle on-site check-ins and payments. Users can reserve parking online, receive a digital QR code, and be guided directly to their assigned slot — all synchronized with real-time updates in the Firebase Realtime Database. This integration minimizes human error, streamlines entry and exit processes, and enhances security.</p>
+
+    <h2>Developers</h2>
+    <div class="team">
+      <div class="member"><h3>Justine Andrew C. Garcia</h3></div>
+      <div class="member"><h3>Patrick P. Guevarra</h3></div>
+      <div class="member"><h3>Jeremiah Wayne V. Sandoval</h3></div>
+      <div class="member"><h3>Glaize Anne S. Torres</h3></div>
+    </div>
+
+    <h2>Institution</h2>
+    <p>This project was developed under the <strong>Information and Communications Technology Program</strong> of <strong>STI College Caloocan</strong>, as part of the requirements for the <strong>Bachelor of Science in Computer Engineering</strong> degree. Guided by <strong>Mr. JB Caampued</strong> as Thesis Adviser and <strong>Engr. Jimmy Jovero</strong> as Thesis Coordinator, IntelliPark represents the group’s pursuit of technological innovation for smarter, more sustainable parking management.</p>
+
+    <div class="contact">
+      <h2>Contact Us</h2>
+      <p>For inquiries or collaborations, feel free to reach out to us at:</p>
+      <div class="info">
+        <a href="mailto:intellipark2026@gmail.com">intellipark2026@gmail.com</a> | 0961&nbsp;715&nbsp;3112
+      </div>
+    </div>
+  </div>
+</body>
+</html>
