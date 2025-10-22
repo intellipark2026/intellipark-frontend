@@ -3,48 +3,176 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment Success</title>
+  <title>Payment Successful - IntelliPark</title>
+  
+  <!-- ✅ Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <!-- ✅ Font: Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #fff;
+    }
+
     body {
-      margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center;
-      background: linear-gradient(135deg, #667eea, #764ba2); font-family: 'Segoe UI', sans-serif; color: #fff;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at center, #0d0d0d 0%, #000 100%);
+      overflow: hidden;
     }
+
     .container {
-      text-align: center; background: rgba(255, 255, 255, 0.1); padding: 40px;
-      border-radius: 20px; backdrop-filter: blur(10px); max-width: 500px;
+      text-align: center;
+      background: rgba(25, 25, 25, 0.85);
+      padding: 55px 45px;
+      border-radius: 24px;
+      backdrop-filter: blur(12px);
+      box-shadow:
+        0 0 25px rgba(0, 255, 128, 0.15),
+        inset 0 0 10px rgba(0, 255, 128, 0.1);
+      border: 1px solid rgba(0, 255, 128, 0.15);
+      animation: cardPulse 2s infinite alternate;
     }
-    .checkmark { font-size: 80px; }
-    h1 { font-size: 32px; margin: 20px 0; }
-    .slot { font-size: 24px; font-weight: bold; margin: 20px 0;
-            padding: 15px; background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
-    .details { text-align: left; background: rgba(255, 255, 255, 0.1);
-               padding: 15px; border-radius: 10px; margin: 20px 0; }
-    .qr-box { background: white; padding: 25px; border-radius: 15px; margin: 20px auto; display: inline-block; }
-    #qr { display: block; }
-    .ticket-id { font-family: monospace; font-size: 11px; color: #000; margin-top: 10px; }
-    .info { background: rgba(255, 193, 7, 0.2); border: 2px solid #fc3;
-            border-radius: 10px; padding: 12px; margin-top: 15px; font-size: 14px; }
+
+    @keyframes cardPulse {
+      0% { box-shadow: 0 0 15px rgba(0, 255, 128, 0.2); }
+      100% { box-shadow: 0 0 40px rgba(0, 255, 128, 0.5); }
+    }
+
+    .checkmark {
+      width: 105px;
+      height: 105px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: rgba(0, 255, 128, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow:
+        0 0 25px rgba(0, 255, 128, 0.4),
+        inset 0 0 20px rgba(0, 255, 128, 0.3);
+      animation: glowPulse 2s infinite;
+    }
+
+    @keyframes glowPulse {
+      0% { box-shadow: 0 0 20px rgba(0, 255, 128, 0.3); transform: scale(1); }
+      50% { box-shadow: 0 0 50px rgba(0, 255, 128, 0.8); transform: scale(1.05); }
+      100% { box-shadow: 0 0 20px rgba(0, 255, 128, 0.3); transform: scale(1); }
+    }
+
+    .checkmark span {
+      font-size: 52px;
+      color: #00ff99;
+      text-shadow: 0 0 20px rgba(0, 255, 128, 0.9);
+    }
+
+    h1 {
+      font-size: 30px;
+      letter-spacing: 1px;
+      margin: 10px 0 25px;
+      color: #fff;
+      text-transform: uppercase;
+      font-weight: 600;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+      position: relative;
+    }
+
+    h1::after {
+      content: "";
+      display: block;
+      width: 120px;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.8);
+      margin: 12px auto 0;
+      border-radius: 6px;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+    }
+
+    .details {
+      text-align: left;
+      margin: 25px auto;
+      font-size: 17px;
+      line-height: 1.9;
+      font-weight: 400;
+    }
+
+    .details p {
+      margin: 8px 0;
+      color: #fff;
+    }
+
+    .details span {
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0 0 6px rgba(0, 255, 128, 0.4);
+    }
+
+    .qr-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 22px;
+      border-radius: 14px;
+      margin: 25px auto;
+      display: inline-block;
+      box-shadow: 0 0 25px rgba(252, 252, 252, 0.15);
+    }
+
+    #qr {
+      display: block;
+      margin: auto;
+    }
+
+    .ticket-id {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #bbb;
+      letter-spacing: 0.5px;
+    }
+
+    .info {
+      margin-top: 25px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 500;
+      text-shadow: 0 0 8px rgba(0, 255, 128, 0.6);
+    }
+
+    .footer {
+      font-size: 14px;
+      color: #777;
+      margin-top: 10px;
+      font-weight: 400;
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
-    <div class="checkmark">✅</div>
-    <h1>Payment Successful!</h1>
-    <div class="slot">Slot: <span id="slotNum"></span></div>
+    <div class="checkmark"><span>✔</span></div>
+    <h1>Payment Confirmed</h1>
+
     <div class="details">
-      <p><strong>Plate:</strong> <span id="plateNum"></span></p>
-      <p><strong>Vehicle:</strong> <span id="vehicleType"></span></p>
-      <p><strong>Amount:</strong> ₱50</p>
+      <p>Slot: <span id="slotNum">N/A</span></p>
+      <p>Plate: <span id="plateNum">N/A</span></p>
+      <p>Vehicle: <span id="vehicleType">N/A</span></p>
+      <p>Amount: <span>₱50</span></p>
     </div>
+
     <div class="qr-box">
       <canvas id="qr"></canvas>
       <div class="ticket-id">Ticket: <span id="ticketDisplay"></span></div>
     </div>
-    <div class="info">📱 <strong>ONE-TIME USE QR CODE</strong><br>Scan at exit to open gate</div>
-  </div>
 
+    <div class="info">📱 One-Time Use QR Code<br>Scan at exit to open gate</div>
+    <div class="footer">Welcome to IntelliPark</div>
+  </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <script>
     const firebaseConfig = {
@@ -69,23 +197,29 @@
     document.getElementById("plateNum").textContent = plate.toUpperCase();
     document.getElementById("vehicleType").textContent = vehicle;
 
-    // ✅ Generate unique ticket ID
-    const ticketId = `TK-${slot.toUpperCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    // ✅ Generate unique ticket ID for walk-in
+    const ticketId = `WK-${slot.toUpperCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
     document.getElementById("ticketDisplay").textContent = ticketId;
 
-    // ✅ Save ticket to Firebase as "unused"
+    // ✅ Save walk-in ticket - CRITICALLY IMPORTANT FIELDS
     db.ref(`/tickets/${ticketId}`).set({
       slot: slot,
       plate: plate,
       vehicle: vehicle,
+      type: 'walkin',              // ✅ CRITICAL: Mark as walk-in
+      status: 'Paid',              // ✅ CRITICAL: Payment completed
       createdAt: new Date().toISOString(),
-      used: false
+      used: false,                 // ✅ Not used yet
+      entryVerified: null          // ✅ Set to null (not false) for walk-in
     }).then(() => {
-      console.log('✅ Ticket saved to Firebase');
+      console.log('✅ Walk-in ticket saved:', ticketId);
+      console.log('✅ Type: walkin, Status: Paid');
+    }).catch(err => {
+      console.error('❌ Firebase save error:', err);
     });
 
-    // QR format: TICKET_ID|SLOT|PLATE
-    const qrData = `${ticketId}|${slot}|${plate}`;
+    // ✅ Generate QR with type=walkin
+    const qrData = `https://intellipark2025-327e9.web.app/verify?ticketId=${ticketId}&slot=${slot}&plate=${plate}&vehicle=${vehicle}&type=walkin`;
     
     new QRious({
       element: document.getElementById('qr'),
@@ -93,7 +227,7 @@
       size: 280
     });
 
-    console.log('QR generated:', qrData);
+    console.log('✅ QR Code:', qrData);
   </script>
 </body>
 </html>

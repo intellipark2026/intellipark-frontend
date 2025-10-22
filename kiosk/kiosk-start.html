@@ -325,173 +325,184 @@
     <audio id="qrDetectedPrompt" src="scan_prompt.mp3" preload="auto"></audio>
 
     <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
-        authDomain: "intellipark2025-327e9.firebaseapp.com",
-        databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
-        projectId: "intellipark2025-327e9",
-        storageBucket: "intellipark2025-327e9.appspot.com",
-        messagingSenderId: "126333727252",
-        appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
-      };
+  const firebaseConfig = {
+    apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
+    authDomain: "intellipark2025-327e9.firebaseapp.com",
+    databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
+    projectId: "intellipark2025-327e9",
+    storageBucket: "intellipark2025-327e9.appspot.com",
+    messagingSenderId: "126333727252",
+    appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
+  };
 
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.database();
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-      const reader = new Html5Qrcode("reader");
-      const notif = document.getElementById("notification");
-      const successSound = document.getElementById("successSound");
-      const failSound = document.getElementById("failSound");
-      const qrDetectedPrompt = document.getElementById("qrDetectedPrompt");
+  // ✅ Initialize scanner properly
+  const reader = new Html5Qrcode("reader");
+  const notif = document.getElementById("notification");
+  const successSound = document.getElementById("successSound");
+  const failSound = document.getElementById("failSound");
+  const qrDetectedPrompt = document.getElementById("qrDetectedPrompt");
 
-      let scannedRecently = false;
+  let scannedRecently = false;
 
-      function showNotification(message, type = "success") {
-        notif.textContent = message;
-        notif.className = type;
-        notif.style.display = "block";
+  function showNotification(message, type = "success") {
+    notif.textContent = message;
+    notif.className = type;
+    notif.style.display = "block";
 
-        if (type === "success") successSound.play();
-        else failSound.play();
+    if (type === "success") successSound.play();
+    else failSound.play();
+  }
+
+  // ✅ Your existing onScanSuccess function (keep it exactly as is)
+  function onScanSuccess(decodedText) {
+    if (scannedRecently) return;
+    scannedRecently = true;
+
+    qrDetectedPrompt.play();
+
+    console.log("🔍 QR Scanned:", decodedText);
+
+    try {
+      const url = new URL(decodedText);
+      const ticketId = url.searchParams.get("ticketId");
+      const slot = url.searchParams.get("slot");
+      const plate = url.searchParams.get("plate");
+      const vehicle = url.searchParams.get("vehicle") || "N/A";
+      const name = url.searchParams.get("name") || "Guest";
+      const time = url.searchParams.get("time") || new Date().toLocaleTimeString();
+      const qrType = url.searchParams.get("type");
+
+      console.log("📋 Data:", { ticketId, slot, plate, vehicle, name, time, qrType });
+
+      if (!slot || !plate) {
+        console.error("❌ Missing data");
+        showNotification("❌ Invalid QR format", "error");
+        setTimeout(() => {
+          scannedRecently = false;
+        }, 2000);
+        return;
       }
 
-  function onScanSuccess(decodedText) {
-  if (scannedRecently) return;
-  scannedRecently = true;
+      if (qrType === 'reservation') {
+        console.log("🔍 Verifying...");
+        
+        if (ticketId) {
+          db.ref(`/tickets/${ticketId}`).get().then(ticketSnapshot => {
+            if (!ticketSnapshot.exists()) {
+              console.error("❌ Invalid ticket");
+              showNotification("❌ Invalid ticket", "error");
+              setTimeout(() => { scannedRecently = false; }, 3000);
+              return;
+            }
 
-  qrDetectedPrompt.play();
-  reader.pause();
+            const ticket = ticketSnapshot.val();
+            
+            if (ticket.used) {
+              console.error("❌ Already used");
+              showNotification("❌ This ticket was already used", "error");
+              setTimeout(() => { scannedRecently = false; }, 3000);
+              return;
+            }
 
-  console.log("🔍 QR Scanned:", decodedText);
+            if (ticket.entryVerified) {
+              console.warn("⚠️ Already checked in");
+              showNotification("⚠️ Already checked in. Proceed to slot", "success");
+              setTimeout(() => {
+                window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
+              }, 2000);
+              return;
+            }
 
-  try {
-    const url = new URL(decodedText);
-    const ticketId = url.searchParams.get("ticketId");
-    const slot = url.searchParams.get("slot");
-    const plate = url.searchParams.get("plate");
-    const vehicle = url.searchParams.get("vehicle") || "N/A";
-    const name = url.searchParams.get("name") || "Guest";
-    const time = url.searchParams.get("time") || new Date().toLocaleTimeString();
-    const qrType = url.searchParams.get("type");
+            console.log("✅ Ticket valid");
 
-    console.log("📋 Data:", { ticketId, slot, plate, vehicle, name, time, qrType });
+            db.ref(`/reservations/${slot}`).get().then(snapshot => {
+              if (snapshot.exists()) {
+                const reservation = snapshot.val();
+                console.log("📦 Reservation:", reservation);
+                
+                if (reservation.plate === plate && reservation.status === "Paid") {
+                  console.log("✅ Verified!");
+                  
+                  db.ref(`/tickets/${ticketId}`).update({
+                    entryVerified: true,
+                    entryTime: new Date().toISOString()
+                  });
 
-    if (!slot || !plate) {
-      console.error("❌ Missing data");
-      showNotification("❌ Invalid QR format", "error");
-      setTimeout(() => {
-        scannedRecently = false;
-        reader.resume();
-      }, 2000);
-      return;
-    }
-
-    if (qrType === 'reservation') {
-      console.log("🔍 Verifying...");
-      
-      if (ticketId) {
-        db.ref(`/tickets/${ticketId}`).get().then(ticketSnapshot => {
-          if (!ticketSnapshot.exists()) {
-            console.error("❌ Invalid ticket");
-            showNotification("❌ Invalid ticket", "error");
-            setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
-            return;
-          }
-
-          const ticket = ticketSnapshot.val();
-          
-          if (ticket.used) {
-            console.error("❌ Already used");
-            showNotification("❌ This ticket was already used", "error");
-            setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
-            return;
-          }
-
-          if (ticket.entryVerified) {
-            console.warn("⚠️ Already checked in");
-            showNotification("⚠️ Already checked in. Proceed to slot", "success");
-            setTimeout(() => {
-              window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
-            }, 2000);
-            return;
-          }
-
-          console.log("✅ Ticket valid");
-
+                  showNotification("✅ Welcome! Opening gate...", "success");
+                  
+                  setTimeout(() => {
+                    window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
+                  }, 2000);
+                } else {
+                  console.error("❌ Invalid");
+                  showNotification("❌ Invalid reservation", "error");
+                  setTimeout(() => { scannedRecently = false; }, 3000);
+                }
+              } else {
+                console.error("❌ Not found");
+                showNotification("❌ No reservation found", "error");
+                setTimeout(() => { scannedRecently = false; }, 3000);
+              }
+            });
+          }).catch(error => {
+            console.error("❌ Error:", error);
+            showNotification("❌ Verification failed", "error");
+            setTimeout(() => { scannedRecently = false; }, 3000);
+          });
+        } else {
           db.ref(`/reservations/${slot}`).get().then(snapshot => {
             if (snapshot.exists()) {
               const reservation = snapshot.val();
-              console.log("📦 Reservation:", reservation);
-              
               if (reservation.plate === plate && reservation.status === "Paid") {
-                console.log("✅ Verified!");
-                
-                db.ref(`/tickets/${ticketId}`).update({
-                  entryVerified: true,
-                  entryTime: new Date().toISOString()
-                });
-
-                showNotification("✅ Welcome! Opening gate...", "success");
-                
+                showNotification("✅ Verified! Opening gate...", "success");
                 setTimeout(() => {
                   window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
                 }, 2000);
               } else {
-                console.error("❌ Invalid");
                 showNotification("❌ Invalid reservation", "error");
-                setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
+                setTimeout(() => { scannedRecently = false; }, 3000);
               }
             } else {
-              console.error("❌ Not found");
               showNotification("❌ No reservation found", "error");
-              setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
+              setTimeout(() => { scannedRecently = false; }, 3000);
             }
           });
-        }).catch(error => {
-          console.error("❌ Error:", error);
-          showNotification("❌ Verification failed", "error");
-          setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
-        });
+        }
       } else {
-        db.ref(`/reservations/${slot}`).get().then(snapshot => {
-          if (snapshot.exists()) {
-            const reservation = snapshot.val();
-            if (reservation.plate === plate && reservation.status === "Paid") {
-              showNotification("✅ Verified! Opening gate...", "success");
-              setTimeout(() => {
-                window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
-              }, 2000);
-            } else {
-              showNotification("❌ Invalid reservation", "error");
-              setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
-            }
-          } else {
-            showNotification("❌ No reservation found", "error");
-            setTimeout(() => { scannedRecently = false; reader.resume(); }, 3000);
-          }
-        });
+        showNotification("❌ Invalid QR type", "error");
+        setTimeout(() => { scannedRecently = false; }, 2000);
       }
-    } else {
-      showNotification("❌ Invalid QR type", "error");
-      setTimeout(() => { scannedRecently = false; reader.resume(); }, 2000);
+    } catch (e) {
+      console.error("❌ Parse error:", e);
+      showNotification("❌ Failed to read QR", "error");
+      setTimeout(() => { scannedRecently = false; }, 2000);
     }
-  } catch (e) {
-    console.error("❌ Parse error:", e);
-    showNotification("❌ Failed to read QR", "error");
-    setTimeout(() => { scannedRecently = false; reader.resume(); }, 2000);
   }
-}
-      function proceed() {
-        window.location.href = "kiosk-vehicle.html";
-      }
 
-      window.onload = () => {
-        reader.start({ facingMode: "environment" }, { fps: 10, qrbox: 180 }, onScanSuccess)
-        .catch(err => {
-          console.error("Camera error:", err);
-          showNotification("❌ Unable to access camera", "error");
-        });
-      };
-    </script>
+  function proceed() {
+    window.location.href = "kiosk-vehicle.html";
+  }
+
+  // ✅ Proper camera initialization with full-screen scanning
+  window.onload = () => {
+    const config = {
+      fps: 30,
+      qrbox: { width: 400, height: 400 },  // ✅ Large box for easy scanning anywhere
+      aspectRatio: 1.0
+    };
+
+    reader.start(
+      { facingMode: "environment" }, 
+      config, 
+      onScanSuccess
+    ).catch(err => {
+      console.error("Camera error:", err);
+      showNotification("❌ Unable to access camera", "error");
+    });
+  };
+</script>
   </body>
   </html>

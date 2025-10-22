@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Entry Confirmed - IntelliPark</title>
+  <title>IntelliPark - Entrance Receipt</title>
   <style>
     body {
       margin: 0;
@@ -11,77 +11,143 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at center, #0f0f0f 0%, #1a1a1a 50%, #000 100%);
+      font-family: 'Poppins', sans-serif;
       color: #fff;
+      overflow: hidden;
+      perspective: 1000px;
     }
 
-    .confirmation-container {
-      text-align: center;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 60px 80px;
-      border-radius: 25px;
+    .receipt-container {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 128, 0.2);
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(0, 255, 128, 0.35);
       backdrop-filter: blur(15px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      width: 360px;
+      padding: 40px 35px 50px;
+      text-align: center;
+      animation: fadeIn 1s ease, float3D 6s ease-in-out infinite;
+      transform-style: preserve-3d;
     }
 
+    /* ✅ Green Check Animation */
     .checkmark {
-      font-size: 100px;
-      margin-bottom: 20px;
-      animation: scaleIn 0.5s ease;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(145deg, #00ff99, #00cc66);
+      box-shadow: 0 0 25px rgba(0, 255, 128, 0.6);
+      margin: 0 auto 25px;
+      animation: popIn 0.6s ease-out;
     }
 
-    @keyframes scaleIn {
-      from { transform: scale(0); }
-      to { transform: scale(1); }
+    .checkmark svg {
+      width: 50px;
+      height: 50px;
+      stroke: #fff;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      animation: drawCheck 0.6s ease forwards 0.3s;
     }
 
-    h1 {
-      font-size: 42px;
-      margin: 20px 0;
-      font-weight: 800;
+    @keyframes popIn {
+      0% { transform: scale(0); opacity: 0; }
+      70% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); }
     }
 
-    .info-box {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 25px;
-      border-radius: 15px;
-      margin: 25px 0;
-      font-size: 20px;
+    @keyframes drawCheck {
+      to { stroke-dashoffset: 0; }
     }
 
-    .info-row {
-      margin: 12px 0;
+    /* 🌌 Floating 3D effect */
+    @keyframes float3D {
+      0%, 100% {
+        transform: translateZ(0) scale(1) rotateX(0deg) rotateY(0deg);
+      }
+      25% {
+        transform: translateZ(30px) scale(1.03) rotateX(2deg) rotateY(-2deg);
+      }
+      50% {
+        transform: translateZ(0px) scale(0.98) rotateX(-1deg) rotateY(1deg);
+      }
+      75% {
+        transform: translateZ(20px) scale(1.02) rotateX(1deg) rotateY(1deg);
+      }
+    }
+
+    .receipt-header {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: linear-gradient(to right, #00ffcc, #00ff99);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+    }
+
+    /* ✅ Only the line changed to white */
+    .glow-line {
+      width: 60%;
+      height: 2px;
+      margin: 10px auto 20px;
+      border-radius: 10px;
+      background: linear-gradient(to right, #ffffff, #e0e0e0, #ffffff);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .detail {
+      margin: 15px 0;
+      font-size: 1.05rem;
+      letter-spacing: 0.5px;
+      color: #dcdcdc;
+    }
+
+    .detail span {
+      color: #ffffff;
       font-weight: 600;
     }
 
-    .gate-message {
-      font-size: 24px;
-      font-weight: 700;
+    /* ✅ White “Welcome to IntelliPark” text */
+    .thank-you {
       margin-top: 25px;
-      color: #ffeb3b;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      font-size: 0.95rem;
+      color: #ffffff;
+      font-style: italic;
+      letter-spacing: 0.5px;
     }
 
-    .countdown {
-      font-size: 18px;
-      margin-top: 30px;
-      opacity: 0.9;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
 <body>
-  <div class="confirmation-container">
-    <div class="checkmark">✅</div>
-    <h1>Entry Confirmed!</h1>
-    <div class="info-box">
-      <div class="info-row">Slot: <strong id="slot"></strong></div>
-      <div class="info-row">Name: <strong id="name"></strong></div>
-      <div class="info-row">Plate: <strong id="plate"></strong></div>
-      <div class="info-row">Vehicle: <strong id="vehicle"></strong></div>
+  <div class="receipt-container">
+    <div class="checkmark">
+      <svg viewBox="0 0 52 52">
+        <path d="M14 27l7 7 17-17" />
+      </svg>
     </div>
-    <div class="gate-message">🚧 Gate Opening... Please Proceed 🚧</div>
-    <div class="countdown" id="countdown">Returning to start in 10 seconds...</div>
+
+    <div class="receipt-header">Entrance Confirmed</div>
+    <div class="glow-line"></div>
+
+    <div class="detail">Slot Number: <span id="slot"></span></div>
+    <div class="detail">Name: <span id="name"></span></div>
+    <div class="detail">Plate Number: <span id="plate"></span></div>
+    <div class="detail">Vehicle Type: <span id="vehicle"></span></div>
+
+    <div class="thank-you">Welcome to IntelliPark</div>
   </div>
 
   <script>

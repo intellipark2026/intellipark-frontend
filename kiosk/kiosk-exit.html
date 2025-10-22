@@ -1,54 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Exit Kiosk</title>
+
+  <!-- Libraries -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      height: 100vh; background: linear-gradient(135deg, #000, #fff);
-      display: flex; justify-content: center; align-items: center;
-      font-family: sans-serif; color: #fff;
+      height: 100vh;
+      background: linear-gradient(135deg, #000, #fff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Poppins', sans-serif;
+      color: #fff;
     }
+
     .kiosk {
-      background: rgba(0,0,0,0.9); width: 90%; max-width: 1000px; height: 600px;
-      border-radius: 25px; display: flex; overflow: hidden;
+      background: rgba(0, 0, 0, 0.9);
+      width: 90%;
+      max-width: 1200px;
+      height: 700px;
+      border-radius: 25px;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
     }
+
     .left {
-      flex: 1; background: #fff; color: #000; display: flex;
-      flex-direction: column; justify-content: center; padding-left: 60px;
+      flex: 1;
+      background: #fff;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding-left: 70px;
     }
-    .left h1 { font-size: 80px; line-height: 1.1; font-weight: 700; }
+
+    .left h1 {
+      font-size: 100px;
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: -2px;
+      background: linear-gradient(90deg, #000, #777);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
     .right {
-      flex: 1.5; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; padding: 20px;
+      flex: 1.5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
-    #reader { width: 350px; height: 350px; border: 4px solid #fff; border-radius: 20px; }
-    #reader video { transform: scaleX(-1) !important; }
+
+    /* ✅ Bigger scanner box */
+    #reader {
+      width: 500px;
+      height: 500px;
+      border-radius: 25px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+    }
+
+    #reader video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      transform: scaleX(-1) !important;
+    }
+
+    /* ✅ Larger "Scan QR to Exit" text */
     .text {
-      margin-top: 25px; background: #fff; color: #000;
-      padding: 12px 40px; border-radius: 50px; font-weight: 600;
+      margin-top: 35px;
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      width: 500px;
+      text-align: center;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 0 14px rgba(255, 255, 255, 0.7);
     }
-    .box { display: none; padding: 30px; border-radius: 15px; text-align: center; margin-top: 30px; width: 90%; }
-    .success { background: rgba(0,200,83,0.2); border: 3px solid #0c3; }
-    .success h2 { font-size: 48px; color: #0f6; margin: 0; }
-    .error { background: rgba(255,77,77,0.2); border: 2px solid #f44; }
-    .loading { background: rgba(255,255,255,0.1); }
+
+    /* ✅ Bigger status boxes */
+    .box {
+      display: none;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      margin-top: 40px;
+      width: 500px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .success h2 {
+      font-size: 56px;
+      color: #fff;
+      margin: 0;
+    }
+
+    .error h3 {
+      font-size: 42px;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+
     .spin {
-      border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid #fff;
-      border-radius: 50%; width: 50px; height: 50px;
-      animation: spin 1s linear infinite; margin: 20px auto;
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-top: 5px solid #fff;
+      border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      animation: spin 1s linear infinite;
+      margin: 30px auto;
     }
+
     @keyframes spin { 100% { transform: rotate(360deg); } }
+
     .debug {
-      position: fixed; bottom: 10px; left: 10px; right: 10px;
-      background: rgba(0,0,0,0.95); color: #0f0; padding: 15px;
-      border-radius: 10px; font-family: monospace; font-size: 11px;
-      max-height: 150px; overflow-y: auto; z-index: 9999;
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.95);
+      color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 11px;
+      max-height: 150px;
+      overflow-y: auto;
+      z-index: 9999;
     }
   </style>
 </head>
@@ -57,24 +152,25 @@
     <div class="left">
       <h1>Intelli<br>Park</h1>
     </div>
+
     <div class="right">
       <div id="reader"></div>
-      <div class="text">SCAN QR TO EXIT</div>
+      <div class="text">Scan QR to Exit</div>
       
       <div class="box loading" id="loading">
         <div class="spin"></div>
-        <p>Verifying ticket...</p>
+        <p style="font-size:22px;">Verifying ticket...</p>
       </div>
       
       <div class="box success" id="success">
-        <h2>✅ GATE OPEN</h2>
-        <p style="font-size:20px; margin-top:10px;">Drive safely!</p>
-        <p id="countdown" style="font-size:24px; margin-top:20px;"></p>
+        <h2>✅ Gate Open</h2>
+        <p style="font-size:24px; margin-top:10px;">Drive safely!</p>
+        <p id="countdown" style="font-size:28px; margin-top:20px;"></p>
       </div>
       
       <div class="box error" id="error">
         <h3>❌ Error</h3>
-        <p id="errMsg"></p>
+        <p id="errMsg" style="font-size:22px;"></p>
       </div>
     </div>
   </div>
@@ -107,114 +203,149 @@
     }
 
     async function processQR(qrData) {
-  if (!scanning) return;
-  scanning = false;
+      if (!scanning) return;
+      scanning = false;
 
-  try {
-    log('QR: ' + qrData.substring(0, 50));
-    
-    let ticketId, slot, plate;
+      try {
+        log('🔍 QR: ' + qrData.substring(0, 80));
+        
+        let ticketId, slot, plate, qrType;
 
-    // Check format
-    if (qrData.includes('intellipark-kiosk.web.app/verify') || qrData.includes('intellipark2025-327e9.web.app')) {
-      const url = new URL(qrData);
-      ticketId = url.searchParams.get('ticketId');
-      slot = url.searchParams.get('slot');
-      plate = url.searchParams.get('plate');
-      log('URL format');
-    } else if (qrData.includes('|')) {
-      const parts = qrData.split('|');
-      if (parts.length < 3) throw new Error('Invalid QR format');
-      [ticketId, slot, plate] = parts;
-      log('Pipe format');
-    } else {
-      throw new Error('Unsupported QR format');
-    }
+        // Parse QR code
+        if (qrData.includes('verify?')) {
+          const url = new URL(qrData);
+          ticketId = url.searchParams.get('ticketId');
+          slot = url.searchParams.get('slot');
+          plate = url.searchParams.get('plate');
+          qrType = url.searchParams.get('type');
+          log('📋 URL Format');
+        } else if (qrData.includes('|')) {
+          const parts = qrData.split('|');
+          if (parts.length < 3) throw new Error('Invalid QR format');
+          [ticketId, slot, plate] = parts;
+          qrType = null;
+          log('📋 Pipe Format');
+        } else {
+          throw new Error('Unsupported QR format');
+        }
 
-    if (!ticketId || !slot || !plate) {
-      throw new Error('Missing data');
-    }
+        if (!ticketId || !slot || !plate) {
+          throw new Error('Missing data');
+        }
 
-    log('Ticket: ' + ticketId);
-    log('Slot: ' + slot + ', Plate: ' + plate);
+        log(`📌 TicketID: ${ticketId}`);
+        log(`📌 Slot: ${slot}, Plate: ${plate}`);
+        log(`📌 QR Type: ${qrType || 'not specified'}`);
 
-    document.getElementById('loading').style.display = 'block';
+        document.getElementById('loading').style.display = 'block';
 
-    // Check if ticket exists
-    const ticketSnapshot = await db.ref(`/tickets/${ticketId}`).once('value');
-    
-    if (!ticketSnapshot.exists()) {
-      throw new Error('Invalid ticket');
-    }
+        // Get ticket from Firebase
+        const ticketSnapshot = await db.ref(`/tickets/${ticketId}`).once('value');
+        
+        if (!ticketSnapshot.exists()) {
+          throw new Error('Invalid ticket');
+        }
 
-    const ticketData = ticketSnapshot.val();
-    log('Ticket: ' + JSON.stringify(ticketData));
-    
-    if (ticketData.used) {
-      throw new Error('Already used');
-    }
+        const ticketData = ticketSnapshot.val();
+        log('📦 Ticket Data: ' + JSON.stringify(ticketData));
+        
+        // Check if already used
+        if (ticketData.used) {
+          throw new Error('Already used');
+        }
 
-    if (!ticketData.entryVerified) {
-      throw new Error('Check in at entrance first');
-    }
+        // ✅ CRITICAL FIX: Get type from Firebase OR QR parameter
+        const ticketType = ticketData.type || qrType;
+        log(`🎫 Ticket Type: ${ticketType}`);
 
-    log('Ticket valid, calling backend...');
+        // ✅ VALIDATE BASED ON TYPE
+        if (ticketType === 'walkin') {
+          // ✅ Walk-in: ONLY check if paid
+          log('💰 Checking walk-in payment status...');
+          if (ticketData.status !== 'Paid') {
+            throw new Error('Payment required');
+          }
+          log('✅ Walk-in payment verified - GATE CAN OPEN');
+        } else if (ticketType === 'reservation') {
+          // ✅ Reservation: Must be checked in at entrance
+          log('🚪 Checking reservation entry status...');
+          if (!ticketData.entryVerified) {
+            throw new Error('Check in at entrance first');
+          }
+          log('✅ Reservation entry verified - GATE CAN OPEN');
+        } else {
+          // ✅ Unknown type: Smart fallback
+          log('⚠️ Type unknown, using smart detection...');
+          
+          // If status is Paid and no entryVerified = walk-in
+          if (ticketData.status === 'Paid' && (ticketData.entryVerified === null || ticketData.entryVerified === false)) {
+            log('✅ Detected as walk-in (paid, no entry) - GATE CAN OPEN');
+          } 
+          // If entryVerified is true = reservation
+          else if (ticketData.entryVerified === true) {
+            log('✅ Detected as reservation (entry verified) - GATE CAN OPEN');
+          } 
+          else {
+            throw new Error('Ticket not verified');
+          }
+        }
 
-    // ✅ FIXED: Call backend FIRST (it will mark ticket as used)
-    const response = await fetch(`${BACKEND}/api/exit`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        slot, 
-        plate, 
-        exitTime: new Date().toISOString(), 
-        ticketId 
-      })
-    });
+        log('🌐 Calling backend...');
 
-    log('Response: ' + response.status);
+        // Call backend
+        const response = await fetch(`${BACKEND}/api/exit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            slot, 
+            plate, 
+            exitTime: new Date().toISOString(), 
+            ticketId 
+          })
+        });
 
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || 'Backend error');
-    }
+        log('📡 Response: ' + response.status);
 
-    const result = await response.json();
-    log('Gate opened! Duration: ' + result.duration);
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'Backend error');
+        }
 
-    // ✅ Backend already marked ticket as used, no need to do it here
-    
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('success').style.display = 'block';
+        const result = await response.json();
+        log('✅ SUCCESS! Duration: ' + result.duration);
 
-    let count = 10;
-    const interval = setInterval(() => {
-      document.getElementById('countdown').textContent = `Closing in ${count--}s`;
-      if (count < 0) {
-        clearInterval(interval);
-        location.reload();
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('success').style.display = 'block';
+
+        let count = 10;
+        const interval = setInterval(() => {
+          document.getElementById('countdown').textContent = `Closing in ${count--}s`;
+          if (count < 0) {
+            clearInterval(interval);
+            location.reload();
+          }
+        }, 1000);
+
+      } catch (error) {
+        log('❌ ERROR: ' + error.message);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('errMsg').textContent = error.message;
+        setTimeout(() => location.reload(), 7000);
       }
-    }, 1000);
+    }
 
-  } catch (error) {
-    log('Error: ' + error.message);
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('error').style.display = 'block';
-    document.getElementById('errMsg').textContent = error.message;
-    setTimeout(() => location.reload(), 7000);
-  }
-}
-    log('Starting camera...');
+    log('📷 Starting camera...');
     reader.start(
       { facingMode: "user" },
-      { fps: 30, qrbox: 300 },
+      { fps: 30, qrbox: { width: 400, height: 400 } },
       (decodedText) => {
         if (scanning) {
           reader.stop().then(() => processQR(decodedText));
         }
       },
       () => {}
-    ).catch(err => log('Camera error: ' + err.message));
+    ).catch(err => log('❌ Camera error: ' + err.message));
   </script>
 </body>
 </html>
