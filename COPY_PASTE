@@ -1,0 +1,129 @@
+#include <ESP8266WiFi.h>
+#include <FirebaseESP8266.h>
+
+// ————— Wi-Fi Credentials —————
+#define WIFI_SSID       "izee"
+#define WIFI_PASSWORD   "ririsaur23"
+
+// ————— Firebase Credentials —————
+#define FIREBASE_HOST   "intellipark2025-327e9-default-rtdb.firebaseio.com"
+#define FIREBASE_AUTH   "sxbI32IN66g1NDwaNlZq9umZowszVoRu3TaSjAt3"
+
+// ————— Ultrasonic Pins —————
+#define TRIG_PIN_SLOT1  D5  // GPIO14
+#define ECHO_PIN_SLOT1  D6  // GPIO12
+#define TRIG_PIN_SLOT2  D7  // GPIO5
+#define ECHO_PIN_SLOT2  D8  // GPIO4
+
+FirebaseData   fbdo;
+FirebaseAuth   auth;
+FirebaseConfig config;
+
+// Timers for “Reserved” slots
+unsigned long slot1ReservedTime = 0;
+unsigned long slot2ReservedTime = 0;
+
+void setup() {
+  Serial.begin(115200);
+
+  // Pin modes
+  pinMode(TRIG_PIN_SLOT1, OUTPUT);
+  pinMode(ECHO_PIN_SLOT1, INPUT);
+  pinMode(TRIG_PIN_SLOT2, OUTPUT);
+  pinMode(ECHO_PIN_SLOT2, INPUT);
+
+  // Wi-Fi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Connecting to Wi-Fi");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+  Serial.println("\nConnected to Wi-Fi");
+
+  // Firebase
+  config.database_url = FIREBASE_HOST;
+  config.signer.tokens.legacy_token = FIREBASE_AUTH;
+  Firebase.begin(&config, &auth);
+  Firebase.reconnectWiFi(true);
+}
+
+void loop() {
+  unsigned long now = millis();
+
+  updateSlot("slot1", TRIG_PIN_SLOT1, ECHO_PIN_SLOT1, slot1ReservedTime, now);
+  updateSlot("slot2", TRIG_PIN_SLOT2, ECHO_PIN_SLOT2, slot2ReservedTime, now);
+
+  delay(200);
+}
+
+void updateSlot(const String& slot, int trigPin, int echoPin,
+                unsigned long &reservedStart, unsigned long now) {
+  long duration;
+  float distance;
+
+  // — Trigger the sensor —
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // — Read echo pulse —
+  duration = pulseIn(echoPin, HIGH, 50000);
+  distance = duration * 0.034 / 2;
+
+  Serial.print("[" + slot + "] Distance: ");
+  Serial.print(distance);
+  Serial.print(" cm - ");
+
+  // — Fetch current status from Firebase —
+  String status;
+  if (!Firebase.getString(fbdo, "/" + slot + "/status")) {
+    Serial.println("Failed to read status");
+    return;
+  }
+  status = fbdo.stringData();
+
+  // — Handle Reserved state —
+  if (status == "Reserved") {
+    if (reservedStart == 0) reservedStart = now;
+
+    if (distance > 0 && distance < 10) {
+      Firebase.setString(fbdo, "/" + slot + "/status", "Occupied");
+      reservedStart = 0;
+      Serial.println("Reserved → Occupied");
+    }
+    else if (now - reservedStart > 30000) {
+      Firebase.setString(fbdo, "/" + slot + "/status", "Available");
+      reservedStart = 0;
+      Serial.println("Reserved → Available (timeout)");
+    }
+    else {
+      Serial.println("Waiting for car (Reserved)");
+    }
+    return;
+  }
+
+  // — Handle Occupied state —
+  if (status == "Occupied") {
+    if (distance >= 10 || distance == 0) {
+      Firebase.setString(fbdo, "/" + slot + "/status", "Available");
+      Serial.println("Occupied → Available (car left)");
+    }
+    else {
+      Serial.println("Still Occupied");
+    }
+    return;
+  }
+
+  // — Handle Available state —
+  if (distance > 0 && distance < 10) {
+    Firebase.setString(fbdo, "/" + slot + "/status", "Occupied");
+    Serial.println("Available → Occupied");
+  }
+  else {
+    Firebase.setString(fbdo, "/" + slot + "/status", "Available");
+    Serial.println("Still Available");
+  }
+}
