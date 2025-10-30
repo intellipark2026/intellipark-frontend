@@ -4,6 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reservation Confirmed - IntelliPark</title>
+
+<!-- PWA Configuration -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="IntelliPark">
+
+<!-- Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('✅ SW registered'))
+        .catch(err => console.error('❌ SW error:', err));
+    });
+  }
+</script>
+
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -13,7 +34,7 @@
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: #121212; /* dark background */
+      background: #121212;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -78,6 +99,19 @@
       color: #ccc;
       margin-bottom: 10px;
       line-height: 1.6;
+    }
+
+    /* ✅ NEW: Slot display styling */
+    .slot-display {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 15px;
+      margin: 20px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #00ff99;
+      text-shadow: 0 0 8px rgba(0,255,153,0.3);
     }
 
     #emailStatus {
@@ -171,8 +205,14 @@
   <div class="glow-circle"></div>
 
   <div class="container">
-    <h2>Reservation Confirmed</h2>
+    <h2>✅ Reservation Confirmed</h2>
     <p>Your payment has been received and your parking slot is reserved.</p>
+    
+    <!-- ✅ NEW: Display reserved slot prominently -->
+    <div class="slot-display">
+      Reserved Slot: <span id="slotDisplay">Loading...</span>
+    </div>
+    
     <p id="emailStatus">Sending receipt to your email...</p>
     <p>You can also <strong>view and print your receipt</strong> below:</p>
 
@@ -183,6 +223,10 @@
   <script>
     (function() { emailjs.init("Jt7LWhzpR4vECWuKG"); })();
 
+    // ✅ UPDATED: Validate slot parameter
+    const validSlots = ['slot01', 'slot02', 'slot03', 'slot04', 'slot05', 
+                        'slot06', 'slot07', 'slot08', 'slot09', 'slot10'];
+
     const params = new URLSearchParams(window.location.search);
     const slot = params.get("slot") || "N/A";
     const name = params.get("name") || "N/A";
@@ -192,6 +236,16 @@
     const timestamp = params.get("timestamp") || new Date().toISOString();
     const email = params.get("email") || "";
 
+    // ✅ Validate slot and display
+    if (!validSlots.includes(slot)) {
+      console.warn('Invalid slot:', slot);
+      document.getElementById("slotDisplay").textContent = slot.toUpperCase() + " (Unverified)";
+      document.getElementById("slotDisplay").style.color = "#ffcc00";
+    } else {
+      document.getElementById("slotDisplay").textContent = slot.toUpperCase();
+    }
+
+    // Generate QR code
     const qrCanvas = document.createElement("canvas");
     new QRious({
       element: qrCanvas,
@@ -199,24 +253,43 @@
       size: 200
     });
 
+    // Send email confirmation
     if (email && email !== "N/A") {
-      const emailParams = { to_email: email, email, name, slot, plate, vehicle, time };
+      const emailParams = { 
+        to_email: email, 
+        email, 
+        name, 
+        slot: slot.toUpperCase(), // Display uppercase in email
+        plate, 
+        vehicle, 
+        time 
+      };
+      
       emailjs.send("service_ubjbmis", "template_x2h90up", emailParams)
         .then(() => {
-          document.getElementById("emailStatus").textContent = "A copy of your receipt has been sent to your email.";
-          document.getElementById("emailStatus").style.color = "#34c759"; // green success
+          document.getElementById("emailStatus").textContent = "✅ A copy of your receipt has been sent to your email.";
+          document.getElementById("emailStatus").style.color = "#34c759";
         })
-        .catch(() => {
-          document.getElementById("emailStatus").textContent = "Failed to send email. Please check your connection.";
-          document.getElementById("emailStatus").style.color = "#ff3b30"; // red error
+        .catch((error) => {
+          console.error('Email send error:', error);
+          document.getElementById("emailStatus").textContent = "❌ Failed to send email. Please check your connection.";
+          document.getElementById("emailStatus").style.color = "#ff3b30";
         });
     } else {
-      document.getElementById("emailStatus").textContent = "No valid email address provided.";
+      document.getElementById("emailStatus").textContent = "⚠️ No valid email address provided.";
       document.getElementById("emailStatus").style.color = "#ff3b30";
     }
 
     function goToReceipt() {
-      const receiptParams = new URLSearchParams({ slot, name, plate, vehicle, time, timestamp, email });
+      const receiptParams = new URLSearchParams({ 
+        slot, 
+        name, 
+        plate, 
+        vehicle, 
+        time, 
+        timestamp, 
+        email 
+      });
       window.location.href = `receipt.html?${receiptParams.toString()}`;
     }
   </script>

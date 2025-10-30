@@ -4,6 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>INTELLIPARK</title>
+
+  <!-- PWA Configuration (CLEANED UP - Removed duplicates) -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="IntelliPark">
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('✅ SW registered'))
+          .catch(err => console.error('❌ SW error:', err));
+      });
+    }
+  </script>
+
   <style>
     * {
       margin: 0;
@@ -33,7 +54,7 @@
       background: rgba(20, 20, 20, 0.6);
       backdrop-filter: blur(12px);
       box-shadow: 0 2px 25px rgba(0, 0, 0, 0.4);
-      border-bottom: 2px solid rgb(145, 142, 142); /* 💜 kept purple accent */
+      border-bottom: 2px solid rgb(145, 142, 142);
       z-index: 100;
     }
 
@@ -77,6 +98,7 @@
       border-radius: 10px;
       overflow: hidden;
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      min-width: 180px;
     }
 
     .dropdown.show .dropdown-content {
@@ -200,10 +222,11 @@
     }
 
     .fines span {
-      color: #000000;
+      color: #ffffff;
       font-weight: bold;
     }
 
+    /* ✅ MOBILE RESPONSIVE IMPROVEMENTS */
     @media (max-width: 900px) {
       .main-content {
         flex-direction: column;
@@ -214,22 +237,136 @@
 
       .left-section, .policy {
         width: 100%;
+        min-width: auto;
       }
 
       .title {
-        font-size: 52px;
+        font-size: 48px;
       }
 
       .subtitle {
-        font-size: 18px;
+        font-size: 16px;
       }
 
       .policy {
         margin-top: 30px;
         padding: 35px 25px;
+        min-width: auto;
+      }
+
+      .navbar {
+        padding: 15px 20px;
+      }
+
+      .navbar img {
+        height: 35px;
+      }
+    }
+
+    /* ✅ EXTRA SMALL MOBILE (Phones) */
+    @media (max-width: 600px) {
+      .title {
+        font-size: 36px;
+      }
+
+      .subtitle {
+        font-size: 14px;
+        margin-bottom: 30px;
+      }
+
+      .btn {
+        padding: 14px 36px;
+        font-size: 16px;
+      }
+
+      .policy {
+        padding: 25px 20px;
+        min-width: 280px;
+      }
+
+      .policy h2 {
+        font-size: 24px;
+        margin-bottom: 25px;
+      }
+
+      .lights {
+        gap: 30px;
+      }
+
+      .light img {
+        width: 60px;
+      }
+
+      .light p {
+        font-size: 14px;
+      }
+
+      .fines {
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .navbar {
+        padding: 12px 15px;
+      }
+
+      .menu-btn {
+        padding: 5px 10px;
+        font-size: 18px;
+      }
+
+      .dropdown-content {
+        min-width: 150px;
+      }
+
+      .dropdown-content a {
+        padding: 10px 15px;
+        font-size: 14px;
+      }
+    }
+
+    /* ✅ VERY SMALL DEVICES (< 400px) */
+    @media (max-width: 400px) {
+      .main-content {
+        padding: 100px 15px 40px;
+      }
+
+      .title {
+        font-size: 28px;
+      }
+
+      .subtitle {
+        font-size: 13px;
+      }
+
+      .btn {
+        padding: 12px 30px;
+        font-size: 15px;
+      }
+
+      .policy {
+        padding: 20px 15px;
+        min-width: 260px;
+      }
+
+      .policy h2 {
+        font-size: 20px;
+      }
+
+      .lights {
+        gap: 20px;
+      }
+
+      .light img {
+        width: 50px;
+      }
+
+      .fines {
+        font-size: 13px;
       }
     }
   </style>
+  
 </head>
 <body>
 

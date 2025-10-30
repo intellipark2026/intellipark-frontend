@@ -5,6 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Select Parking Level - IntelliPark</title>
 
+  <!-- PWA Configuration (CLEANED - Removed all duplicates) -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="IntelliPark">
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('✅ SW registered'))
+          .catch(err => console.error('❌ SW error:', err));
+      });
+    }
+  </script>
+
   <style>
     * {
       margin: 0;
@@ -62,6 +82,8 @@
       margin-bottom: 40px;
       text-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
       color: #f8f8f8;
+      text-align: center;
+      padding: 0 20px;
     }
 
     /* Container */
@@ -72,6 +94,7 @@
       gap: 30px;
       width: 90%;
       max-width: 700px;
+      padding-bottom: 50px;
     }
 
     .floor-container {
@@ -129,6 +152,7 @@
       border-radius: 50%;
       background: currentColor;
       box-shadow: 0 0 8px currentColor;
+      flex-shrink: 0;
     }
 
     .available { color: #3eff5e; }
@@ -158,12 +182,78 @@
       to { box-shadow: 0 0 50px #ff4343ff, inset 0 0 20px #ff434380; }
     }
 
+    /* ✅ MOBILE RESPONSIVE */
     @media (max-width: 768px) {
-      .floor-container {
-        padding: 25px;
+      .navbar {
+        padding: 12px 20px;
       }
-      h2 { font-size: 28px; }
-      .floor-title { font-size: 20px; }
+
+      .navbar img {
+        height: 35px;
+      }
+
+      .navbar a span {
+        font-size: 16px;
+      }
+
+      h2 {
+        font-size: 28px;
+        margin-top: 100px;
+        margin-bottom: 30px;
+      }
+
+      .container {
+        width: 95%;
+        gap: 20px;
+      }
+
+      .floor-container {
+        padding: 25px 20px;
+      }
+
+      .floor-title {
+        font-size: 20px;
+        margin-bottom: 15px;
+      }
+
+      .counts-row {
+        font-size: 14px;
+        gap: 10px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+      }
+    }
+
+    /* ✅ EXTRA SMALL MOBILE */
+    @media (max-width: 480px) {
+      h2 {
+        font-size: 24px;
+        margin-top: 90px;
+      }
+
+      .floor-container {
+        padding: 20px 15px;
+        border-radius: 12px;
+      }
+
+      .floor-title {
+        font-size: 18px;
+      }
+
+      .counts-row {
+        font-size: 13px;
+      }
+
+      .navbar {
+        padding: 10px 15px;
+      }
+
+      .navbar img {
+        height: 30px;
+      }
     }
   </style>
 </head>
@@ -204,91 +294,105 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
-      authDomain: "intellipark2025-327e9.firebaseapp.com",
-      databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
-      projectId: "intellipark2025-327e9",
-      storageBucket: "intellipark2025-327e9.appspot.com",
-      messagingSenderId: "126333727252",
-      appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
+    authDomain: "intellipark2025-327e9.firebaseapp.com",
+    databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
+    projectId: "intellipark2025-327e9",
+    storageBucket: "intellipark2025-327e9.appspot.com",
+    messagingSenderId: "126333727252",
+    appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    const floorSlots = {
-      1: ['slot1', 'slot2'],
-      2: ['slot3', 'slot4'],
-    };
+  // ✅ Zero-padded slot names for 10-slot system
+  const floorSlots = {
+    1: ['slot01', 'slot02', 'slot03', 'slot04', 'slot05'],
+    2: ['slot06', 'slot07', 'slot08', 'slot09', 'slot10'],
+  };
 
-    let slotStatuses = {
-      slot1: "Loading...", slot2: "Loading...",
-      slot3: "Loading...", slot4: "Loading..."
-    };
+  let slotStatuses = {
+    slot01: "Loading...", slot02: "Loading...", slot03: "Loading...", 
+    slot04: "Loading...", slot05: "Loading...", slot06: "Loading...",
+    slot07: "Loading...", slot08: "Loading...", slot09: "Loading...", 
+    slot10: "Loading..."
+  };
 
-    // Real-time slot monitoring
-    Object.keys(slotStatuses).forEach(slotId => {
-      db.ref(`/${slotId}/status`).on("value", snap => {
-        slotStatuses[slotId] = snap.val();
-        updateCountsAndGlow();
-      });
+  // Real-time slot monitoring
+  Object.keys(slotStatuses).forEach(slotId => {
+    db.ref(`/${slotId}/status`).on("value", snap => {
+      slotStatuses[slotId] = snap.val();
+      updateCountsAndGlow();
     });
+  });
 
-    // Update counts + glow effect
-    function updateCountsAndGlow() {
-      [1, 2].forEach(floorNum => {
-        const slots = floorSlots[floorNum];
-        let available = 0, reserved = 0, occupied = 0;
+  // Update counts + glow effect
+  function updateCountsAndGlow() {
+    [1, 2].forEach(floorNum => {
+      const slots = floorSlots[floorNum];
+      let available = 0, reserved = 0, occupied = 0;
 
-        slots.forEach(slotId => {
-          const s = slotStatuses[slotId];
-          if (s === "Available") available++;
-          else if (s === "Reserved") reserved++;
-          else if (s === "Occupied") occupied++;
-        });
-
-        document.getElementById(`floor${floorNum}-available`).textContent = available;
-        document.getElementById(`floor${floorNum}-reserved`).textContent = reserved;
-        document.getElementById(`floor${floorNum}-occupied`).textContent = occupied;
-
-        const floorDiv = document.getElementById(`floor${floorNum}`);
-        floorDiv.classList.remove('glow-available', 'glow-occupied', 'disabled');
-
-        if (available > 0) {
-          floorDiv.classList.add('glow-available');
-        } else {
-          floorDiv.classList.add('glow-occupied', 'disabled');
-        }
+      slots.forEach(slotId => {
+        const s = slotStatuses[slotId];
+        if (s === "Available") available++;
+        else if (s === "Reserved") reserved++;
+        else if (s === "Occupied") occupied++;
       });
-    }
 
-    // Booking logic
-    function attemptBooking(floorName) {
-      let slotToBook = null;
-      if (floorName === "1st Floor") {
-        if (slotStatuses["slot1"] === "Available") slotToBook = "slot1";
-        else if (slotStatuses["slot2"] === "Available") slotToBook = "slot2";
+      document.getElementById(`floor${floorNum}-available`).textContent = available;
+      document.getElementById(`floor${floorNum}-reserved`).textContent = reserved;
+      document.getElementById(`floor${floorNum}-occupied`).textContent = occupied;
+
+      const floorDiv = document.getElementById(`floor${floorNum}`);
+      floorDiv.classList.remove('glow-available', 'glow-occupied', 'disabled');
+
+      if (available > 0) {
+        floorDiv.classList.add('glow-available');
       } else {
-        if (slotStatuses["slot3"] === "Available") slotToBook = "slot3";
-        else if (slotStatuses["slot4"] === "Available") slotToBook = "slot4";
+        floorDiv.classList.add('glow-occupied', 'disabled');
       }
+    });
+  }
 
-      if (!slotToBook) return;
-      if (confirm(`Do you want to reserve a slot on ${floorName}?`)) {
-        window.location.href = `booking.html?slot=${slotToBook}`;
+  // ✅ Booking logic for zero-padded slots
+  function attemptBooking(floorName) {
+    let slotToBook = null;
+    
+    if (floorName === "1st Floor") {
+      for (let i = 1; i <= 5; i++) {
+        const slotName = `slot${String(i).padStart(2, '0')}`;
+        if (slotStatuses[slotName] === "Available") {
+          slotToBook = slotName;
+          break;
+        }
+      }
+    } else if (floorName === "2nd Floor") {
+      for (let i = 6; i <= 10; i++) {
+        const slotName = `slot${String(i).padStart(2, '0')}`;
+        if (slotStatuses[slotName] === "Available") {
+          slotToBook = slotName;
+          break;
+        }
       }
     }
 
-    // Home link adjuster
-    document.addEventListener("DOMContentLoaded", function() {
-      const btn = document.getElementById("homeBtn");
-      if (btn) {
-        btn.href = (location.hostname === "127.0.0.1" || location.hostname === "localhost")
-          ? "http://127.0.0.1:5500/public/intelli.html"
-          : "intelli.html";
-      }
-    });
-  </script>
+    if (!slotToBook) return;
+    if (confirm(`Do you want to reserve a slot on ${floorName}?`)) {
+      window.location.href = `booking.html?slot=${slotToBook}`;
+    }
+  }
+
+  // Home link adjuster
+  document.addEventListener("DOMContentLoaded", function() {
+    const btn = document.getElementById("homeBtn");
+    if (btn) {
+      btn.href = (location.hostname === "127.0.0.1" || location.hostname === "localhost")
+        ? "http://127.0.0.1:5500/public/intelli.html"
+        : "intelli.html";
+    }
+  });
+</script>
 </body>
 </html>

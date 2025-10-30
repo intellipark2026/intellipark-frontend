@@ -4,6 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - INTELLIPARK</title>
+
+    <!-- PWA Configuration -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="IntelliPark">
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('✅ SW registered'))
+            .catch(err => console.error('❌ SW error:', err));
+        });
+      }
+    </script>
     
     <!-- PDF Export Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -21,6 +41,7 @@
             background: linear-gradient(135deg, #000000, #1b1a1a);
             min-height: 100vh;
             color: #fff;
+            overflow-x: hidden;
         }
 
         .navbar {
@@ -119,9 +140,23 @@
             padding-bottom: 10px;
         }
 
+        .floor-group {
+            margin-bottom: 25px;
+        }
+
+        .floor-title {
+            font-size: 18px;
+            color: #fff;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            border-left: 4px solid #00ff99;
+        }
+
         .slots-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
             margin-top: 15px;
         }
@@ -147,16 +182,19 @@
         .slot-available {
             background: rgba(0,255,153,0.2);
             color: #00ff99;
+            border-color: #00ff99;
         }
 
         .slot-reserved {
             background: rgba(0,191,255,0.2);
             color: #00bfff;
+            border-color: #00bfff;
         }
 
         .slot-occupied {
             background: rgba(255,77,77,0.2);
             color: #ff4d4d;
+            border-color: #ff4d4d;
         }
 
         table {
@@ -253,15 +291,222 @@
             font-style: italic;
         }
 
+        /* ✅ IMPROVED MOBILE RESPONSIVE */
+        @media (max-width: 1200px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .slots-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+
         @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+                padding: 12px 15px;
+            }
+            
+            .navbar a span {
+                font-size: 16px;
+            }
+            
+            .navbar img {
+                height: 30px;
+            }
+            
+            .navbar > div {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            h1 {
+                font-size: 24px;
+                text-align: center;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 15px;
+            }
+            
+            .stat-number {
+                font-size: 28px;
+            }
+            
+            .stat-label {
+                font-size: 12px;
+            }
+            
+            .section {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .section-title {
+                font-size: 18px;
+            }
+            
+            .floor-title {
+                font-size: 16px;
+                padding: 8px;
+            }
+            
+            .slots-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .slot-card {
+                padding: 15px;
+            }
+            
+            .slot-card h3 {
+                font-size: 16px;
+            }
+            
+            .slot-card p {
+                font-size: 14px !important;
+            }
+            
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filters label {
+                font-size: 13px;
+            }
+            
+            .filters input[type="date"],
+            .filters select {
+                width: 100%;
+                font-size: 13px;
+                padding: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 13px;
+            }
+            
+            /* Make table scrollable on mobile */
+            #logsContainer {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            table {
+                font-size: 11px;
+                min-width: 800px;
+            }
+            
+            th, td {
+                padding: 8px 5px;
+                white-space: nowrap;
+            }
+            
+            .status-badge {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar a span {
+                font-size: 14px;
+            }
+            
+            h1 {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+            
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
-            .filters {
-                flex-direction: column;
+            
+            .stat-card {
+                padding: 12px;
             }
-            table {
+            
+            .stat-number {
+                font-size: 24px;
+            }
+            
+            .stat-label {
                 font-size: 11px;
+            }
+            
+            .section {
+                padding: 12px;
+                border-radius: 10px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+            
+            .floor-group {
+                margin-bottom: 15px;
+            }
+            
+            .floor-title {
+                font-size: 14px;
+                padding: 6px;
+            }
+            
+            .slots-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .slot-card {
+                padding: 12px;
+            }
+            
+            .slot-card h3 {
+                font-size: 14px;
+            }
+            
+            .slot-card p {
+                font-size: 12px !important;
+            }
+            
+            .btn {
+                padding: 8px;
+                font-size: 12px;
+            }
+            
+            table {
+                font-size: 10px;
+            }
+            
+            th, td {
+                padding: 6px 3px;
+            }
+        }
+
+        /* Landscape mobile optimization */
+        @media (max-width: 900px) and (orientation: landscape) {
+            .navbar {
+                padding: 8px 15px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .slots-grid {
+                grid-template-columns: repeat(5, 1fr);
             }
         }
     </style>
@@ -303,7 +548,16 @@
 
         <div class="section">
             <h2 class="section-title">🚗 Real-time Slot Status</h2>
-            <div class="slots-grid" id="slotsGrid"></div>
+            
+            <div class="floor-group">
+                <div class="floor-title">🏢 1st Floor (Slots 01-05)</div>
+                <div class="slots-grid" id="floor1Grid"></div>
+            </div>
+            
+            <div class="floor-group">
+                <div class="floor-title">🏢 2nd Floor (Slots 06-10)</div>
+                <div class="slots-grid" id="floor2Grid"></div>
+            </div>
         </div>
 
         <div class="section">
@@ -341,12 +595,11 @@
                             <th>Name</th>
                             <th>Plate</th>
                             <th>Vehicle</th>
-                            <th>Source</th> <!-- New column -->
+                            <th>Source</th>
                             <th>Status</th>
                             <th>Amount</th>
                         </tr>
                     </thead>
-
                     <tbody id="logsTableBody"></tbody>
                 </table>
             </div>
@@ -393,12 +646,18 @@
         let allReservations = [];
         let slotStatuses = {};
 
+        const allSlots = ['slot01', 'slot02', 'slot03', 'slot04', 'slot05', 
+                          'slot06', 'slot07', 'slot08', 'slot09', 'slot10'];
+        
+        const floor1Slots = ['slot01', 'slot02', 'slot03', 'slot04', 'slot05'];
+        const floor2Slots = ['slot06', 'slot07', 'slot08', 'slot09', 'slot10'];
+
         function initDashboard() {
-            console.log('🚀 Initializing dashboard...');
+            console.log('🚀 Initializing dashboard with 10 slots...');
             loadSlotStatuses();
             loadReservations();
 
-            ['slot1','slot2','slot3','slot4'].forEach(slotId => {
+            allSlots.forEach(slotId => {
                 db.ref(`/${slotId}/status`).on('value', snapshot => {
                     slotStatuses[slotId] = snapshot.val();
                     updateSlotDisplay();
@@ -406,7 +665,6 @@
                 });
             });
 
-            // ✅ FIXED: Listen to value changes (includes exitTime updates)
             db.ref('/reservations').on('value', snapshot => {
                 console.log('📊 Reservations data updated');
                 loadReservations();
@@ -419,7 +677,7 @@
         }
 
         function loadSlotStatuses() {
-            ['slot1','slot2','slot3','slot4'].forEach(slotId => {
+            allSlots.forEach(slotId => {
                 db.ref(`/${slotId}/status`).once('value').then(snapshot => {
                     slotStatuses[slotId] = snapshot.val() || 'Available';
                     updateSlotDisplay();
@@ -428,32 +686,40 @@
         }
 
         function updateSlotDisplay() {
-            const slotsGrid = document.getElementById('slotsGrid');
-            slotsGrid.innerHTML = '';
+            const floor1Grid = document.getElementById('floor1Grid');
+            const floor2Grid = document.getElementById('floor2Grid');
+            
+            floor1Grid.innerHTML = '';
+            floor2Grid.innerHTML = '';
 
-            const slotNames = {
-                slot1: '1st Floor - Slot 1',
-                slot2: '1st Floor - Slot 2',
-                slot3: '2nd Floor - Slot 3',
-                slot4: '2nd Floor - Slot 4'
-            };
-
-            Object.keys(slotStatuses).forEach(slotId => {
+            floor1Slots.forEach((slotId, index) => {
                 const status = slotStatuses[slotId] || 'Available';
-                const slotCard = document.createElement('div');
-                
-                let statusClass = 'slot-available';
-                if (status === 'Reserved') statusClass = 'slot-reserved';
-                if (status === 'Occupied') statusClass = 'slot-occupied';
-                
-                slotCard.className = `slot-card ${statusClass}`;
-                slotCard.innerHTML = `
-                    <h3>${slotNames[slotId]}</h3>
-                    <p style="font-size: 18px; margin: 10px 0;">${status.toUpperCase()}</p>
-                    ${status !== 'Available' ? `<div class="slot-details">Reserved via system</div>` : ''}
-                `;
-                slotsGrid.appendChild(slotCard);
+                const slotCard = createSlotCard(slotId, status, `Slot ${String(index + 1).padStart(2, '0')}`);
+                floor1Grid.appendChild(slotCard);
             });
+
+            floor2Slots.forEach((slotId, index) => {
+                const status = slotStatuses[slotId] || 'Available';
+                const slotCard = createSlotCard(slotId, status, `Slot ${String(index + 6).padStart(2, '0')}`);
+                floor2Grid.appendChild(slotCard);
+            });
+        }
+
+        function createSlotCard(slotId, status, displayName) {
+            const slotCard = document.createElement('div');
+            
+            let statusClass = 'slot-available';
+            if (status === 'Reserved') statusClass = 'slot-reserved';
+            if (status === 'Occupied') statusClass = 'slot-occupied';
+            
+            slotCard.className = `slot-card ${statusClass}`;
+            slotCard.innerHTML = `
+                <h3>${displayName}</h3>
+                <p style="font-size: 18px; margin: 10px 0;">${status.toUpperCase()}</p>
+                ${status !== 'Available' ? `<div class="slot-details">Reserved via system</div>` : ''}
+            `;
+            
+            return slotCard;
         }
 
         function loadReservations() {
@@ -470,7 +736,6 @@
                         allReservations.push({
                             slot: slotId,
                             ...res,
-                            // ✅ Ensure exitTime is included
                             exitTime: res.exitTime || null
                         });
                     });
@@ -495,26 +760,21 @@
             });
         }
 
-        // ✅ FIXED: Display Time Out and Duration correctly
         function displayLogs(logs) {
             const tbody = document.getElementById('logsTableBody');
             tbody.innerHTML = '';
             
             if(logs.length === 0){
-                tbody.innerHTML='<tr><td colspan="9" class="empty-state">No reservations found</td></tr>';
+                tbody.innerHTML='<tr><td colspan="10" class="empty-state">No reservations found</td></tr>';
                 return;
             }
             
             logs.forEach(log=>{
                 const row = document.createElement('tr');
                 
-                // Time In
                 const timeIn = log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A';
-                
-                // ✅ Time Out - check if exitTime exists
                 const timeOut = log.exitTime ? new Date(log.exitTime).toLocaleString() : '-';
                 
-                // ✅ Duration - calculate if both timestamps exist
                 let duration = '-';
                 if (log.timestamp && log.exitTime) {
                     const entryTime = new Date(log.timestamp);
@@ -529,7 +789,6 @@
                 const status = log.status || 'Pending';
                 const amount = log.amount || 50;
                 
-                // In your displayLogs() function, modify the row.innerHTML to include:
                 row.innerHTML=`
                     <td>${timeIn}</td>
                     <td>${timeOut}</td>
@@ -820,19 +1079,28 @@
         }
 
         async function resetAllSlots() {
-            if (!confirm('⚠️ Are you sure you want to reset ALL slots to Available?\n\nThis will:\n• Set all slots to Available status\n• Keep all reservation logs for records\n\nSlots will be ready for new bookings.')) {
+            if (!confirm('⚠️ Are you sure you want to reset ALL 10 slots to Available?\n\nThis will:\n• Set all slots to Available status\n• Keep all reservation logs for records\n\nSlots will be ready for new bookings.')) {
                 return;
             }
 
             try {
-                await db.ref("/").update({
-                    slot1: { status: "Available", reserved: false },
-                    slot2: { status: "Available", reserved: false },
-                    slot3: { status: "Available", reserved: false },
-                    slot4: { status: "Available", reserved: false }
+                const updates = {};
+                allSlots.forEach(slotId => {
+                    updates[`/${slotId}`] = { 
+                        status: "Available", 
+                        reserved: false,
+                        name: "",
+                        email: "",
+                        plate: "",
+                        vehicle: "",
+                        time: "",
+                        bookedAt: ""
+                    };
                 });
 
-                alert('✅ All slots have been reset to Available!\n\n📝 Reservation logs are preserved for records.');
+                await db.ref("/").update(updates);
+
+                alert('✅ All 10 slots have been reset to Available!\n\n📝 Reservation logs are preserved for records.');
                 refreshData();
 
             } catch (error) {

@@ -203,110 +203,168 @@
   </div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
-      authDomain: "intellipark2025-327e9.firebaseapp.com",
-      databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
-      projectId: "intellipark2025-327e9",
-      storageBucket: "intellipark2025-327e9.appspot.com",
-      messagingSenderId: "126333727252",
-      appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  const firebaseConfig = {
+    apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
+    authDomain: "intellipark2025-327e9.firebaseapp.com",
+    databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
+    projectId: "intellipark2025-327e9",
+    storageBucket: "intellipark2025-327e9.appspot.com",
+    messagingSenderId: "126333727252",
+    appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
+  };
+  
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    const floorSlots = { 1: ['slot1', 'slot2'], 2: ['slot3', 'slot4'] };
-    let slotStatuses = { slot1: null, slot2: null, slot3: null, slot4: null };
+  // ✅ UPDATED: 10 slots with zero-padding, 5 per floor
+  const floorSlots = { 
+    1: ['slot01', 'slot02', 'slot03', 'slot04', 'slot05'], 
+    2: ['slot06', 'slot07', 'slot08', 'slot09', 'slot10'] 
+  };
+  
+  let slotStatuses = { 
+    slot01: null, slot02: null, slot03: null, slot04: null, slot05: null,
+    slot06: null, slot07: null, slot08: null, slot09: null, slot10: null
+  };
 
-    Object.keys(slotStatuses).forEach(slotId => {
-      db.ref(`/${slotId}/status`).on("value", snap => {
-        slotStatuses[slotId] = snap.val();
-        updateCountsAndGlows();
-      });
+  console.log('🚀 IntelliPark Kiosk Levels - 10 Slot System');
+  console.log('📍 1st Floor:', floorSlots[1]);
+  console.log('📍 2nd Floor:', floorSlots[2]);
+
+  // Listen to all 10 slots
+  Object.keys(slotStatuses).forEach(slotId => {
+    db.ref(`/${slotId}/status`).on("value", snap => {
+      slotStatuses[slotId] = snap.val();
+      updateCountsAndGlows();
     });
+  });
 
-    function updateCountsAndGlows() {
-      [1, 2].forEach(floorNum => {
-        const slots = floorSlots[floorNum];
-        let available = 0, reserved = 0, occupied = 0;
-        slots.forEach(slotId => {
-          const s = slotStatuses[slotId];
-          if (s === "Available") available++;
-          else if (s === "Reserved") reserved++;
-          else if (s === "Occupied") occupied++;
-        });
-        document.getElementById(`floor${floorNum}-available`).textContent = available;
-        document.getElementById(`floor${floorNum}-reserved`).textContent = reserved;
-        document.getElementById(`floor${floorNum}-occupied`).textContent = occupied;
-        const box = document.getElementById(`floor${floorNum}-box`);
-        box.classList.remove('glow-available', 'glow-occupied');
-        box.classList.add(available > 0 ? 'glow-available' : 'glow-occupied');
-        document.getElementById(`floor${floorNum}-btn`).disabled = available === 0;
-      });
-    }
-
-    // ✅ Helper function to generate valid plate number
-    function generateValidPlate() {
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      const plate = 
-        letters.charAt(Math.floor(Math.random() * 26)) +
-        letters.charAt(Math.floor(Math.random() * 26)) +
-        letters.charAt(Math.floor(Math.random() * 26)) +
-        Math.floor(100 + Math.random() * 900);
-      return plate; // Returns format like "ABC456"
-    }
-
-    async function handleLevelSelect(floorNum) {
+  function updateCountsAndGlows() {
+    [1, 2].forEach(floorNum => {
       const slots = floorSlots[floorNum];
+      let available = 0, reserved = 0, occupied = 0;
       
-      // ✅ Get vehicle from previous page
-      const vehicle = sessionStorage.getItem("selectedVehicle") || "Car";
+      slots.forEach(slotId => {
+        const s = slotStatuses[slotId];
+        if (s === "Available") available++;
+        else if (s === "Reserved") reserved++;
+        else if (s === "Occupied") occupied++;
+      });
       
-      // ✅ Generate valid temporary plate in ABC123 format (will be replaced by LPR later)
-      const plate = generateValidPlate();
+      document.getElementById(`floor${floorNum}-available`).textContent = available;
+      document.getElementById(`floor${floorNum}-reserved`).textContent = reserved;
+      document.getElementById(`floor${floorNum}-occupied`).textContent = occupied;
       
-      console.log("🚗 Selected:", { vehicle, plate, floor: floorNum });
+      const box = document.getElementById(`floor${floorNum}-box`);
+      box.classList.remove('glow-available', 'glow-occupied');
+      box.classList.add(available > 0 ? 'glow-available' : 'glow-occupied');
       
-      for (const slotId of slots) {
-        if (slotStatuses[slotId] === "Available") {
-          const timestamp = new Date().toISOString();
-          const data = {
+      const btn = document.getElementById(`floor${floorNum}-btn`);
+      btn.disabled = available === 0;
+      
+      console.log(`🏢 Floor ${floorNum}: Available=${available}, Reserved=${reserved}, Occupied=${occupied}`);
+    });
+  }
+
+  // ✅ Helper function to generate valid plate number
+  function generateValidPlate() {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const plate = 
+      letters.charAt(Math.floor(Math.random() * 26)) +
+      letters.charAt(Math.floor(Math.random() * 26)) +
+      letters.charAt(Math.floor(Math.random() * 26)) +
+      Math.floor(100 + Math.random() * 900);
+    return plate; // Returns format like "ABC456"
+  }
+
+  async function handleLevelSelect(floorNum) {
+    const slots = floorSlots[floorNum];
+    
+    console.log(`🏢 Selected Floor ${floorNum}`);
+    console.log(`📍 Available slots to check:`, slots);
+    
+    // Get vehicle from previous page
+    const vehicle = sessionStorage.getItem("selectedVehicle") || "Car";
+    
+    // Generate valid temporary plate in ABC123 format
+    const plate = generateValidPlate();
+    
+    console.log("🚗 Walk-in booking:", { vehicle, plate, floor: floorNum });
+    
+    // Find first available slot on this floor
+    for (const slotId of slots) {
+      console.log(`🔍 Checking ${slotId}: ${slotStatuses[slotId]}`);
+      
+      if (slotStatuses[slotId] === "Available") {
+        const timestamp = new Date().toISOString();
+        const data = {
+          name: "WalkIn",
+          email: "walkin@intellipark.io",
+          plate: plate,
+          vehicle: vehicle,
+          time: new Date().toLocaleTimeString(),
+          timestamp: timestamp,
+          type: 'walk-in',
+          reservedVia: 'Kiosk',
+          status: 'Pending' // Will be updated to 'Paid' after payment
+        };
+        
+        try {
+          console.log(`📝 Reserving ${slotId}...`);
+          
+          await db.ref(`/reservations/${slotId}`).set(data);
+          await db.ref(`/${slotId}`).update({ 
+            status: "Reserved", 
+            reserved: true,
+            reservedBy: `Walk-in ${plate}`,
+            reservationType: 'Kiosk',
+            vehicleType: vehicle,
             name: "WalkIn",
             email: "walkin@intellipark.io",
             plate: plate,
             vehicle: vehicle,
             time: new Date().toLocaleTimeString(),
-            timestamp: timestamp
-          };
-          
-          try {
-            await db.ref(`/reservations/${slotId}`).set(data);
-            await db.ref(`/${slotId}`).update({ status: "Reserved", reserved: true });
+            bookedAt: timestamp
+          });
 
-            console.log(`✅ Reserved ${slotId} for ${plate}`);
+          console.log(`✅ Reserved ${slotId} for ${plate}`);
 
-            // Auto-release after 5 minutes if not paid
-            setTimeout(async () => {
-              const snap = await db.ref(`/${slotId}/status`).get();
-              if (snap.val() === "Reserved") {
-                await db.ref(`/${slotId}`).update({ status: "Available", reserved: false });
+          // Auto-release after 5 minutes if not paid
+          setTimeout(async () => {
+            const snap = await db.ref(`/${slotId}/status`).get();
+            if (snap.val() === "Reserved") {
+              const reservationSnap = await db.ref(`/reservations/${slotId}`).get();
+              if (reservationSnap.exists() && reservationSnap.val().status === 'Pending') {
+                await db.ref(`/${slotId}`).update({ 
+                  status: "Available", 
+                  reserved: false,
+                  name: "",
+                  email: "",
+                  plate: "",
+                  vehicle: "",
+                  time: "",
+                  bookedAt: ""
+                });
                 await db.ref(`/reservations/${slotId}`).remove();
-                console.log(`⏰ Auto-released ${slotId}`);
+                console.log(`⏰ Auto-released ${slotId} (payment timeout)`);
               }
-            }, 300000); // 5 minutes
+            }
+          }, 300000); // 5 minutes
 
-            // ✅ Redirect to QR page with valid plate
-            window.location.href = `kiosk-qr.html?slot=${slotId}&vehicle=${encodeURIComponent(vehicle)}&plate=${encodeURIComponent(plate)}`;
-            return;
-          } catch (err) {
-            console.error("❌ Error making reservation:", err);
-            alert("Something went wrong. Please try again.");
-            return;
-          }
+          // Redirect to payment page
+          window.location.href = `kiosk-qr.html?slot=${slotId}&vehicle=${encodeURIComponent(vehicle)}&plate=${encodeURIComponent(plate)}`;
+          return;
+        } catch (err) {
+          console.error("❌ Error making reservation:", err);
+          alert("Something went wrong. Please try again.");
+          return;
         }
       }
-      alert("No available slots on this floor!");
     }
-  </script>
+    
+    console.log(`❌ No available slots on Floor ${floorNum}`);
+    alert(`No available slots on ${floorNum === '1' ? '1st' : '2nd'} Floor!`);
+  }
+</script>
 </body>
 </html>

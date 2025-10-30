@@ -4,6 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Book Parking - IntelliPark</title>
+
+  <!-- PWA Configuration -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="IntelliPark">
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('✅ SW registered'))
+          .catch(err => console.error('❌ SW error:', err));
+      });
+    }
+  </script>
+
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
@@ -17,6 +38,7 @@
       flex-direction: column;
       align-items: center;
       color: #fff;
+      overflow-x: hidden;
     }
 
     /* NAVBAR */
@@ -54,6 +76,7 @@
       border-radius: 25px;
       padding: 40px 50px;
       margin-top: 60px;
+      margin-bottom: 40px;
       width: 95%;
       max-width: 520px;
       box-shadow: 0 8px 40px rgba(0,0,0,0.3);
@@ -123,6 +146,55 @@
       backdrop-filter: blur(18px);
     }
 
+    /* SELECT DROPDOWN STYLING */
+    select {
+      cursor: pointer;
+    }
+
+    select option {
+      background: rgba(30, 30, 30, 0.95);
+      color: #fff;
+      padding: 10px;
+    }
+
+    select::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    select::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+    }
+
+    select::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+    }
+
+    /* PRICE DISPLAY BOX */
+    .price-display {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin: 20px 0;
+      text-align: center;
+      backdrop-filter: blur(12px);
+    }
+
+    .price-label {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 5px;
+      letter-spacing: 1px;
+    }
+
+    .price-amount {
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
     /* TERMS BOX */
     .terms-box {
       background: rgba(255, 255, 255, 0.05);
@@ -139,7 +211,11 @@
 
     .terms-box strong { color: #fff; }
 
-    /* CHECKBOX (clickable) */
+    /* CHECKBOX */
+    .terms-check {
+      margin-top: 15px;
+    }
+
     .terms-check label {
       display: flex;
       align-items: center;
@@ -164,6 +240,7 @@
       display: inline-block;
       position: relative;
       vertical-align: middle;
+      flex-shrink: 0;
     }
 
     .terms-check input[type="checkbox"]:checked {
@@ -222,11 +299,100 @@
 
     .back-btn:hover { color: #fff; }
 
-    @media (max-width: 600px) {
-      .container { padding: 30px 25px; }
-      h2 { font-size: 22px; }
+    /* ✅ MOBILE RESPONSIVE IMPROVEMENTS */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 12px 20px;
+      }
+
+      .navbar img {
+        height: 35px;
+      }
+
+      .navbar a span {
+        font-size: 16px;
+      }
+
+      .container {
+        padding: 30px 25px;
+        margin-top: 40px;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+
+      p {
+        font-size: 14px;
+      }
+
+      .price-amount {
+        font-size: 28px;
+      }
+
+      .terms-box {
+        font-size: 12px;
+        padding: 12px;
+      }
+
+      .terms-check label {
+        font-size: 13px;
+      }
+
+      input, select {
+        font-size: 14px;
+        padding: 11px 12px;
+      }
+
+      .submit-btn {
+        font-size: 16px;
+        padding: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 25px 20px;
+        margin-top: 30px;
+        width: 97%;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .navbar {
+        padding: 10px 15px;
+      }
+
+      .navbar img {
+        height: 30px;
+        margin-right: 8px;
+      }
+
+      label {
+        font-size: 14px;
+      }
+
+      .price-display {
+        padding: 12px 15px;
+      }
+
+      .price-amount {
+        font-size: 26px;
+      }
+
+      .terms-box {
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      .back-btn {
+        font-size: 14px;
+      }
     }
   </style>
+
 </head>
 
 <body>
@@ -260,9 +426,16 @@
       <div class="form-group">
         <label for="vehicle">VEHICLE TYPE:</label>
         <select id="vehicle" required>
-          <option value="car">Car</option>
-          <option value="motorcycle">Motorcycle</option>
+          <option value="">-- Select Vehicle --</option>
+          <option value="Car">Car (₱50)</option>
+          <option value="Motorcycle">Motorcycle (₱30)</option>
         </select>
+      </div>
+
+      <!-- PRICE DISPLAY -->
+      <div class="price-display" id="priceDisplay" style="display:none;">
+        <div class="price-label">TOTAL AMOUNT</div>
+        <div class="price-amount" id="priceAmount">₱0</div>
       </div>
 
       <div class="form-group">
@@ -292,146 +465,192 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
-      authDomain: "intellipark2025-327e9.firebaseapp.com",
-      databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
-      projectId: "intellipark2025-327e9",
-      storageBucket: "intellipark2025-327e9.appspot.com",
-      messagingSenderId: "126333727252",
-      appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
+    authDomain: "intellipark2025-327e9.firebaseapp.com",
+    databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
+    projectId: "intellipark2025-327e9",
+    storageBucket: "intellipark2025-327e9.appspot.com",
+    messagingSenderId: "126333727252",
+    appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    const params = new URLSearchParams(window.location.search);
-    const selectedSlot = params.get("slot");
-    if (!selectedSlot) {
-      alert("No slot selected. Redirecting...");
-      window.location.href = "levels.html";
+  const validSlots = ['slot01', 'slot02', 'slot03', 'slot04', 'slot05', 
+                      'slot06', 'slot07', 'slot08', 'slot09', 'slot10'];
+
+  const params = new URLSearchParams(window.location.search);
+  const selectedSlot = params.get("slot");
+  
+  if (!selectedSlot || !validSlots.includes(selectedSlot)) {
+    alert("Invalid or no slot selected. Redirecting...");
+    window.location.href = "levels.html";
+  }
+  
+  document.getElementById("selectedSlot").textContent = selectedSlot.toUpperCase();
+
+  const form = document.getElementById("bookingForm");
+  const timeInput = document.getElementById("time");
+  const agreeTerms = document.getElementById("agreeTerms");
+  const reserveBtn = document.getElementById("reserveBtn");
+  const vehicleSelect = document.getElementById("vehicle");
+  const priceDisplay = document.getElementById("priceDisplay");
+  const priceAmount = document.getElementById("priceAmount");
+
+  let selectedPrice = 0;
+  vehicleSelect.addEventListener("change", () => {
+    const vehicleType = vehicleSelect.value;
+    
+    if (vehicleType === "Motorcycle") {
+      selectedPrice = 30;
+      priceAmount.textContent = "₱30";
+      priceDisplay.style.display = "block";
+    } else if (vehicleType === "Car") {
+      selectedPrice = 50;
+      priceAmount.textContent = "₱50";
+      priceDisplay.style.display = "block";
+    } else {
+      selectedPrice = 0;
+      priceDisplay.style.display = "none";
     }
-    document.getElementById("selectedSlot").textContent = selectedSlot.toUpperCase();
+    
+    console.log(`Selected: ${vehicleType} - ₱${selectedPrice}`);
+  });
 
-    const form = document.getElementById("bookingForm");
-    const timeInput = document.getElementById("time");
-    const agreeTerms = document.getElementById("agreeTerms");
-    const reserveBtn = document.getElementById("reserveBtn");
+  agreeTerms.addEventListener("change", () => {
+    reserveBtn.disabled = !agreeTerms.checked;
+  });
 
-    agreeTerms.addEventListener("change", () => {
+  function normalize(date) {
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+    return date;
+  }
+
+  function setMinMaxTime() {
+    const now = new Date();
+    const hhMin = String(now.getHours()).padStart(2, "0");
+    const mmMin = String(now.getMinutes()).padStart(2, "0");
+    timeInput.min = `${hhMin}:${mmMin}`;
+    now.setMinutes(now.getMinutes() + 120);
+    const hhMax = String(now.getHours()).padStart(2, "0");
+    const mmMax = String(now.getMinutes()).padStart(2, "0");
+    timeInput.max = `${hhMax}:${mmMax}`;
+  }
+  document.addEventListener("DOMContentLoaded", setMinMaxTime);
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!agreeTerms.checked) {
+      alert("Please agree to the Terms and Conditions first.");
+      return;
+    }
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const plate = document.getElementById("plate").value.trim().toUpperCase();
+    const vehicle = document.getElementById("vehicle").value;
+    const time = document.getElementById("time").value;
+
+    if (!vehicle) {
+      alert("Please select a vehicle type.");
+      return;
+    }
+
+    const platePattern = /^[A-Za-z]{3}[0-9]{3}$/;
+    if (!platePattern.test(plate)) {
+      alert("Plate format must be ABC123 (3 letters + 3 numbers).");
+      return;
+    }
+
+    const now = normalize(new Date());
+    const selectedTime = normalize(new Date());
+    const [hh, mm] = time.split(":").map(Number);
+    selectedTime.setHours(hh, mm, 0, 0);
+    const maxTime = normalize(new Date());
+    maxTime.setMinutes(maxTime.getMinutes() + 120);
+    if (selectedTime < now) {
+      alert("You cannot book in the past.");
+      return;
+    }
+    if (selectedTime > maxTime) {
+      alert("You cannot book more than 2 hours ahead.");
+      return;
+    }
+
+    reserveBtn.disabled = true;
+    reserveBtn.textContent = "Creating Invoice...";
+
+    try {
+      const slotSnapshot = await db.ref(`/${selectedSlot}`).get();
+      
+      if (!slotSnapshot.exists()) {
+        alert(`Slot ${selectedSlot} does not exist in the system.`);
+        window.location.href = "levels.html";
+        return;
+      }
+      
+      const slotData = slotSnapshot.val();
+      if (slotData.status !== "Available") {
+        alert(`Sorry, ${selectedSlot.toUpperCase()} is no longer available.`);
+        window.location.href = "levels.html";
+        return;
+      }
+
+      console.log("📤 Sending to backend:", { 
+        name, 
+        email, 
+        plate, 
+        vehicle, 
+        amount: selectedPrice, 
+        time, 
+        slot: selectedSlot 
+      });
+
+      const res = await fetch("https://intellipark-backend-ar00.onrender.com/api/create-invoice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          name, 
+          email, 
+          plate, 
+          vehicle, 
+          amount: selectedPrice,
+          time, 
+          slot: selectedSlot 
+        })
+      });
+
+      console.log("📥 Response status:", res.status);
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("❌ Backend error:", errorText);
+        throw new Error(`Server returned ${res.status}: ${errorText}`);
+      }
+
+      const result = await res.json();
+      console.log("📦 Response data:", result);
+
+      const invoiceUrl = result.invoice_url || result.invoiceUrl;
+      
+      if (invoiceUrl) {
+        console.log("✅ Redirecting to payment:", invoiceUrl);
+        window.location.href = invoiceUrl;
+      } else {
+        console.error("❌ No invoice URL found in response:", result);
+        throw new Error("No invoice URL received from server");
+      }
+    } catch (err) {
+      console.error("❌ Full error:", err);
+      alert("Failed to create invoice:\n\n" + err.message + "\n\nPlease try again.");
+      
       reserveBtn.disabled = !agreeTerms.checked;
-    });
-
-    function normalize(date) {
-      date.setSeconds(0);
-      date.setMilliseconds(0);
-      return date;
+      reserveBtn.textContent = "Reserve Now";
     }
-
-    function setMinMaxTime() {
-      const now = new Date();
-      const hhMin = String(now.getHours()).padStart(2, "0");
-      const mmMin = String(now.getMinutes()).padStart(2, "0");
-      timeInput.min = `${hhMin}:${mmMin}`;
-      now.setMinutes(now.getMinutes() + 120);
-      const hhMax = String(now.getHours()).padStart(2, "0");
-      const mmMax = String(now.getMinutes()).padStart(2, "0");
-      timeInput.max = `${hhMax}:${mmMax}`;
-    }
-    document.addEventListener("DOMContentLoaded", setMinMaxTime);
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!agreeTerms.checked) {
-        alert("Please agree to the Terms and Conditions first.");
-        return;
-      }
-
-      const name = document.getElementById("name").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const plate = document.getElementById("plate").value.trim().toUpperCase();
-      const vehicle = document.getElementById("vehicle").value;
-      const time = document.getElementById("time").value;
-
-      const platePattern = /^[A-Za-z]{3}[0-9]{3}$/;
-      if (!platePattern.test(plate)) {
-        alert("Plate format must be ABC123 (3 letters + 3 numbers).");
-        return;
-      }
-
-      const now = normalize(new Date());
-      const selectedTime = normalize(new Date());
-      const [hh, mm] = time.split(":").map(Number);
-      selectedTime.setHours(hh, mm, 0, 0);
-      const maxTime = normalize(new Date());
-      maxTime.setMinutes(maxTime.getMinutes() + 120);
-      if (selectedTime < now) {
-        alert("You cannot book in the past.");
-        return;
-      }
-      if (selectedTime > maxTime) {
-        alert("You cannot book more than 2 hours ahead.");
-        return;
-      }
-
-      // Disable button during processing
-      reserveBtn.disabled = true;
-      reserveBtn.textContent = "Creating Invoice...";
-
-      try {
-        const slotStatus = await db.ref(`/${selectedSlot}/status`).get();
-        if (!slotStatus.exists() || slotStatus.val() !== "Available") {
-          alert(`Sorry, ${selectedSlot} is no longer available.`);
-          window.location.href = "levels.html";
-          return;
-        }
-
-        console.log("📤 Sending to backend:", { name, email, plate, vehicle, time, slot: selectedSlot });
-
-        const res = await fetch("https://intellipark-backend-ar00.onrender.com/api/create-invoice", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            name, 
-            email, 
-            plate, 
-            vehicle, 
-            time, 
-            slot: selectedSlot 
-          })
-        });
-
-        console.log("📥 Response status:", res.status);
-        console.log("📥 Response OK:", res.ok);
-
-        if (!res.ok) {
-          const errorText = await res.text();
-          console.error("❌ Backend error:", errorText);
-          throw new Error(`Server returned ${res.status}: ${errorText}`);
-        }
-
-        const result = await res.json();
-        console.log("📦 Response data:", result);
-
-        // Check both possible response formats
-        const invoiceUrl = result.invoice_url || result.invoiceUrl;
-        
-        if (invoiceUrl) {
-          console.log("✅ Redirecting to:", invoiceUrl);
-          window.location.href = invoiceUrl;
-        } else {
-          console.error("❌ No invoice URL found in response:", result);
-          throw new Error("No invoice URL received from server");
-        }
-      } catch (err) {
-        console.error("❌ Full error:", err);
-        alert("Failed to create invoice:\n\n" + err.message + "\n\nPlease check:\n• Your internet connection\n• Plate format (ABC123)\n• Backend service status\n\nTry again in a moment.");
-        
-        // Re-enable button
-        reserveBtn.disabled = !agreeTerms.checked;
-        reserveBtn.textContent = "Reserve Now";
-      }
-    });
-  </script>
+  });
+</script>
 </body>
 </html>

@@ -82,174 +82,209 @@
   <div class="debug" id="debug">Ready...</div>
 
   <script>
-    const BACKEND = 'https://intellipark-backend-ar00.onrender.com';
-    const firebaseConfig = {
-      apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
-      authDomain: "intellipark2025-327e9.firebaseapp.com",
-      databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
-      projectId: "intellipark2025-327e9",
-      storageBucket: "intellipark2025-327e9.appspot.com",
-      messagingSenderId: "126333727252",
-      appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
-    };
-    
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    
-    let scanning = true;
-    const reader = new Html5Qrcode("reader");
-    const debugEl = document.getElementById('debug');
+  const BACKEND = 'https://intellipark-backend-ar00.onrender.com';
+  
+  // ✅ UPDATED: Valid slots for 10-slot system
+  const validSlots = ['slot01', 'slot02', 'slot03', 'slot04', 'slot05', 
+                      'slot06', 'slot07', 'slot08', 'slot09', 'slot10'];
+  
+  const firebaseConfig = {
+    apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
+    authDomain: "intellipark2025-327e9.firebaseapp.com",
+    databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
+    projectId: "intellipark2025-327e9",
+    storageBucket: "intellipark2025-327e9.appspot.com",
+    messagingSenderId: "126333727252",
+    appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
+  };
+  
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  
+  let scanning = true;
+  const reader = new Html5Qrcode("reader");
+  const debugEl = document.getElementById('debug');
 
-    function log(msg) {
-      debugEl.innerHTML += '<br>' + msg;
-      debugEl.scrollTop = debugEl.scrollHeight;
-      console.log(msg);
-    }
+  function log(msg) {
+    debugEl.innerHTML += '<br>' + msg;
+    debugEl.scrollTop = debugEl.scrollHeight;
+    console.log(msg);
+  }
 
-    async function processQR(qrData) {
-      if (!scanning) return;
-      scanning = false;
+  async function processQR(qrData) {
+    if (!scanning) return;
+    scanning = false;
 
-      try {
-        log('🔍 QR: ' + qrData.substring(0, 80));
-        
-        let ticketId, slot, plate, qrType;
+    try {
+      log('🔍 QR: ' + qrData.substring(0, 80));
+      
+      let ticketId, slot, plate, qrType;
 
-        // Parse QR code
-        if (qrData.includes('verify?')) {
-          const url = new URL(qrData);
-          ticketId = url.searchParams.get('ticketId');
-          slot = url.searchParams.get('slot');
-          plate = url.searchParams.get('plate');
-          qrType = url.searchParams.get('type');
-          log('📋 URL Format');
-        } else if (qrData.includes('|')) {
-          const parts = qrData.split('|');
-          if (parts.length < 3) throw new Error('Invalid QR format');
-          [ticketId, slot, plate] = parts;
-          qrType = null;
-          log('📋 Pipe Format');
-        } else {
-          throw new Error('Unsupported QR format');
-        }
-
-        if (!ticketId || !slot || !plate) {
-          throw new Error('Missing data');
-        }
-
-        log(`📌 TicketID: ${ticketId}`);
-        log(`📌 Slot: ${slot}, Plate: ${plate}`);
-        log(`📌 QR Type: ${qrType || 'not specified'}`);
-
-        document.getElementById('loading').style.display = 'block';
-
-        // Get ticket from Firebase
-        const ticketSnapshot = await db.ref(`/tickets/${ticketId}`).once('value');
-        
-        if (!ticketSnapshot.exists()) {
-          throw new Error('Invalid ticket');
-        }
-
-        const ticketData = ticketSnapshot.val();
-        log('📦 Ticket Data: ' + JSON.stringify(ticketData));
-        
-        // Check if already used
-        if (ticketData.used) {
-          throw new Error('Already used');
-        }
-
-        // ✅ CRITICAL FIX: Get type from Firebase OR QR parameter
-        const ticketType = ticketData.type || qrType;
-        log(`🎫 Ticket Type: ${ticketType}`);
-
-        // ✅ VALIDATE BASED ON TYPE
-        if (ticketType === 'walkin') {
-          // ✅ Walk-in: ONLY check if paid
-          log('💰 Checking walk-in payment status...');
-          if (ticketData.status !== 'Paid') {
-            throw new Error('Payment required');
-          }
-          log('✅ Walk-in payment verified - GATE CAN OPEN');
-        } else if (ticketType === 'reservation') {
-          // ✅ Reservation: Must be checked in at entrance
-          log('🚪 Checking reservation entry status...');
-          if (!ticketData.entryVerified) {
-            throw new Error('Check in at entrance first');
-          }
-          log('✅ Reservation entry verified - GATE CAN OPEN');
-        } else {
-          // ✅ Unknown type: Smart fallback
-          log('⚠️ Type unknown, using smart detection...');
-          
-          // If status is Paid and no entryVerified = walk-in
-          if (ticketData.status === 'Paid' && (ticketData.entryVerified === null || ticketData.entryVerified === false)) {
-            log('✅ Detected as walk-in (paid, no entry) - GATE CAN OPEN');
-          } 
-          // If entryVerified is true = reservation
-          else if (ticketData.entryVerified === true) {
-            log('✅ Detected as reservation (entry verified) - GATE CAN OPEN');
-          } 
-          else {
-            throw new Error('Ticket not verified');
-          }
-        }
-
-        log('🌐 Calling backend...');
-
-        // Call backend
-        const response = await fetch(`${BACKEND}/api/exit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            slot, 
-            plate, 
-            exitTime: new Date().toISOString(), 
-            ticketId 
-          })
-        });
-
-        log('📡 Response: ' + response.status);
-
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.error || 'Backend error');
-        }
-
-        const result = await response.json();
-        log('✅ SUCCESS! Duration: ' + result.duration);
-
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('success').style.display = 'block';
-
-        let count = 10;
-        const interval = setInterval(() => {
-          document.getElementById('countdown').textContent = `Closing in ${count--}s`;
-          if (count < 0) {
-            clearInterval(interval);
-            location.reload();
-          }
-        }, 1000);
-
-      } catch (error) {
-        log('❌ ERROR: ' + error.message);
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('error').style.display = 'block';
-        document.getElementById('errMsg').textContent = error.message;
-        setTimeout(() => location.reload(), 7000);
+      // Parse QR code
+      if (qrData.includes('verify?')) {
+        const url = new URL(qrData);
+        ticketId = url.searchParams.get('ticketId');
+        slot = url.searchParams.get('slot');
+        plate = url.searchParams.get('plate');
+        qrType = url.searchParams.get('type');
+        log('📋 URL Format detected');
+      } else if (qrData.includes('|')) {
+        const parts = qrData.split('|');
+        if (parts.length < 3) throw new Error('Invalid QR format');
+        [ticketId, slot, plate] = parts;
+        qrType = null;
+        log('📋 Pipe Format detected');
+      } else {
+        throw new Error('Unsupported QR format');
       }
-    }
 
-    log('📷 Starting camera...');
-    reader.start(
-      { facingMode: "user" },
-      { fps: 30, qrbox: { width: 400, height: 400 } },
-      (decodedText) => {
-        if (scanning) {
-          reader.stop().then(() => processQR(decodedText));
+      if (!ticketId || !slot || !plate) {
+        throw new Error('Missing required data');
+      }
+
+      // ✅ UPDATED: Validate slot
+      if (!validSlots.includes(slot)) {
+        log(`❌ Invalid slot: ${slot}`);
+        throw new Error(`Invalid slot: ${slot}`);
+      }
+
+      log(`📌 TicketID: ${ticketId}`);
+      log(`📌 Slot: ${slot} (Valid ✓)`);
+      log(`📌 Plate: ${plate}`);
+      log(`📌 QR Type: ${qrType || 'not specified'}`);
+
+      document.getElementById('loading').style.display = 'block';
+
+      // Get ticket from Firebase
+      log('🔍 Fetching ticket from Firebase...');
+      const ticketSnapshot = await db.ref(`/tickets/${ticketId}`).once('value');
+      
+      if (!ticketSnapshot.exists()) {
+        log('❌ Ticket not found in database');
+        throw new Error('Invalid ticket');
+      }
+
+      const ticketData = ticketSnapshot.val();
+      log('📦 Ticket Data: ' + JSON.stringify(ticketData));
+      
+      // Check if already used
+      if (ticketData.used) {
+        log('❌ Ticket already used');
+        throw new Error('Ticket already used');
+      }
+
+      // ✅ Get type from Firebase OR QR parameter
+      const ticketType = ticketData.type || qrType;
+      log(`🎫 Ticket Type: ${ticketType}`);
+
+      // ✅ VALIDATE BASED ON TYPE
+      if (ticketType === 'walkin') {
+        log('💰 Walk-in ticket - checking payment status...');
+        if (ticketData.status !== 'Paid') {
+          log('❌ Walk-in ticket not paid');
+          throw new Error('Payment required');
         }
-      },
-      () => {}
-    ).catch(err => log('❌ Camera error: ' + err.message));
-  </script>
+        log('✅ Walk-in payment verified - GATE CAN OPEN');
+      } else if (ticketType === 'reservation') {
+        log('🚪 Reservation ticket - checking entrance verification...');
+        if (!ticketData.entryVerified) {
+          log('❌ Reservation not checked in at entrance');
+          throw new Error('Please check in at entrance first');
+        }
+        log('✅ Reservation entry verified - GATE CAN OPEN');
+      } else {
+        log('⚠️ No ticket type specified - using smart detection...');
+        
+        // Smart detection fallback
+        if (ticketData.status === 'Paid' && !ticketData.entryVerified) {
+          log('✅ Detected as walk-in (paid, no entry check) - GATE CAN OPEN');
+        } 
+        else if (ticketData.entryVerified) {
+          log('✅ Detected as reservation (entry verified) - GATE CAN OPEN');
+        } 
+        else {
+          log('❌ Ticket not verified');
+          throw new Error('Ticket not verified');
+        }
+      }
+
+      // Verify slot data matches ticket
+      if (ticketData.slot !== slot) {
+        log(`⚠️ Slot mismatch: Ticket says ${ticketData.slot}, QR says ${slot}`);
+        throw new Error('Slot mismatch');
+      }
+
+      if (ticketData.plate !== plate) {
+        log(`⚠️ Plate mismatch: Ticket says ${ticketData.plate}, QR says ${plate}`);
+        throw new Error('Plate mismatch');
+      }
+
+      log('🌐 Calling backend to record exit...');
+
+      // Call backend to record exit
+      const response = await fetch(`${BACKEND}/api/exit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          slot, 
+          plate, 
+          exitTime: new Date().toISOString(), 
+          ticketId 
+        })
+      });
+
+      log('📡 Backend response: ' + response.status);
+
+      if (!response.ok) {
+        const err = await response.json();
+        log('❌ Backend error: ' + (err.error || 'Unknown error'));
+        throw new Error(err.error || 'Backend error');
+      }
+
+      const result = await response.json();
+      log('✅ EXIT SUCCESS!');
+      log('⏱️ Parking Duration: ' + result.duration);
+      log('🚗 Slot freed: ' + result.slot);
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('success').style.display = 'block';
+
+      // Countdown timer
+      let count = 10;
+      const interval = setInterval(() => {
+        document.getElementById('countdown').textContent = `Closing in ${count--}s`;
+        if (count < 0) {
+          clearInterval(interval);
+          location.reload();
+        }
+      }, 1000);
+
+    } catch (error) {
+      log('❌ ERROR: ' + error.message);
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('errMsg').textContent = error.message;
+      setTimeout(() => location.reload(), 7000);
+    }
+  }
+
+  // Initialize camera
+  log('🚀 IntelliPark Exit Kiosk - 10 Slot System');
+  log('📍 Valid slots: ' + validSlots.join(', '));
+  log('📷 Starting camera...');
+  
+  reader.start(
+    { facingMode: "user" },
+    { fps: 30, qrbox: { width: 400, height: 400 } },
+    (decodedText) => {
+      if (scanning) {
+        reader.stop().then(() => processQR(decodedText));
+      }
+    },
+    () => {}
+  ).catch(err => {
+    log('❌ Camera error: ' + err.message);
+  });
+</script>
 </body>
 </html>

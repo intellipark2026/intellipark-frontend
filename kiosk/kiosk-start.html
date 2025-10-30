@@ -1,28 +1,21 @@
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IntelliPark Kiosk Start</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-    <style> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IntelliPark Kiosk Start</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <style>
 
-    @keyframes glowText {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
+  @keyframes glowText {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 
-
-      @keyframes pulse {
+  @keyframes pulse {
     0% {
       transform: scale(1);
       box-shadow: 0 0 20px rgba(255,255,255,0.1), 0 0 30px rgba(233, 236, 238, 0.2);
@@ -35,7 +28,6 @@
       transform: scale(1);
       box-shadow: 0 0 20px rgba(255,255,255,0.1), 0 0 30px rgba(235, 238, 240, 0.2);
     }
-    
   }
 
   .bold-white-text {
@@ -46,463 +38,916 @@
     text-align: center;
   }
 
+  body, button, a {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
 
-      body, button, a {
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      }
-
-      html, body {
-        margin: 0;
-        padding: 0;
-        background: linear-gradient(180deg, #111 0%, #222 50%, #000 100%);
-        color: white;
-        height: 100vh;
-        width: 100vw;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-      }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(180deg, #111 0%, #222 50%, #000 100%);
+    color: white;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
 
   .header {
-  text-align: center;
-  font-size: 6vh;
-  font-weight: 900;
-  padding: 4vh 0;
-  margin-top: 1vh;
-  color: #ffffff;
-  background: linear-gradient(90deg, #e1e9e8, #fafdff, #ffffff, #b6bebd);
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-
-  /* ✅ Full glowing border around header */
-  border: 3px solid rgba(252, 254, 255, 0.4);
-  border-radius: 25px;
-  width: 90%;
-  margin: 2vh auto;
-  display: block;
-  box-shadow:
-    0 0 25px rgba(254, 255, 255, 0.3),
-    0 0 40px rgba(255, 255, 255, 0.3),
-    inset 0 0 20px rgba(244, 246, 247, 0.2);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  animation: headerGlow 4s ease-in-out infinite alternate;
-}
-
-/* ✨ Animated glow for the header border */
-@keyframes headerGlow {
-  0% {
-    box-shadow:
-      0 0 25px rgba(249, 249, 255, 0.3),
-      0 0 40px rgba(249, 253, 255, 0.3),
-      inset 0 0 20px rgba(254, 255, 255, 0.2);
+    text-align: center;
+    font-size: 6vh;
+    font-weight: 900;
+    padding: 4vh 0;
+    margin-top: 1vh;
+    color: #ffffff;
+    background: linear-gradient(90deg, #e1e9e8, #fafdff, #ffffff, #b6bebd);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border: 3px solid rgba(252, 254, 255, 0.4);
+    border-radius: 25px;
+    width: 90%;
+    margin: 2vh auto;
+    display: block;
+    box-shadow: 0 0 25px rgba(254, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.3), inset 0 0 20px rgba(244, 246, 247, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: headerGlow 4s ease-in-out infinite alternate;
   }
-  100% {
-    box-shadow:
-      0 0 40px rgba(255, 255, 255, 0.7),
-      0 0 80px rgba(255, 255, 255, 0.4),
-      inset 0 0 25px rgba(244, 246, 247, 0.3);
+
+  @keyframes headerGlow {
+    0% {
+      box-shadow: 0 0 25px rgba(249, 249, 255, 0.3), 0 0 40px rgba(249, 253, 255, 0.3), inset 0 0 20px rgba(254, 255, 255, 0.2);
+    }
+    100% {
+      box-shadow: 0 0 40px rgba(255, 255, 255, 0.7), 0 0 80px rgba(255, 255, 255, 0.4), inset 0 0 25px rgba(244, 246, 247, 0.3);
+    }
   }
-}
 
+  .tap-message {
+    text-align: center;
+    font-size: 5vh;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    margin: 3vh 0;
+    padding: 18px 30px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    animation: pulse 2s infinite ease-in-out;
+    box-shadow: 0 0 20px rgba(255,255,255,0.1), 0 0 30px rgba(0,150,255,0.2);
+  }
 
+  .main {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex: 1;
+    padding: 2vh 5vw;
+    gap: 5vw;
+    flex-wrap: wrap;
+    margin-top: -3vh;
+  }
 
+  .policy-box {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border-radius: 80px;
+    padding: 40px 50px;
+    width: 48vw;
+    max-width: 650px;
+    font-size: 2.8vh;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.7);
+    border: 3px solid rgba(255,255,255,0.3);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
 
+  .policy-box h2 {
+    font-size: 4vh;
+    font-weight: 900;
+    background: linear-gradient(90deg, #fefefe, #dddddd);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.15);
+    margin-bottom: 20px;
+  }
 
-      .tap-message {
-      text-align: center;
-      font-size: 5vh;
-      font-weight: 800;
-      color: white;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-      margin: 3vh 0;
-      letter-spacing: px;
-      padding: 18px 30px;
-      border-radius: 50px;
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      width: fit-content;
-      margin-left: auto;
-      margin-right: auto;
-      animation: pulse 2s infinite ease-in-out;
-      box-shadow: 0 0 20px rgba(255,255,255,0.1), 0 0 30px rgba(0,150,255,0.2);
-      }
+  .indicator-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 3vh 0;
+    gap: 30px;
+  }
 
+  .indicator img {
+    height: 100px;
+    margin-bottom: 12px;
+    border-radius: 10%;
+    transition: all 0.3s ease-in-out;
+  }
 
-      .main {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      flex: 1;
-      padding: 2vh 5vw;
-      gap: 5vw;
-      flex-wrap: wrap;
-      margin-top: -3vh; /* ✅ Add this line to lift up slightly */
-      }
+  .indicator.green img {
+    box-shadow: 0 0 25px rgba(0,255,0,0.7), 0 0 40px rgba(0,255,0,0.4);
+  }
 
-      /* Enlarged and clearer policy box */
-      .policy-box {
-        background: rgba(255,255,255,0.1);
-        color: white;
-        border-radius: 80px;
-        padding: 40px 50px;
-        width: 48vw;
-        max-width: 650px;
-        font-size: 2.8vh;  /* bigger font */
-        font-weight: 700;
-        text-align: center;
-        box-shadow: 0 8px 28px rgba(0,0,0,0.7);
-        border: 3px solid rgba(255,255,255,0.3);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-      }
+  .indicator.red img {
+    box-shadow: 0 0 25px rgba(255,0,0,0.7), 0 0 40px rgba(255,0,0,0.4);
+  }
 
-      .policy-box h2 {
-        font-size: 4vh;
-        font-weight: 900;
-        background: linear-gradient(90deg, #fefefe, #dddddd);
-        background-clip: text;
-        -webkit-background-clip: text;
-        color: transparent;
-        -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.15);
-        margin-bottom: 20px;
-        }
+  .indicator.blue img {
+    box-shadow: 0 0 25px rgba(0,150,255,0.7), 0 0 40px rgba(0,150,255,0.4);
+  }
 
-      
+  .indicator div {
+    font-size: 2.8vh;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    text-align: center;
+  }
 
-      .indicator-row {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        flex-wrap: wrap;
-        margin: 3vh 0;
-        gap: 30px;
-      }
+  .scanner-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
 
-      /* Bigger indicator icons and text */
-      .indicator img {
-        height: 100px;
-        margin-bottom: 12px;
-        border-radius: 10%;
-        transition: all 0.3s ease-in-out;
-      }
+  .scanner-frame {
+    width: 42vw;
+    max-width: 320px;
+    aspect-ratio: 1 / 1;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 22px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+  }
 
-      /* Apply these with JavaScript or manually in HTML */
-      .indicator.green img {
-        box-shadow: 0 0 25px rgba(0,255,0,0.7), 0 0 40px rgba(0,255,0,0.4);
-      }
+  #reader {
+    width: 100%;
+    height: 100%;
+    border-radius: 22px;
+    object-fit: cover;
+  }
 
-      .indicator.red img {
-        box-shadow: 0 0 25px rgba(255,0,0,0.7), 0 0 40px rgba(255,0,0,0.4);
-        }
+  #reader video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 22px !important;
+    transform: scaleX(-1);
+  }
 
-      .indicator.blue img {
-        box-shadow: 0 0 25px rgba(0,150,255,0.7), 0 0 40px rgba(0,150,255,0.4);
-      }
+  .qr-instruction {
+    margin-top: 1.5vh;
+    font-size: 2.2vh;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  }
 
+  .manual-entry-btn {
+    margin-top: 2vh;
+    padding: 12px 28px;
+    background: rgba(255,204,0,0.2);
+    color: #ffcc00;
+    border: 2px solid #ffcc00;
+    border-radius: 12px;
+    font-size: 2vh;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(255,204,0,0.2);
+  }
 
-      .indicator div {
-        font-size: 2.8vh;
-        font-weight: 800;
-        color: #ffffff;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-        text-align: center;
-      }
+  .manual-entry-btn:hover {
+    background: rgba(255,204,0,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255,204,0,0.4);
+  }
 
-      
+  .manual-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
 
-      .scanner-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
+  .manual-modal.active {
+    display: flex;
+  }
 
-      .scanner-frame {
-        width: 42vw;
-        max-width: 320px;
-        aspect-ratio: 1 / 1;
-        border: 1px solid rgba(255,255,255,0.2);
-        border-radius: 22px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.6);
-        background: rgba(255,255,255,0.05);
-        backdrop-filter: blur(10px);
-        overflow: hidden;
-      }
+  .manual-form {
+    background: rgba(30,30,30,0.95);
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 450px;
+    border: 2px solid rgba(255,204,0,0.5);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+  }
 
-      #reader {
-        width: 100%;
-        height: 100%;
-        border-radius: 22px;
-        object-fit: cover;
-      }
+  .manual-form h2 {
+    color: #ffcc00;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 3vh;
+  }
 
-      #reader video {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
-        border-radius: 22px !important;
-        transform: scaleX(-1); /* ✅ Mirror effect */
-      }
+  .manual-form p {
+    color: #aaa;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 25px;
+  }
 
-      .qr-instruction {
-        margin-top: 1.5vh;
-        font-size: 2.2vh;
-        font-weight: 600;
-        text-shadow: 0 1px 3px rgba(0,0,0,0.7);
-      }
+  .manual-form input {
+    width: 100%;
+    padding: 18px;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,204,0,0.3);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 32px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 4px;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
 
-      #notification {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(0,0,0,0.8);
-        padding: 18px 26px;
-        border-radius: 12px;
-        font-size: 20px;
-        font-weight: bold;
-        color: white;
-        display: none;
-        z-index: 999;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-      }
-      #notification.success { background-color: #008000cc; }
-      #notification.error { background-color: #cc0000cc; }
-    </style>
-  </head>
-  <body onclick="proceed()">
+  .manual-form input::placeholder {
+    color: rgba(255,255,255,0.4);
+    font-size: 16px;
+    letter-spacing: normal;
+  }
 
-    <div class="header">Welcome to IntelliPark</div>
-    <div class="tap-message">
-    Tap Anywhere to Proceed
-    </div>
+  .manual-form input:focus {
+    outline: none;
+    border-color: #ffcc00;
+    background: rgba(255,255,255,0.15);
+    box-shadow: 0 0 20px rgba(255,204,0,0.3);
+  }
 
+  .manual-form button {
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
 
-    <div class="main">
-      <div class="policy-box">
-        <h2 class="bold-white-text" style="font-size: 4vh;">Policy and Guidelines</h2>
-        <div class="indicator-row">
-          <div class="indicator">
-            <img src="green.png" alt="Green" />
-            <div>Available Slot<br><span style="color:lightgreen">Green Light</span></div>
-          </div>
-          <div class="indicator">
-            <img src="red.png" alt="Red" />
-            <div>Occupied Spot<br><span style="color:#ff6b6b">Red Light</span></div>
-          </div>
-          <div class="indicator">
-            <img src="blue.png" alt="Blue" />
-            <div>Reserved Spot<br><span style="color:skyblue">Blue Light</span></div>
-          </div>
+  .btn-verify {
+    background: rgba(0,255,153,0.2);
+    color: #00ff99;
+    border: 2px solid #00ff99;
+  }
+
+  .btn-verify:hover {
+    background: rgba(0,255,153,0.3);
+    transform: translateY(-2px);
+  }
+
+  .btn-cancel {
+    background: rgba(255,77,77,0.2);
+    color: #ff4d4d;
+    border: 2px solid #ff4d4d;
+  }
+
+  .btn-cancel:hover {
+    background: rgba(255,77,77,0.3);
+  }
+
+  .manual-form .hint {
+    font-size: 13px;
+    color: #888;
+    text-align: center;
+    margin-top: 15px;
+  }
+
+  /* ✅ Virtual Keyboard Styles */
+  .virtual-keyboard {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(20,20,20,0.98);
+    padding: 15px;
+    border-top: 2px solid rgba(255,204,0,0.5);
+    z-index: 2000;
+    display: none;
+    box-shadow: 0 -5px 30px rgba(0,0,0,0.8);
+  }
+
+  .virtual-keyboard.active {
+    display: block;
+  }
+
+  .keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .key {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 18px 20px;
+    min-width: 60px;
+    border-radius: 8px;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    font-family: 'Courier New', monospace;
+  }
+
+  .key:active {
+    background: rgba(255,204,0,0.4);
+    border-color: #ffcc00;
+    transform: scale(0.95);
+  }
+
+  .key.number {
+    background: rgba(0,150,255,0.2);
+    border-color: rgba(0,150,255,0.4);
+  }
+
+  .key.number:active {
+    background: rgba(0,150,255,0.5);
+  }
+
+  .key.backspace {
+    background: rgba(255,77,77,0.2);
+    border-color: rgba(255,77,77,0.4);
+    min-width: 100px;
+  }
+
+  .key.backspace:active {
+    background: rgba(255,77,77,0.5);
+  }
+
+  .key.space {
+    min-width: 200px;
+  }
+
+  .key.close-keyboard {
+    background: rgba(0,255,153,0.2);
+    border-color: rgba(0,255,153,0.4);
+    min-width: 120px;
+  }
+
+  .key.close-keyboard:active {
+    background: rgba(0,255,153,0.5);
+  }
+
+  #notification {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.8);
+    padding: 18px 26px;
+    border-radius: 12px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    display: none;
+    z-index: 999;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+  }
+  #notification.success { background-color: #008000cc; }
+  #notification.error { background-color: #cc0000cc; }
+  </style>
+</head>
+<body onclick="proceedIfNotModal(event)">
+
+  <div class="header">Welcome to IntelliPark</div>
+  <div class="tap-message">Tap Anywhere to Proceed</div>
+
+  <div class="main">
+    <div class="policy-box">
+      <h2 class="bold-white-text" style="font-size: 4vh;">Policy and Guidelines</h2>
+      <div class="indicator-row">
+        <div class="indicator">
+          <img src="green.png" alt="Green" />
+          <div>Available Slot<br><span style="color:lightgreen">Green Light</span></div>
         </div>
-        <div class="fines">
-    <div class="bold-white-text" style="color: #fdec00; margin-top: 6px;">
-      Vehicles that exceed the allotted reserved parking time will be subjected to clamping.
-    </div>
+        <div class="indicator">
+          <img src="red.png" alt="Red" />
+          <div>Occupied Spot<br><span style="color:#ff6b6b">Red Light</span></div>
+        </div>
+        <div class="indicator">
+          <img src="blue.png" alt="Blue" />
+          <div>Reserved Spot<br><span style="color:skyblue">Blue Light</span></div>
+        </div>
+      </div>
+      <div class="fines">
+        <div class="bold-white-text" style="color: #fdec00; margin-top: 6px;">
+          Vehicles that exceed the allotted reserved parking time will be subjected to clamping.
+        </div>
         <div class="bold-white-text" style="margin-top: 12px;">Fines:</div>
-      <div class="bold-white-text">• Lost Ticket Fine: ₱500</div>
-    <div class="bold-white-text">• Unauthorized Use of Reserved Spot: ₱400</div>
-  </div>
-      </div>
-
-      <div class="scanner-wrapper">
-        <div class="scanner-frame">
-          <div id="reader"></div>
-        </div>
-        <div class="qr-instruction">Scan your QR Reservation here</div>
+        <div class="bold-white-text">• Lost Ticket Fine: ₱500</div>
+        <div class="bold-white-text">• Unauthorized Use of Reserved Spot: ₱400</div>
       </div>
     </div>
 
+    <div class="scanner-wrapper">
+      <div class="scanner-frame">
+        <div id="reader"></div>
+      </div>
+      <div class="qr-instruction">Scan your QR Reservation here</div>
+      
+      <button class="manual-entry-btn" onclick="event.stopPropagation(); showManualEntry();">
+        🔑 Manual Entry (No QR?)
+      </button>
+    </div>
+  </div>
 
-    <div id="notification"></div>
+  <!-- ✅ Manual Entry Modal -->
+  <div class="manual-modal" id="manualModal" onclick="event.stopPropagation();">
+    <div class="manual-form" onclick="event.stopPropagation();">
+      <h2>🔐 Manual Entry</h2>
+      
+      <p>Enter your vehicle plate number</p>
+      
+      <input type="text" 
+             id="plateNumber" 
+             placeholder="Plate Number (e.g., ABC123)" 
+             maxlength="7"
+             onclick="event.stopPropagation();">
+      
+      <button onclick="verifyByPlate()" class="btn-verify">
+        ✅ Find My Reservation
+      </button>
+      
+      <button onclick="hideManualEntry()" class="btn-cancel">
+        ❌ Cancel
+      </button>
+      
+      <p class="hint">
+        Must match the plate number on your reservation
+      </p>
+    </div>
+  </div>
 
-    <audio id="successSound" src="success.mp3" preload="auto"></audio>
-    <audio id="failSound" src="fail.mp3" preload="auto"></audio>
-    <audio id="qrDetectedPrompt" src="scan_prompt.mp3" preload="auto"></audio>
+  <!-- ✅ Virtual Keyboard -->
+  <div class="virtual-keyboard" id="virtualKeyboard">
+    <div class="keyboard-row">
+      <div class="key" onclick="addChar('A')">A</div>
+      <div class="key" onclick="addChar('B')">B</div>
+      <div class="key" onclick="addChar('C')">C</div>
+      <div class="key" onclick="addChar('D')">D</div>
+      <div class="key" onclick="addChar('E')">E</div>
+      <div class="key" onclick="addChar('F')">F</div>
+      <div class="key" onclick="addChar('G')">G</div>
+    </div>
+    <div class="keyboard-row">
+      <div class="key" onclick="addChar('H')">H</div>
+      <div class="key" onclick="addChar('I')">I</div>
+      <div class="key" onclick="addChar('J')">J</div>
+      <div class="key" onclick="addChar('K')">K</div>
+      <div class="key" onclick="addChar('L')">L</div>
+      <div class="key" onclick="addChar('M')">M</div>
+      <div class="key" onclick="addChar('N')">N</div>
+    </div>
+    <div class="keyboard-row">
+      <div class="key" onclick="addChar('O')">O</div>
+      <div class="key" onclick="addChar('P')">P</div>
+      <div class="key" onclick="addChar('Q')">Q</div>
+      <div class="key" onclick="addChar('R')">R</div>
+      <div class="key" onclick="addChar('S')">S</div>
+      <div class="key" onclick="addChar('T')">T</div>
+    </div>
+    <div class="keyboard-row">
+      <div class="key" onclick="addChar('U')">U</div>
+      <div class="key" onclick="addChar('V')">V</div>
+      <div class="key" onclick="addChar('W')">W</div>
+      <div class="key" onclick="addChar('X')">X</div>
+      <div class="key" onclick="addChar('Y')">Y</div>
+      <div class="key" onclick="addChar('Z')">Z</div>
+    </div>
+    <div class="keyboard-row">
+      <div class="key number" onclick="addChar('0')">0</div>
+      <div class="key number" onclick="addChar('1')">1</div>
+      <div class="key number" onclick="addChar('2')">2</div>
+      <div class="key number" onclick="addChar('3')">3</div>
+      <div class="key number" onclick="addChar('4')">4</div>
+      <div class="key number" onclick="addChar('5')">5</div>
+    </div>
+    <div class="keyboard-row">
+      <div class="key number" onclick="addChar('6')">6</div>
+      <div class="key number" onclick="addChar('7')">7</div>
+      <div class="key number" onclick="addChar('8')">8</div>
+      <div class="key number" onclick="addChar('9')">9</div>
+      <div class="key backspace" onclick="backspace()">⌫ DELETE</div>
+    </div>
+    <div class="keyboard-row">
+      <div class="key close-keyboard" onclick="closeKeyboard()">✓ DONE</div>
+    </div>
+  </div>
 
-    <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
-    authDomain: "intellipark2025-327e9.firebaseapp.com",
-    databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
-    projectId: "intellipark2025-327e9",
-    storageBucket: "intellipark2025-327e9.appspot.com",
-    messagingSenderId: "126333727252",
-    appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
-  };
+  <div id="notification"></div>
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+  <audio id="successSound" src="success.mp3" preload="auto"></audio>
+  <audio id="failSound" src="fail.mp3" preload="auto"></audio>
+  <audio id="qrDetectedPrompt" src="scan_prompt.mp3" preload="auto"></audio>
 
-  // ✅ Initialize scanner properly
-  const reader = new Html5Qrcode("reader");
-  const notif = document.getElementById("notification");
-  const successSound = document.getElementById("successSound");
-  const failSound = document.getElementById("failSound");
-  const qrDetectedPrompt = document.getElementById("qrDetectedPrompt");
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
+      authDomain: "intellipark2025-327e9.firebaseapp.com",
+      databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
+      projectId: "intellipark2025-327e9",
+      storageBucket: "intellipark2025-327e9.appspot.com",
+      messagingSenderId: "126333727252",
+      appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
+    };
 
-  let scannedRecently = false;
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  function showNotification(message, type = "success") {
-    notif.textContent = message;
-    notif.className = type;
-    notif.style.display = "block";
+    const validSlots = ['slot01', 'slot02', 'slot03', 'slot04', 'slot05', 
+                        'slot06', 'slot07', 'slot08', 'slot09', 'slot10'];
 
-    if (type === "success") successSound.play();
-    else failSound.play();
-  }
+    const reader = new Html5Qrcode("reader");
+    const notif = document.getElementById("notification");
+    const successSound = document.getElementById("successSound");
+    const failSound = document.getElementById("failSound");
+    const qrDetectedPrompt = document.getElementById("qrDetectedPrompt");
 
-  // ✅ Your existing onScanSuccess function (keep it exactly as is)
-  function onScanSuccess(decodedText) {
-    if (scannedRecently) return;
-    scannedRecently = true;
+    let scannedRecently = false;
+    let activeInput = null;
 
-    qrDetectedPrompt.play();
+    function showNotification(message, type = "success") {
+      notif.textContent = message;
+      notif.className = type;
+      notif.style.display = "block";
 
-    console.log("🔍 QR Scanned:", decodedText);
+      if (type === "success") successSound.play();
+      else failSound.play();
 
-    try {
-      const url = new URL(decodedText);
-      const ticketId = url.searchParams.get("ticketId");
-      const slot = url.searchParams.get("slot");
-      const plate = url.searchParams.get("plate");
-      const vehicle = url.searchParams.get("vehicle") || "N/A";
-      const name = url.searchParams.get("name") || "Guest";
-      const time = url.searchParams.get("time") || new Date().toLocaleTimeString();
-      const qrType = url.searchParams.get("type");
+      setTimeout(() => {
+        notif.style.display = "none";
+      }, 3000);
+    }
 
-      console.log("📋 Data:", { ticketId, slot, plate, vehicle, name, time, qrType });
-
-      if (!slot || !plate) {
-        console.error("❌ Missing data");
-        showNotification("❌ Invalid QR format", "error");
-        setTimeout(() => {
-          scannedRecently = false;
-        }, 2000);
+    function proceedIfNotModal(event) {
+      const modal = document.getElementById('manualModal');
+      if (modal && modal.classList.contains('active')) {
         return;
       }
+      proceed();
+    }
 
-      if (qrType === 'reservation') {
-        console.log("🔍 Verifying...");
+    function proceed() {
+      window.location.href = "kiosk-vehicle.html";
+    }
+
+    function showManualEntry() {
+      document.getElementById('manualModal').classList.add('active');
+      console.log('🔑 Manual entry opened');
+    }
+
+    function hideManualEntry() {
+      document.getElementById('manualModal').classList.remove('active');
+      document.getElementById('plateNumber').value = '';
+      closeKeyboard();
+    }
+
+    // ✅ Virtual Keyboard Functions
+    document.addEventListener('DOMContentLoaded', function() {
+      const plateInput = document.getElementById('plateNumber');
+      
+      if (plateInput) {
+        plateInput.addEventListener('focus', function() {
+          activeInput = this;
+          document.getElementById('virtualKeyboard').classList.add('active');
+        });
         
-        if (ticketId) {
-          db.ref(`/tickets/${ticketId}`).get().then(ticketSnapshot => {
-            if (!ticketSnapshot.exists()) {
-              console.error("❌ Invalid ticket");
-              showNotification("❌ Invalid ticket", "error");
-              setTimeout(() => { scannedRecently = false; }, 3000);
-              return;
-            }
+        plateInput.setAttribute('readonly', 'readonly');
+        plateInput.addEventListener('click', function() {
+          this.removeAttribute('readonly');
+          activeInput = this;
+          document.getElementById('virtualKeyboard').classList.add('active');
+          setTimeout(() => {
+            this.setAttribute('readonly', 'readonly');
+          }, 100);
+        });
+      }
+    });
 
-            const ticket = ticketSnapshot.val();
+    function addChar(char) {
+      if (!activeInput) return;
+      
+      const currentValue = activeInput.value;
+      const maxLength = parseInt(activeInput.getAttribute('maxlength')) || 999;
+      
+      if (currentValue.length < maxLength) {
+        activeInput.value = currentValue + char;
+        activeInput.dispatchEvent(new Event('input'));
+      }
+    }
+
+    function backspace() {
+      if (!activeInput) return;
+      activeInput.value = activeInput.value.slice(0, -1);
+      activeInput.dispatchEvent(new Event('input'));
+    }
+
+    function closeKeyboard() {
+      document.getElementById('virtualKeyboard').classList.remove('active');
+      activeInput = null;
+    }
+
+    async function verifyByPlate() {
+      const plate = document.getElementById('plateNumber').value.trim().toUpperCase();
+      
+      if (!plate) {
+        showNotification('⚠️ Please enter plate number', 'error');
+        return;
+      }
+      
+      if (plate.length < 5) {
+        showNotification('⚠️ Invalid plate number', 'error');
+        return;
+      }
+      
+      console.log('🔐 Searching for plate:', plate);
+      hideManualEntry();
+      showNotification('🔍 Searching reservation...', 'success');
+      
+      try {
+        const ticketsSnapshot = await db.ref('/tickets').once('value');
+        const tickets = ticketsSnapshot.val();
+        
+        let matchedTicket = null;
+        let matchedTicketId = null;
+        
+        if (tickets) {
+          for (const [tid, ticket] of Object.entries(tickets)) {
+            if (ticket.plate.toUpperCase() === plate && 
+                !ticket.used && 
+                !ticket.entryVerified &&
+                ticket.status === 'Paid') {
+              
+              console.log('✅ Found ticket:', tid);
+              matchedTicket = ticket;
+              matchedTicketId = tid;
+              break;
+            }
+          }
+        }
+        
+        if (!matchedTicket) {
+          console.log('🔍 Checking reservations...');
+          const reservationsSnapshot = await db.ref('/reservations').once('value');
+          const reservations = reservationsSnapshot.val();
+          
+          if (reservations) {
+            for (const [slot, reservation] of Object.entries(reservations)) {
+              if (reservation.plate.toUpperCase() === plate && 
+                  reservation.status === 'Paid') {
+                
+                console.log('✅ Found reservation:', slot);
+                
+                const tempTicketId = `TEMP_${Date.now()}`;
+                await db.ref(`/tickets/${tempTicketId}`).set({
+                  ticketId: tempTicketId,
+                  slot: slot,
+                  plate: plate,
+                  vehicle: reservation.vehicle || 'N/A',
+                  name: reservation.name || 'Guest',
+                  timestamp: new Date().toISOString(),
+                  type: 'reservation',
+                  status: 'Paid',
+                  used: false,
+                  entryVerified: true,
+                  entryTime: new Date().toISOString()
+                });
+                
+                showNotification('✅ Welcome! Gate opening...', 'success');
+                
+                setTimeout(() => {
+                  window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(reservation.name || 'Guest')}&plate=${plate}&vehicle=${reservation.vehicle || 'N/A'}&time=${reservation.time || ''}`;
+                }, 2000);
+                
+                return;
+              }
+            }
+          }
+        }
+        
+        if (matchedTicket) {
+          await db.ref(`/tickets/${matchedTicketId}`).update({
+            entryVerified: true,
+            entryTime: new Date().toISOString()
+          });
+          
+          showNotification('✅ Welcome! Gate opening...', 'success');
+          
+          setTimeout(() => {
+            window.location.href = `kiosk-entry-confirmed.html?slot=${matchedTicket.slot}&name=${encodeURIComponent(matchedTicket.name || 'Guest')}&plate=${matchedTicket.plate}&vehicle=${matchedTicket.vehicle}&time=${matchedTicket.reservationTime || ''}`;
+          }, 2000);
+          
+        } else {
+          throw new Error('No paid reservation found for this plate');
+        }
+        
+      } catch (error) {
+        console.error('❌', error.message);
+        showNotification('❌ ' + error.message, 'error');
+        setTimeout(() => {
+          showManualEntry();
+        }, 3000);
+      }
+    }
+
+    function onScanSuccess(decodedText) {
+      if (scannedRecently) return;
+      scannedRecently = true;
+
+      qrDetectedPrompt.play();
+
+      console.log("🔍 QR Scanned:", decodedText);
+
+      try {
+        const url = new URL(decodedText);
+        const ticketId = url.searchParams.get("ticketId");
+        const slot = url.searchParams.get("slot");
+        const plate = url.searchParams.get("plate");
+        const vehicle = url.searchParams.get("vehicle") || "N/A";
+        const name = url.searchParams.get("name") || "Guest";
+        const time = url.searchParams.get("time") || new Date().toLocaleTimeString();
+        const qrType = url.searchParams.get("type");
+
+        console.log("📋 Extracted data:", { ticketId, slot, plate, vehicle, name, time, qrType });
+
+        if (!slot || !plate) {
+          console.error("❌ Missing required data");
+          showNotification("❌ Invalid QR format", "error");
+          setTimeout(() => { scannedRecently = false; }, 2000);
+          return;
+        }
+
+        if (!validSlots.includes(slot)) {
+          console.warn("⚠️ Invalid slot:", slot, "- Expected one of:", validSlots);
+          showNotification(`⚠️ Invalid slot: ${slot}`, "error");
+          setTimeout(() => { scannedRecently = false; }, 3000);
+          return;
+        }
+
+        console.log("✅ Slot validation passed:", slot);
+
+        if (qrType === 'reservation') {
+          console.log("🔍 Verifying reservation ticket...");
+          
+          if (ticketId) {
+            db.ref(`/tickets/${ticketId}`).get().then(ticketSnapshot => {
+              if (!ticketSnapshot.exists()) {
+                console.error("❌ Ticket not found in database");
+                showNotification("❌ Invalid ticket", "error");
+                setTimeout(() => { scannedRecently = false; }, 3000);
+                return;
+              }
+
+              const ticket = ticketSnapshot.val();
+              console.log("📦 Ticket data:", ticket);
+              
+              if (ticket.used) {
+                console.error("❌ Ticket already used");
+                showNotification("❌ This ticket was already used", "error");
+                setTimeout(() => { scannedRecently = false; }, 3000);
+                return;
+              }
+
+              if (ticket.entryVerified) {
+                console.warn("⚠️ Already checked in - allowing re-entry");
+                showNotification("⚠️ Already checked in. Proceed to slot", "success");
+                setTimeout(() => {
+                  window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
+                }, 2000);
+                return;
+              }
+
+              console.log("✅ Ticket is valid, checking reservation...");
+
+              db.ref(`/reservations/${slot}`).get().then(snapshot => {
+                if (snapshot.exists()) {
+                  const reservation = snapshot.val();
+                  console.log("📦 Reservation found:", reservation);
+                  
+                  if (reservation.plate === plate && reservation.status === "Paid") {
+                    console.log("✅ Reservation verified! Marking entry...");
+                    
+                    db.ref(`/tickets/${ticketId}`).update({
+                      entryVerified: true,
+                      entryTime: new Date().toISOString()
+                    });
+
+                    showNotification("✅ Welcome! Opening gate...", "success");
+                    
+                    setTimeout(() => {
+                      window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
+                    }, 2000);
+                  } else {
+                    console.error("❌ Reservation mismatch or not paid");
+                    showNotification("❌ Invalid reservation", "error");
+                    setTimeout(() => { scannedRecently = false; }, 3000);
+                  }
+                } else {
+                  console.error("❌ No reservation found for slot:", slot);
+                  showNotification("❌ No reservation found", "error");
+                  setTimeout(() => { scannedRecently = false; }, 3000);
+                }
+              });
+            }).catch(error => {
+              console.error("❌ Database error:", error);
+              showNotification("❌ Verification failed", "error");
+              setTimeout(() => { scannedRecently = false; }, 3000);
+            });
+          } else {
+            console.log("⚠️ No ticketId, checking reservation directly...");
             
-            if (ticket.used) {
-              console.error("❌ Already used");
-              showNotification("❌ This ticket was already used", "error");
-              setTimeout(() => { scannedRecently = false; }, 3000);
-              return;
-            }
-
-            if (ticket.entryVerified) {
-              console.warn("⚠️ Already checked in");
-              showNotification("⚠️ Already checked in. Proceed to slot", "success");
-              setTimeout(() => {
-                window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
-              }, 2000);
-              return;
-            }
-
-            console.log("✅ Ticket valid");
-
             db.ref(`/reservations/${slot}`).get().then(snapshot => {
               if (snapshot.exists()) {
                 const reservation = snapshot.val();
-                console.log("📦 Reservation:", reservation);
-                
                 if (reservation.plate === plate && reservation.status === "Paid") {
-                  console.log("✅ Verified!");
-                  
-                  db.ref(`/tickets/${ticketId}`).update({
-                    entryVerified: true,
-                    entryTime: new Date().toISOString()
-                  });
-
-                  showNotification("✅ Welcome! Opening gate...", "success");
-                  
+                  showNotification("✅ Verified! Opening gate...", "success");
                   setTimeout(() => {
                     window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
                   }, 2000);
                 } else {
-                  console.error("❌ Invalid");
                   showNotification("❌ Invalid reservation", "error");
                   setTimeout(() => { scannedRecently = false; }, 3000);
                 }
               } else {
-                console.error("❌ Not found");
                 showNotification("❌ No reservation found", "error");
                 setTimeout(() => { scannedRecently = false; }, 3000);
               }
             });
-          }).catch(error => {
-            console.error("❌ Error:", error);
-            showNotification("❌ Verification failed", "error");
-            setTimeout(() => { scannedRecently = false; }, 3000);
-          });
+          }
         } else {
-          db.ref(`/reservations/${slot}`).get().then(snapshot => {
-            if (snapshot.exists()) {
-              const reservation = snapshot.val();
-              if (reservation.plate === plate && reservation.status === "Paid") {
-                showNotification("✅ Verified! Opening gate...", "success");
-                setTimeout(() => {
-                  window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
-                }, 2000);
-              } else {
-                showNotification("❌ Invalid reservation", "error");
-                setTimeout(() => { scannedRecently = false; }, 3000);
-              }
-            } else {
-              showNotification("❌ No reservation found", "error");
-              setTimeout(() => { scannedRecently = false; }, 3000);
-            }
-          });
+          console.error("❌ Invalid QR type:", qrType);
+          showNotification("❌ Invalid QR type", "error");
+          setTimeout(() => { scannedRecently = false; }, 2000);
         }
-      } else {
-        showNotification("❌ Invalid QR type", "error");
+      } catch (e) {
+        console.error("❌ QR parse error:", e);
+        showNotification("❌ Failed to read QR", "error");
         setTimeout(() => { scannedRecently = false; }, 2000);
       }
-    } catch (e) {
-      console.error("❌ Parse error:", e);
-      showNotification("❌ Failed to read QR", "error");
-      setTimeout(() => { scannedRecently = false; }, 2000);
     }
-  }
 
-  function proceed() {
-    window.location.href = "kiosk-vehicle.html";
-  }
+    window.onload = () => {
+      console.log("🚀 IntelliPark Kiosk Entry - 10 Slot System");
+      console.log("📍 Valid slots:", validSlots);
+      
+      const config = {
+        fps: 30,
+        qrbox: { width: 400, height: 400 },
+        aspectRatio: 1.0
+      };
 
-  // ✅ Proper camera initialization with full-screen scanning
-  window.onload = () => {
-    const config = {
-      fps: 30,
-      qrbox: { width: 400, height: 400 },  // ✅ Large box for easy scanning anywhere
-      aspectRatio: 1.0
+      reader.start(
+        { facingMode: "environment" }, 
+        config, 
+        onScanSuccess
+      ).catch(err => {
+        console.error("❌ Camera error:", err);
+        showNotification("❌ Unable to access camera", "error");
+      });
     };
-
-    reader.start(
-      { facingMode: "environment" }, 
-      config, 
-      onScanSuccess
-    ).catch(err => {
-      console.error("Camera error:", err);
-      showNotification("❌ Unable to access camera", "error");
-    });
-  };
-</script>
-  </body>
-  </html>
+  </script>
+</body>
+</html>

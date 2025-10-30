@@ -162,14 +162,16 @@
   const vehicle = params.get("vehicle") || "N/A";
   let plate = params.get("plate") || "N/A";
 
-  // ✅ FIX: Ensure plate is in correct format (remove spaces, uppercase)
+  console.log('🚀 IntelliPark Kiosk Payment');
+  console.log('📋 Received params:', { slot, vehicle, plate });
+
+  // ✅ FIX: Ensure plate is in correct format
   plate = plate.replace(/\s+/g, '').toUpperCase();
   
-  // ✅ FIX: If plate doesn't match ABC123 format, generate a valid one for walk-in
   const plateRegex = /^[A-Z]{3}[0-9]{3}$/;
   if (!plateRegex.test(plate)) {
     console.warn(`⚠️ Invalid plate format: ${plate}. Generating walk-in plate...`);
-    const randomNum = Math.floor(100 + Math.random() * 900); // 100-999
+    const randomNum = Math.floor(100 + Math.random() * 900);
     plate = `WLK${randomNum}`;
     console.log(`✅ Generated walk-in plate: ${plate}`);
   }
@@ -188,21 +190,35 @@
   // Set navigation link immediately
   document.getElementById("navLink").href = `https://intellipark-kiosk.web.app/kiosk-navigation.html?slot=${slot}`;
 
+  // ✅ FIX: Calculate amount based on vehicle type
+  const vehicleType = vehicle.toLowerCase();
+  let amount = 50; // Default for car
+  
+  if (vehicleType === 'motorcycle') {
+    amount = 30;
+  } else if (vehicleType === 'car') {
+    amount = 50;
+  }
+  
+  console.log(`💰 Calculated amount: ₱${amount} for ${vehicleType}`);
+
   // Create payment invoice via backend
   async function createPaymentInvoice() {
     try {
       console.log('🔄 Creating payment invoice...');
-      console.log('📋 Input data:', { slot, vehicle, plate });
+      console.log('📋 Input data:', { slot, vehicle: vehicleType, plate, amount });
       
       // Generate email for walk-ins
       const walkInEmail = `walkin.${plate.toLowerCase()}@intellipark.io`;
       
+      // ✅ FIXED: Include all required parameters
       const requestBody = {
         slot: slot,
-        vehicle: vehicle.toLowerCase(), // car or motorcycle
+        vehicle: vehicleType === 'motorcycle' ? 'Motorcycle' : 'Car', // Capitalize for backend
         plate: plate,
         email: walkInEmail,
-        type: 'walk-in'
+        type: 'walk-in',
+        amount: amount // ✅ CRITICAL: Added amount parameter
       };
       
       console.log('📤 Sending request to backend:', JSON.stringify(requestBody, null, 2));
@@ -222,7 +238,7 @@
       console.log('📥 Response text:', responseText);
       
       if (!response.ok) {
-        console.error('❌ Server error (400):', responseText);
+        console.error('❌ Server error:', responseText);
         throw new Error(`Backend validation error: ${responseText}`);
       }
 
@@ -241,6 +257,7 @@
         
         console.log('✅ Payment link generated:', data.invoiceUrl);
         console.log('✅ External ID:', data.externalId);
+        console.log('💰 Amount: ₱' + amount);
       } else {
         console.error('❌ Invalid response structure:', data);
         document.getElementById("loadingText").textContent = '❌ Error: Invalid response from server';
@@ -259,6 +276,7 @@
       const retryBtn = document.createElement('button');
       retryBtn.textContent = '🔄 Retry Payment Link';
       retryBtn.className = 'action-button';
+      retryBtn.style.marginTop = '15px';
       retryBtn.onclick = () => {
         document.getElementById("loadingText").textContent = 'Generating payment link...';
         document.getElementById("loadingText").style.color = '#666';

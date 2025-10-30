@@ -1,56 +1,284 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Simple Slot Map</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IntelliPark Navigation - 1st Floor</title>
+
+<!-- PWA Configuration -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="IntelliPark">
+
+<!-- Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('✅ SW registered'))
+        .catch(err => console.error('❌ SW error:', err));
+    });
+  }
+</script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body { 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      height: 100vh; 
-      background: #222; 
-      color: white; 
-      font-family: sans-serif; 
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    
+    #map { height: 100vh; width: 100%; background: #d3d3d3; }
+    
+    .nav-instructions {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 20px 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      z-index: 1000;
+      min-width: 280px;
+      text-align: center;
     }
-    .lot {
-      display: grid;
-      grid-template-columns: repeat(4, 80px);
-      grid-gap: 10px;
+    
+    .nav-arrow {
+      font-size: 56px;
+      color: #4285f4;
+      margin-bottom: 10px;
     }
-    .bay {
-      width: 80px; height: 120px;
-      background: #555;
-      border: 3px solid #444;
-      border-radius: 4px;
+    
+    .distance {
+      font-size: 28px;
+      font-weight: 700;
+      color: #202124;
+      margin-bottom: 8px;
+    }
+    
+    .instruction {
+      font-size: 16px;
+      color: #5f6368;
+      font-weight: 500;
+    }
+    
+    .destination-card {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 15px 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .dest-icon {
+      background: #ea4335;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 24px;
+      color: white;
+      font-weight: bold;
     }
-    .bay.highlight {
-      background: limegreen;
-      border-color: #0f0;
+    
+    .dest-info h3 {
+      font-size: 18px;
+      color: #202124;
+      margin: 0;
+    }
+    
+    .dest-info p {
+      font-size: 14px;
+      color: #5f6368;
+      margin: 5px 0 0 0;
+    }
+    
+    .user-marker {
+      background: #4285f4;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 4px solid white;
+      box-shadow: 0 2px 10px rgba(66, 133, 244, 0.5);
+    }
+    
+    .dest-marker {
+      background: #ea4335;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      border: 4px solid white;
+      box-shadow: 0 2px 10px rgba(234, 67, 53, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
-  <div class="lot" id="lot">
-    <div class="bay" data-slot="slot1">Slot 1</div>
-    <div class="bay" data-slot="slot2">Slot 2</div>
-    <div class="bay" data-slot="slot3">Slot 3</div>
-    <div class="bay" data-slot="slot4">Slot 4</div>
-    <!-- add more bays as needed -->
+  <div class="nav-instructions" id="navBox">
+    <div class="nav-arrow" id="navArrow">↑</div>
+    <div class="distance" id="navDistance">50 meters</div>
+    <div class="instruction" id="navInstruction">Drive straight ahead</div>
   </div>
 
+  <div class="destination-card">
+    <div class="dest-icon">P</div>
+    <div class="dest-info">
+      <h3 id="slotName">Slot 1</h3>
+      <p>1st Floor - Your reserved spot</p>
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  
   <script>
-    // Simulate reading “slot2” from the QR URL:
-    const slotToHighlight = new URLSearchParams(location.search).get("slot") || "slot2";
-    document.querySelectorAll(".bay").forEach(bay => {
-      if (bay.dataset.slot === slotToHighlight) {
-        bay.classList.add("highlight");
-      }
+    const firebaseConfig = {
+      apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
+      authDomain: "intellipark2025-327e9.firebaseapp.com",
+      databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
+      projectId: "intellipark2025-327e9",
+      storageBucket: "intellipark2025-327e9.appspot.com",
+      messagingSenderId: "126333727252",
+      appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    // Get slot from URL
+    const params = new URLSearchParams(window.location.search);
+    const slot = params.get('slot') || 'slot1';
+    
+    // Initialize map with your floor plan
+    const map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: 0,
+      maxZoom: 3
     });
+
+    // Use your uploaded floor plan image
+    const bounds = [[0, 0], [800, 800]];
+    const image = L.imageOverlay('FIRST_FLOOR.png', bounds).addTo(map);
+    map.fitBounds(bounds);
+
+    // Parking slots matching your layout
+    const parkingSlots = {
+      'slot1': { lat: 520, lng: 545, name: 'Slot 1' },
+      'slot2': { lat: 470, lng: 545, name: 'Slot 2' },
+      'slot3': { lat: 415, lng: 545, name: 'Slot 3' },
+      'slota': { lat: 360, lng: 545, name: 'Slot A' },
+      'slotb': { lat: 310, lng: 545, name: 'Slot B' }
+    };
+
+    // Navigation paths
+    const navigationPaths = {
+      'slot1': [
+        { point: [600, 445], instruction: 'Enter from main entrance', distance: 0, arrow: '↑' },
+        { point: [570, 445], instruction: 'Drive straight ahead', distance: 30, arrow: '↑' },
+        { point: [540, 445], instruction: 'Continue forward', distance: 30, arrow: '↑' },
+        { point: [520, 510], instruction: 'Turn right to Slot 1', distance: 40, arrow: '→' },
+        { point: [520, 545], instruction: 'Arrived at Slot 1', distance: 15, arrow: '🅿️' }
+      ],
+      'slot2': [
+        { point: [600, 445], instruction: 'Enter from main entrance', distance: 0, arrow: '↑' },
+        { point: [550, 445], instruction: 'Drive straight ahead', distance: 50, arrow: '↑' },
+        { point: [500, 445], instruction: 'Continue forward', distance: 50, arrow: '↑' },
+        { point: [470, 510], instruction: 'Turn right to Slot 2', distance: 50, arrow: '→' },
+        { point: [470, 545], instruction: 'Arrived at Slot 2', distance: 15, arrow: '🅿️' }
+      ],
+      'slot3': [
+        { point: [600, 445], instruction: 'Enter from main entrance', distance: 0, arrow: '↑' },
+        { point: [530, 445], instruction: 'Drive straight ahead', distance: 70, arrow: '↑' },
+        { point: [460, 445], instruction: 'Continue forward', distance: 70, arrow: '↑' },
+        { point: [415, 510], instruction: 'Turn right to Slot 3', distance: 60, arrow: '→' },
+        { point: [415, 545], instruction: 'Arrived at Slot 3', distance: 15, arrow: '🅿️' }
+      ],
+      'slota': [
+        { point: [600, 445], instruction: 'Enter from main entrance', distance: 0, arrow: '↑' },
+        { point: [500, 445], instruction: 'Drive straight ahead', distance: 100, arrow: '↑' },
+        { point: [400, 445], instruction: 'Continue forward', distance: 100, arrow: '↑' },
+        { point: [360, 510], instruction: 'Turn right to Slot A', distance: 70, arrow: '→' },
+        { point: [360, 545], instruction: 'Arrived at Slot A', distance: 15, arrow: '🅿️' }
+      ],
+      'slotb': [
+        { point: [600, 445], instruction: 'Enter from main entrance', distance: 0, arrow: '↑' },
+        { point: [480, 445], instruction: 'Drive straight ahead', distance: 120, arrow: '↑' },
+        { point: [360, 445], instruction: 'Continue forward', distance: 120, arrow: '↑' },
+        { point: [310, 510], instruction: 'Turn right to Slot B', distance: 80, arrow: '→' },
+        { point: [310, 545], instruction: 'Arrived at Slot B', distance: 15, arrow: '🅿️' }
+      ]
+    };
+
+    const destination = parkingSlots[slot];
+    const path = navigationPaths[slot];
+    
+    document.getElementById('slotName').textContent = destination.name;
+
+    // Add user marker
+    const userMarker = L.marker(path[0].point, {
+      icon: L.divIcon({
+        className: '',
+        html: '<div class="user-marker"></div>',
+        iconSize: [20, 20]
+      })
+    }).addTo(map);
+
+    // Add destination marker
+    const destMarker = L.marker([destination.lat, destination.lng], {
+      icon: L.divIcon({
+        className: '',
+        html: '<div class="dest-marker">P</div>',
+        iconSize: [35, 35]
+      })
+    }).addTo(map);
+
+    // Draw path
+    const pathCoords = path.map(p => p.point);
+    L.polyline(pathCoords, {
+      color: '#4285f4',
+      weight: 6,
+      opacity: 0.8
+    }).addTo(map);
+
+    // Animate navigation
+    let currentStep = 0;
+    function updateNavigation() {
+      if (currentStep < path.length) {
+        const step = path[currentStep];
+        document.getElementById('navArrow').textContent = step.arrow;
+        document.getElementById('navDistance').textContent = `${step.distance} meters`;
+        document.getElementById('navInstruction').textContent = step.instruction;
+        userMarker.setLatLng(step.point);
+        map.panTo(step.point);
+        currentStep++;
+        setTimeout(updateNavigation, 3000);
+      } else {
+        document.getElementById('navBox').innerHTML = `
+          <div class="nav-arrow">🎉</div>
+          <div class="distance">You have arrived!</div>
+          <div class="instruction">Park in ${destination.name}</div>
+        `;
+      }
+    }
+    updateNavigation();
   </script>
 </body>
 </html>
