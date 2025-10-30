@@ -3,128 +3,234 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Drive to Your Slot</title>
+  <title>Navigational Guide</title>
   <style>
-    body {
+    * {
       margin: 0;
-      background: linear-gradient(to bottom, #4B0082, #800080);
-      font-family: 'Segoe UI', sans-serif;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: white;
-      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+    }
+
+    .container {
+      max-width: 95vw;
+      width: 100%;
+      height: 95vh;
+      display: flex;
+      flex-direction: column;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 24px;
+      padding: 25px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
     }
 
     h1 {
-      padding: 20px;
-      font-size: 3vh;
-      text-shadow: 0 0 10px white;
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1.3;
+      flex-shrink: 0;
     }
 
-    .map-container {
+    .video-wrapper {
       position: relative;
-      max-width: 90vw;
-      margin: auto;
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .map-image {
+    .video-wrapper video {
       width: 100%;
-      border: 5px solid white;
-      border-radius: 12px;
-    }
-
-    .glow-rect {
-      position: absolute;
-      border-radius: 8px;
-      box-shadow: 0 0 30px 10px lime;
-      animation: pulse 1.5s infinite;
-      z-index: 5;
-      display: none;
-    }
-
-    @keyframes pulse {
-      0%   { box-shadow: 0 0 10px 4px lime; }
-      50%  { box-shadow: 0 0 25px 8px lime; }
-      100% { box-shadow: 0 0 10px 4px lime; }
-    }
-
-    .slot-label {
-      position: absolute;
-      color: white;
-      background: #222a;
-      padding: 4px 14px;
-      border-radius: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      z-index: 10;
-      pointer-events: none;
-      box-shadow: 0 0 4px #000b;
-      display: none;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      border-radius: 16px;
     }
 
     .back-btn {
-      margin-top: 30px;
-      padding: 12px 24px;
-      font-size: 16px;
+      margin-top: 20px;
+      width: 100%;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: 600;
       background: white;
-      color: purple;
+      color: #1e3c72;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      flex-shrink: 0;
     }
 
     .back-btn:hover {
-      background: #eee;
+      background: #f0f0f0;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .back-btn:active {
+      transform: translateY(0);
+    }
+
+    .error-message {
+      background: #ff4444;
+      color: white;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      display: none;
+      flex-shrink: 0;
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+        max-width: 98vw;
+        height: 96vh;
+      }
+
+      h1 {
+        font-size: 22px;
+        margin-bottom: 15px;
+      }
+
+      .back-btn {
+        font-size: 16px;
+        padding: 14px;
+        margin-top: 15px;
+      }
+    }
+
+    /* Landscape mode optimization */
+    @media (orientation: landscape) and (max-height: 600px) {
+      h1 {
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+
+      .back-btn {
+        padding: 12px;
+        font-size: 15px;
+        margin-top: 10px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Drive to Your Slot</h1>
+  <div class="container">
+    <h1>PLAY THE VIDEO FOR NAVIGATIONAL GUIDE</h1>
+    
+    <div id="errorMessage" class="error-message"></div>
+    
+    <div class="video-wrapper">
+      <video id="navigationVideo" controls playsinline webkit-playsinline preload="metadata">
+        <source id="videoSource" src="" type="video/mp4">
+        Your browser doesn't support video playback.
+      </video>
+    </div>
 
-  <div class="map-container">
-    <img id="floorImage" src="FIRST_FLOOR.png" alt="Parking Map" class="map-image">
-
-    <!-- Slot Highlights (same coordinates, adjustable later if needed) -->
-    <div id="glowSlot1" class="glow-rect" style="top: 10.7%; left: 65.9%; width: 9.4%; height: 31%;"></div>
-    <div id="label-slot1" class="slot-label" style="top: 49%; left: 72%;">SLOT 1</div>
-
-    <div id="glowSlot2" class="glow-rect" style="top: 10.7%; left: 44.2%; width: 9.4%; height: 31%;"></div>
-    <div id="label-slot2" class="slot-label" style="top: 49%; left: 47%;">SLOT 2</div>
-
-    <div id="glowSlot3" class="glow-rect" style="top: 10.7%; left: 22.7%; width: 9.4%; height: 31%;"></div>
-    <div id="label-slot3" class="slot-label" style="top: 49%; left: 26%;">SLOT 3</div>
-
-    <div id="glowSlot4" class="glow-rect" style="top: 10.7%; left: 2.7%; width: 9.4%; height: 31%;"></div>
-    <div id="label-slot4" class="slot-label" style="top: 49%; left: 6%;">SLOT 4</div>
+    <button class="back-btn" onclick="window.location.href='kiosk-start.html'">
+      🏠 Back to Start
+    </button>
   </div>
-
-  <button class="back-btn" onclick="window.location.href='kiosk-start.html'">🏠 Back to Start</button>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     let slot = params.get("slot");
 
-    // Normalize slot input (accepts "2" or "slot2")
+    // Normalize slot input
     if (slot && !slot.toLowerCase().startsWith("slot")) {
       slot = "slot" + slot;
     }
 
-    // Select floor image automatically
-    const floorImage = document.getElementById("floorImage");
-    if (["slot1", "slot2", "slot3"].includes(slot.toLowerCase())) {
-      floorImage.src = "FIRST_FLOOR.png";
+    // Video file mapping for all 10 slots
+    const videoFiles = {
+      "slot1": "navigate-slot-1.mp4",
+      "slot2": "navigate-slot-2.mp4",
+      "slot3": "navigate-slot-3.mp4",
+      "slot4": "navigate-slot-a.mp4",
+      "slot5": "navigate-slot-b.mp4",
+      "slot6": "navigate-slot-4.mp4",
+      "slot7": "navigate-slot-5.mp4",
+      "slot8": "navigate-slot-6.mp4",
+      "slot9": "navigate-slot-c.mp4",
+      "slot10": "navigate-slot-d.mp4"
+    };
+
+    // Get video elements
+    const videoSource = document.getElementById("videoSource");
+    const navigationVideo = document.getElementById("navigationVideo");
+    const errorMessage = document.getElementById("errorMessage");
+    
+    // Set video source
+    if (slot && videoFiles[slot.toLowerCase()]) {
+      videoSource.src = videoFiles[slot.toLowerCase()];
+      navigationVideo.load();
+      console.log("Loading video:", videoFiles[slot.toLowerCase()]);
     } else {
-      floorImage.src = "SECOND_FLOOR.png";
+      showError("No slot selected. Please check your link.");
     }
 
-    // Highlight correct slot
-    const glow = document.getElementById(`glow${slot.charAt(0).toUpperCase() + slot.slice(1)}`);
-    const label = document.getElementById(`label-${slot.toLowerCase()}`);
+    // Error handling
+    navigationVideo.addEventListener('error', function(e) {
+      let errorText = "Video could not be loaded. ";
+      
+      if (navigationVideo.error) {
+        switch (navigationVideo.error.code) {
+          case 1:
+            errorText += "Video loading aborted.";
+            break;
+          case 2:
+            errorText += "Network error occurred.";
+            break;
+          case 3:
+            errorText += "Video format not supported.";
+            break;
+          case 4:
+            errorText += "Video file not found. Check the file path.";
+            break;
+          default:
+            errorText += "Unknown error occurred.";
+        }
+      }
+      
+      showError(errorText);
+      console.error("Video error:", navigationVideo.error);
+    });
 
-    if (glow && label) {
-      glow.style.display = "block";
-      label.style.display = "block";
-    } else {
-      alert("No valid slot selected. Please check your reservation.");
+    // Success handler
+    navigationVideo.addEventListener('loadeddata', function() {
+      console.log("Video loaded successfully!");
+      errorMessage.style.display = "none";
+    });
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = "block";
     }
   </script>
 </body>
