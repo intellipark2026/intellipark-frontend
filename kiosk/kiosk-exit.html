@@ -27,8 +27,48 @@
       flex: 1.5; display: flex; flex-direction: column;
       align-items: center; justify-content: center; padding: 20px;
     }
-    #reader { width: 350px; height: 350px; border: 4px solid #fff; border-radius: 20px; }
-    #reader video { transform: scaleX(-1) !important; }
+    
+    /* ✅ FIXED: Proper camera container styling */
+    #reader { 
+      width: 350px; 
+      height: 350px; 
+      border: 4px solid #fff; 
+      border-radius: 20px; 
+      overflow: hidden;
+      position: relative;
+      background: #000;
+    }
+    
+    /* ✅ FIXED: Force video to fill container properly */
+    #reader video { 
+      width: 100% !important; 
+      height: 100% !important;
+      object-fit: cover !important;
+      transform: scaleX(-1) !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+    }
+    
+    /* ✅ FIXED: Hide default html5-qrcode elements that cause black space */
+    #reader > div:first-child {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    
+    #reader__scan_region {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    
+    #reader__dashboard_section {
+      display: none !important;
+    }
+    
+    #reader__dashboard_section_csr {
+      display: none !important;
+    }
+    
     .text {
       margin-top: 25px; background: #fff; color: #000;
       padding: 12px 40px; border-radius: 50px; font-weight: 600;
@@ -84,7 +124,6 @@
   <script>
   const BACKEND = 'https://intellipark-backend-ar00.onrender.com';
   
-  // ✅ UPDATED: Valid slots for 10-slot system
   const validSlots = ['slot01', 'slot02', 'slot03', 'slot04', 'slot05', 
                       'slot06', 'slot07', 'slot08', 'slot09', 'slot10'];
   
@@ -142,7 +181,6 @@
         throw new Error('Missing required data');
       }
 
-      // ✅ UPDATED: Validate slot
       if (!validSlots.includes(slot)) {
         log(`❌ Invalid slot: ${slot}`);
         throw new Error(`Invalid slot: ${slot}`);
@@ -155,7 +193,6 @@
 
       document.getElementById('loading').style.display = 'block';
 
-      // Get ticket from Firebase
       log('🔍 Fetching ticket from Firebase...');
       const ticketSnapshot = await db.ref(`/tickets/${ticketId}`).once('value');
       
@@ -167,17 +204,14 @@
       const ticketData = ticketSnapshot.val();
       log('📦 Ticket Data: ' + JSON.stringify(ticketData));
       
-      // Check if already used
       if (ticketData.used) {
         log('❌ Ticket already used');
         throw new Error('Ticket already used');
       }
 
-      // ✅ Get type from Firebase OR QR parameter
       const ticketType = ticketData.type || qrType;
       log(`🎫 Ticket Type: ${ticketType}`);
 
-      // ✅ VALIDATE BASED ON TYPE
       if (ticketType === 'walkin') {
         log('💰 Walk-in ticket - checking payment status...');
         if (ticketData.status !== 'Paid') {
@@ -195,7 +229,6 @@
       } else {
         log('⚠️ No ticket type specified - using smart detection...');
         
-        // Smart detection fallback
         if (ticketData.status === 'Paid' && !ticketData.entryVerified) {
           log('✅ Detected as walk-in (paid, no entry check) - GATE CAN OPEN');
         } 
@@ -208,7 +241,6 @@
         }
       }
 
-      // Verify slot data matches ticket
       if (ticketData.slot !== slot) {
         log(`⚠️ Slot mismatch: Ticket says ${ticketData.slot}, QR says ${slot}`);
         throw new Error('Slot mismatch');
@@ -221,7 +253,6 @@
 
       log('🌐 Calling backend to record exit...');
 
-      // Call backend to record exit
       const response = await fetch(`${BACKEND}/api/exit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -249,7 +280,6 @@
       document.getElementById('loading').style.display = 'none';
       document.getElementById('success').style.display = 'block';
 
-      // Countdown timer
       let count = 10;
       const interval = setInterval(() => {
         document.getElementById('countdown').textContent = `Closing in ${count--}s`;
@@ -268,14 +298,18 @@
     }
   }
 
-  // Initialize camera
   log('🚀 IntelliPark Exit Kiosk - 10 Slot System');
   log('📍 Valid slots: ' + validSlots.join(', '));
   log('📷 Starting camera...');
   
+  // ✅ FIXED: Better camera configuration
   reader.start(
     { facingMode: "user" },
-    { fps: 30, qrbox: { width: 400, height: 400 } },
+    { 
+      fps: 30, 
+      qrbox: { width: 300, height: 300 },
+      aspectRatio: 1.0  // ✅ Force square ratio
+    },
     (decodedText) => {
       if (scanning) {
         reader.stop().then(() => processQR(decodedText));

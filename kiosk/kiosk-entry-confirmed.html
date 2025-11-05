@@ -94,7 +94,7 @@
       margin-bottom: 15px;
     }
 
-    /* ✅ Only the line changed to white */
+    /* ✅ White glow line */
     .glow-line {
       width: 60%;
       height: 2px;
@@ -116,12 +116,21 @@
       font-weight: 600;
     }
 
-    /* ✅ White “Welcome to IntelliPark” text */
+    /* ✅ White "Welcome to IntelliPark" text */
     .thank-you {
       margin-top: 25px;
       font-size: 0.95rem;
       color: #ffffff;
       font-style: italic;
+      letter-spacing: 0.5px;
+    }
+
+    /* ✅ Countdown timer styling */
+    .countdown {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #00ff99;
+      font-weight: 600;
       letter-spacing: 0.5px;
     }
 
@@ -148,6 +157,8 @@
     <div class="detail">Vehicle Type: <span id="vehicle"></span></div>
 
     <div class="thank-you">Welcome to IntelliPark</div>
+    
+    <div class="countdown" id="countdown">Returning to start in 5 seconds...</div>
   </div>
 
   <script>
@@ -157,11 +168,14 @@
     document.getElementById("plate").textContent = params.get("plate") || "N/A";
     document.getElementById("vehicle").textContent = params.get("vehicle") || "N/A";
 
-    let timeLeft = 10;
+    // ✅ 5 second countdown timer
+    let timeLeft = 5;
     const countdownEl = document.getElementById("countdown");
+    
     const timer = setInterval(() => {
       timeLeft--;
       countdownEl.textContent = `Returning to start in ${timeLeft} seconds...`;
+      
       if (timeLeft <= 0) {
         clearInterval(timer);
         window.location.href = "kiosk-start.html";

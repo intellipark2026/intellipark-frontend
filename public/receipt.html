@@ -129,7 +129,6 @@
       font-weight: 700;
     }
 
-    /* ✅ Simplified Plate Display for Manual Entry */
     .plate-backup-section {
       background: linear-gradient(135deg, rgba(0,102,204,0.15), rgba(0,153,255,0.1));
       padding: 20px;
@@ -293,7 +292,6 @@
 
     <div class="divider"></div>
 
-    <!-- ✅ Simplified Plate Backup Section -->
     <div class="plate-backup-section">
       <div class="plate-backup-label">🚗 YOUR PLATE NUMBER</div>
       <div class="plate-backup-value" id="plateDisplay">Loading...</div>
@@ -384,7 +382,7 @@
     document.getElementById("receiptDate").textContent =
       !isNaN(dateObj) ? dateObj.toLocaleString() : new Date().toLocaleString();
 
-    // ✅ Generate unified ticket
+    // ✅ FIXED - Generate unified ticket with proper format
     async function generateUnifiedTicket() {
       try {
         console.log('🎫 Starting ticket generation...');
@@ -393,12 +391,16 @@
         const ticketId = `TICKET_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         console.log('📝 Ticket ID:', ticketId);
 
+        // ✅ FIX: Ensure slot is in lowercase format that kiosk expects
+        const normalizedSlot = slot.toLowerCase().replace(/\s+/g, '');
+        console.log('📍 Normalized slot:', normalizedSlot);
+
         // Store ticket in Firebase
         const ticketData = {
           ticketId: ticketId,
-          slot: slot,
-          plate: plate,
-          vehicle: vehicle,
+          slot: normalizedSlot,
+          plate: plate.toUpperCase(),
+          vehicle: vehicle.toLowerCase(),
           name: name,
           email: email,
           reservationTime: time,
@@ -411,10 +413,16 @@
         };
 
         await db.ref(`/tickets/${ticketId}`).set(ticketData);
-        console.log('✅ Ticket stored in Firebase');
+        console.log('✅ Ticket stored in Firebase:', ticketData);
 
-        // Generate QR code URL
-        const qrUrl = `https://intellipark-kiosk.web.app/verify?ticketId=${ticketId}&slot=${encodeURIComponent(slot)}&plate=${encodeURIComponent(plate)}&vehicle=${encodeURIComponent(vehicle)}&name=${encodeURIComponent(name)}&time=${encodeURIComponent(time)}&type=reservation`;
+        // ✅ Verify ticket was saved
+        const verifySnapshot = await db.ref(`/tickets/${ticketId}`).once('value');
+        console.log('🔍 Verification - Ticket in DB:', verifySnapshot.val());
+
+        // ✅ FIX: Generate QR code URL that matches kiosk scanner expectations
+        // Use a simple parseable URL format
+        const currentDomain = window.location.origin;
+        const qrUrl = `${currentDomain}/verify?ticketId=${ticketId}&slot=${encodeURIComponent(normalizedSlot)}&plate=${encodeURIComponent(plate.toUpperCase())}&vehicle=${encodeURIComponent(vehicle.toLowerCase())}&name=${encodeURIComponent(name)}&time=${encodeURIComponent(time)}&type=reservation`;
         
         console.log('📱 QR URL:', qrUrl);
 
@@ -430,7 +438,7 @@
           foreground: 'black'
         });
 
-        console.log('✅ QR code generated');
+        console.log('✅ QR code generated successfully');
 
         // Show QR code
         document.getElementById("loadingQR").style.display = 'none';

@@ -581,64 +581,58 @@
     }
 
     reserveBtn.disabled = true;
-    reserveBtn.textContent = "Creating Invoice...";
+    reserveBtn.textContent = "Processing...";
 
     try {
-      const slotSnapshot = await db.ref(`/${selectedSlot}`).get();
-      
+      // ✅ Run both operations in parallel for faster execution
+      const [slotSnapshot, apiResponse] = await Promise.all([
+        db.ref(`/${selectedSlot}`).get(),
+        fetch("https://intellipark-backend-ar00.onrender.com/api/create-invoice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            name, 
+            email, 
+            plate, 
+            vehicle, 
+            amount: selectedPrice,
+            time, 
+            slot: selectedSlot 
+          })
+        })
+      ]);
+
+      // ✅ Check slot validity
       if (!slotSnapshot.exists()) {
         alert(`Slot ${selectedSlot} does not exist in the system.`);
-        window.location.href = "levels.html";
+        window.location.replace("levels.html");
         return;
       }
       
       const slotData = slotSnapshot.val();
       if (slotData.status !== "Available") {
         alert(`Sorry, ${selectedSlot.toUpperCase()} is no longer available.`);
-        window.location.href = "levels.html";
+        window.location.replace("levels.html");
         return;
       }
 
-      console.log("📤 Sending to backend:", { 
-        name, 
-        email, 
-        plate, 
-        vehicle, 
-        amount: selectedPrice, 
-        time, 
-        slot: selectedSlot 
-      });
+      // ✅ Check API response
+      console.log("📥 Response status:", apiResponse.status);
 
-      const res = await fetch("https://intellipark-backend-ar00.onrender.com/api/create-invoice", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          name, 
-          email, 
-          plate, 
-          vehicle, 
-          amount: selectedPrice,
-          time, 
-          slot: selectedSlot 
-        })
-      });
-
-      console.log("📥 Response status:", res.status);
-
-      if (!res.ok) {
-        const errorText = await res.text();
+      if (!apiResponse.ok) {
+        const errorText = await apiResponse.text();
         console.error("❌ Backend error:", errorText);
-        throw new Error(`Server returned ${res.status}: ${errorText}`);
+        throw new Error(`Server returned ${apiResponse.status}: ${errorText}`);
       }
 
-      const result = await res.json();
+      const result = await apiResponse.json();
       console.log("📦 Response data:", result);
 
       const invoiceUrl = result.invoice_url || result.invoiceUrl;
       
       if (invoiceUrl) {
         console.log("✅ Redirecting to payment:", invoiceUrl);
-        window.location.href = invoiceUrl;
+        window.location.replace(invoiceUrl); // ✅ Faster redirect
       } else {
         console.error("❌ No invoice URL found in response:", result);
         throw new Error("No invoice URL received from server");
