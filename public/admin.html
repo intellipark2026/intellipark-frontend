@@ -509,6 +509,18 @@
                 grid-template-columns: repeat(5, 1fr);
             }
         }
+        select, select:focus, select:active {
+            background-color: #222 !important;
+            color: #fff !important;
+            border: 1px solid #444 !important;
+            }
+
+            /* For Chrome, Edge, Safari (Webkit support) */
+            select option {
+            background-color: #222 !important;
+            color: #fff !important;
+            }
+
     </style>
 </head>
 <body>
@@ -849,7 +861,8 @@
             if (statusFilter) {
                 filtered = filtered.filter(r => (r.status || 'Pending') === statusFilter);
             }
-            
+            console.log("Filtered logs count:", filtered.length);
+            console.log("Filtered logs data:", filtered);
             displayLogs(filtered);
             updateFilterSummary(filtered.length, dateFrom, dateTo, statusFilter);
         }

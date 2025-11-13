@@ -327,20 +327,25 @@
   </div>
 
   <script>
-    // ✅ Wait for libraries to load
-    if (typeof firebase === 'undefined') {
-      console.error('❌ Firebase not loaded');
-      document.getElementById("loadingQR").textContent = '❌ System error - Firebase not loaded';
-      document.getElementById("loadingQR").style.color = 'red';
+    // Function for 12-hour time format (for reserved time)
+    function to12HourFormat(time24) {
+      if (!time24 || time24 === 'N/A') return '';
+      const [hourStr, minStr] = time24.split(':');
+      let hour = parseInt(hourStr, 10);
+      const min = minStr;
+      let period = 'AM';
+      if (hour === 0) {
+        hour = 12;
+      } else if (hour === 12) {
+        period = 'PM';
+      } else if (hour > 12) {
+        hour -= 12;
+        period = 'PM';
+      }
+      return `${hour}:${min} ${period}`;
     }
 
-    if (typeof QRious === 'undefined') {
-      console.error('❌ QRious not loaded');
-      document.getElementById("loadingQR").textContent = '❌ System error - QR library not loaded';
-      document.getElementById("loadingQR").style.color = 'red';
-    }
-
-    // Firebase config
+    // Firebase config & initialization
     const firebaseConfig = {
       apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
       authDomain: "intellipark2025-327e9.firebaseapp.com",
@@ -350,7 +355,6 @@
       messagingSenderId: "126333727252",
       appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
     };
-    
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -364,38 +368,28 @@
     const email = params.get("email") || "N/A";
     const timestamp = params.get("timestamp") || new Date().toISOString();
 
-    console.log('📋 Receipt data:', { slot, name, plate, vehicle, time, email });
-
-    // Display values
+    // Display receipt data
     document.getElementById("slot").textContent = slot.toUpperCase();
     document.getElementById("name").textContent = name;
     document.getElementById("plate").textContent = plate.toUpperCase();
     document.getElementById("vehicle").textContent = vehicle.charAt(0).toUpperCase() + vehicle.slice(1);
-    document.getElementById("time").textContent = time;
+    document.getElementById("time").textContent = to12HourFormat(time);
     document.getElementById("email").textContent = email;
 
-    // ✅ Display plate number for manual entry
     document.getElementById("plateDisplay").textContent = plate.toUpperCase();
 
-    // Format timestamp
     const dateObj = new Date(timestamp);
     document.getElementById("receiptDate").textContent =
-      !isNaN(dateObj) ? dateObj.toLocaleString() : new Date().toLocaleString();
+      !isNaN(dateObj)
+        ? dateObj.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true, month: 'short', day: 'numeric', year: 'numeric' })
+        : new Date().toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true, month: 'short', day: 'numeric', year: 'numeric' });
 
-    // ✅ FIXED - Generate unified ticket with proper format
+    // Generate the QR ticket
     async function generateUnifiedTicket() {
       try {
         console.log('🎫 Starting ticket generation...');
-        
-        // Create unique ticket ID
         const ticketId = `TICKET_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        console.log('📝 Ticket ID:', ticketId);
-
-        // ✅ FIX: Ensure slot is in lowercase format that kiosk expects
         const normalizedSlot = slot.toLowerCase().replace(/\s+/g, '');
-        console.log('📍 Normalized slot:', normalizedSlot);
-
-        // Store ticket in Firebase
         const ticketData = {
           ticketId: ticketId,
           slot: normalizedSlot,
@@ -413,23 +407,14 @@
         };
 
         await db.ref(`/tickets/${ticketId}`).set(ticketData);
-        console.log('✅ Ticket stored in Firebase:', ticketData);
 
-        // ✅ Verify ticket was saved
-        const verifySnapshot = await db.ref(`/tickets/${ticketId}`).once('value');
-        console.log('🔍 Verification - Ticket in DB:', verifySnapshot.val());
-
-        // ✅ FIX: Generate QR code URL that matches kiosk scanner expectations
-        // Use a simple parseable URL format
+        // QR code for kiosk
         const currentDomain = window.location.origin;
         const qrUrl = `${currentDomain}/verify?ticketId=${ticketId}&slot=${encodeURIComponent(normalizedSlot)}&plate=${encodeURIComponent(plate.toUpperCase())}&vehicle=${encodeURIComponent(vehicle.toLowerCase())}&name=${encodeURIComponent(name)}&time=${encodeURIComponent(time)}&type=reservation`;
-        
-        console.log('📱 QR URL:', qrUrl);
 
         // Generate QR code
         const qrCodeCanvas = document.getElementById("qrcode");
-        
-        const qr = new QRious({
+        new QRious({
           element: qrCodeCanvas,
           value: qrUrl,
           size: 180,
@@ -438,9 +423,6 @@
           foreground: 'black'
         });
 
-        console.log('✅ QR code generated successfully');
-
-        // Show QR code
         document.getElementById("loadingQR").style.display = 'none';
         qrCodeCanvas.style.display = 'block';
         document.getElementById("qrInstruction").style.display = 'block';
@@ -450,9 +432,7 @@
         console.error('❌ Error:', error);
         document.getElementById("loadingQR").textContent = '❌ Error: ' + error.message;
         document.getElementById("loadingQR").style.color = 'red';
-        
         document.getElementById("plateDisplay").textContent = plate.toUpperCase();
-        
         const statusBadge = document.getElementById("ticketStatus");
         statusBadge.textContent = 'ERROR';
         statusBadge.className = 'status-badge error-badge';
@@ -460,15 +440,9 @@
       }
     }
 
-    // ✅ Generate ticket when page loads
     window.addEventListener('load', function() {
-      console.log('🚀 Page loaded, checking requirements...');
-      
       if (slot !== 'N/A' && plate !== 'N/A') {
-        setTimeout(() => {
-          console.log('✅ Libraries ready, generating ticket...');
-          generateUnifiedTicket();
-        }, 500);
+        setTimeout(() => { generateUnifiedTicket(); }, 500);
       } else {
         document.getElementById("loadingQR").textContent = '❌ Missing booking information';
         document.getElementById("loadingQR").style.color = 'red';
@@ -477,5 +451,7 @@
       }
     });
   </script>
+</body>
+</html>
 </body>
 </html>

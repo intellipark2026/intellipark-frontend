@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Exit Kiosk</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -27,48 +27,25 @@
       flex: 1.5; display: flex; flex-direction: column;
       align-items: center; justify-content: center; padding: 20px;
     }
-    
-    /* ✅ FIXED: Proper camera container styling */
     #reader { 
-      width: 350px; 
-      height: 350px; 
-      border: 4px solid #fff; 
-      border-radius: 20px; 
-      overflow: hidden;
-      position: relative;
-      background: #000;
+      width: 350px; height: 350px; border: 4px solid #fff; 
+      border-radius: 20px; overflow: hidden; position: relative; background: #000;
     }
-    
-    /* ✅ FIXED: Force video to fill container properly */
     #reader video { 
-      width: 100% !important; 
-      height: 100% !important;
-      object-fit: cover !important;
-      transform: scaleX(-1) !important;
-      position: absolute !important;
-      top: 0 !important;
-      left: 0 !important;
+      width: 100% !important; height: 100% !important;
+      object-fit: cover !important; transform: scaleX(-1) !important;
+      position: absolute !important; top: 0 !important; left: 0 !important;
     }
-    
-    /* ✅ FIXED: Hide default html5-qrcode elements that cause black space */
     #reader > div:first-child {
-      width: 100% !important;
-      height: 100% !important;
+      width: 100% !important; height: 100% !important;
     }
-    
     #reader__scan_region {
-      width: 100% !important;
-      height: 100% !important;
+      width: 100% !important; height: 100% !important;
     }
-    
-    #reader__dashboard_section {
+    #reader__dashboard_section, #reader__dashboard_section_csr {
       display: none !important;
     }
-    
-    #reader__dashboard_section_csr {
-      display: none !important;
-    }
-    
+
     .text {
       margin-top: 25px; background: #fff; color: #000;
       padding: 12px 40px; border-radius: 50px; font-weight: 600;
@@ -90,6 +67,106 @@
       border-radius: 10px; font-family: monospace; font-size: 11px;
       max-height: 150px; overflow-y: auto; z-index: 9999;
     }
+    .manual-exit-btn {
+      margin-top: 15px;
+      padding: 12px 28px;
+      background: rgba(255,204,0,0.2);
+      color: #ffcc00;
+      border: 2px solid #ffcc00;
+      border-radius: 12px;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(255,204,0,0.2);
+    }
+    .manual-exit-btn:hover {
+      background: rgba(255,204,0,0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255,204,0,0.4);
+    }
+    .manual-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 1000;
+      justify-content: center; align-items: center;
+    }
+    .manual-modal.active {
+      display: flex;
+    }
+    .manual-form {
+      background: rgba(30,30,30,0.95);
+      padding: 40px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 450px;
+      border: 2px solid rgba(255,204,0,0.5);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      color: white;
+    }
+    .manual-form h2 {
+      color: #ffcc00;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 3vh;
+    }
+    .manual-form input {
+      width: 100%;
+      padding: 18px;
+      margin-bottom: 15px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,204,0,0.3);
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 32px;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 4px;
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    .manual-form input::placeholder {
+      color: rgba(255,255,255,0.4);
+      font-size: 16px;
+      letter-spacing: normal;
+    }
+    .manual-form input:focus {
+      outline: none;
+      border-color: #ffcc00;
+      background: rgba(255,255,255,0.15);
+      box-shadow: 0 0 20px rgba(255,204,0,0.3);
+    }
+    .manual-form button {
+      width: 100%;
+      padding: 16px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-exit {
+      background: rgba(0,255,153,0.2);
+      color: #00ff99;
+      border: 2px solid #00ff99;
+    }
+    .btn-exit:hover {
+      background: rgba(0,255,153,0.3);
+      transform: translateY(-2px);
+    }
+    .btn-cancel {
+      background: rgba(255,77,77,0.2);
+      color: #ff4d4d;
+      border: 2px solid #ff4d4d;
+    }
+    .btn-cancel:hover {
+      background: rgba(255,77,77,0.3);
+    }
   </style>
 </head>
 <body>
@@ -100,225 +177,313 @@
     <div class="right">
       <div id="reader"></div>
       <div class="text">SCAN QR TO EXIT</div>
-      
+      <button class="manual-exit-btn" onclick="showManualExit();">
+        🔑 Manual Exit (No QR?)
+      </button>
       <div class="box loading" id="loading">
         <div class="spin"></div>
         <p>Verifying ticket...</p>
       </div>
-      
       <div class="box success" id="success">
         <h2>✅ GATE OPEN</h2>
         <p style="font-size:20px; margin-top:10px;">Drive safely!</p>
         <p id="countdown" style="font-size:24px; margin-top:20px;"></p>
       </div>
-      
       <div class="box error" id="error">
         <h3>❌ Error</h3>
         <p id="errMsg"></p>
       </div>
     </div>
   </div>
-
+  <div class="manual-modal" id="manualExitModal" onclick="event.stopPropagation();">
+    <div class="manual-form" onclick="event.stopPropagation();">
+      <h2>🔐 Manual Exit</h2>
+      <p>Enter your vehicle plate number</p>
+      <input type="text" 
+             id="exitPlateNumber" 
+             placeholder="Plate Number (e.g., ABC123)" 
+             maxlength="7" 
+             oninput="this.value = this.value.toUpperCase();">
+      <button onclick="processManualExit()" class="btn-exit">
+        ✅ Exit Vehicle
+      </button>
+      <button onclick="hideManualExit()" class="btn-cancel">
+        ❌ Cancel
+      </button>
+    </div>
+  </div>
   <div class="debug" id="debug">Ready...</div>
-
   <script>
-  const BACKEND = 'https://intellipark-backend-ar00.onrender.com';
-  
-  const validSlots = ['slot01', 'slot02', 'slot03', 'slot04', 'slot05', 
-                      'slot06', 'slot07', 'slot08', 'slot09', 'slot10'];
-  
-  const firebaseConfig = {
-    apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
-    authDomain: "intellipark2025-327e9.firebaseapp.com",
-    databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
-    projectId: "intellipark2025-327e9",
-    storageBucket: "intellipark2025-327e9.appspot.com",
-    messagingSenderId: "126333727252",
-    appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
-  };
-  
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  
-  let scanning = true;
-  const reader = new Html5Qrcode("reader");
-  const debugEl = document.getElementById('debug');
+    const BACKEND = 'https://intellipark-backend-ar00.onrender.com';
+    const validSlots = ['slot01', 'slot02', 'slot03', 'slot04', 'slot05', 
+                        'slot06', 'slot07', 'slot08', 'slot09', 'slot10'];
+    const firebaseConfig = {
+      apiKey: "AIzaSyAuH0ng67kSk0arMNOxujgIpnBVr0pwNWE",
+      authDomain: "intellipark2025-327e9.firebaseapp.com",
+      databaseURL: "https://intellipark2025-327e9-default-rtdb.firebaseio.com",
+      projectId: "intellipark2025-327e9",
+      storageBucket: "intellipark2025-327e9.appspot.com",
+      messagingSenderId: "126333727252",
+      appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  function log(msg) {
-    debugEl.innerHTML += '<br>' + msg;
-    debugEl.scrollTop = debugEl.scrollHeight;
-    console.log(msg);
-  }
+    let scanning = true;
+    const reader = new Html5Qrcode("reader");
+    const debugEl = document.getElementById('debug');
 
-  async function processQR(qrData) {
-    if (!scanning) return;
-    scanning = false;
-
-    try {
-      log('🔍 QR: ' + qrData.substring(0, 80));
-      
-      let ticketId, slot, plate, qrType;
-
-      // Parse QR code
-      if (qrData.includes('verify?')) {
-        const url = new URL(qrData);
-        ticketId = url.searchParams.get('ticketId');
-        slot = url.searchParams.get('slot');
-        plate = url.searchParams.get('plate');
-        qrType = url.searchParams.get('type');
-        log('📋 URL Format detected');
-      } else if (qrData.includes('|')) {
-        const parts = qrData.split('|');
-        if (parts.length < 3) throw new Error('Invalid QR format');
-        [ticketId, slot, plate] = parts;
-        qrType = null;
-        log('📋 Pipe Format detected');
-      } else {
-        throw new Error('Unsupported QR format');
-      }
-
-      if (!ticketId || !slot || !plate) {
-        throw new Error('Missing required data');
-      }
-
-      if (!validSlots.includes(slot)) {
-        log(`❌ Invalid slot: ${slot}`);
-        throw new Error(`Invalid slot: ${slot}`);
-      }
-
-      log(`📌 TicketID: ${ticketId}`);
-      log(`📌 Slot: ${slot} (Valid ✓)`);
-      log(`📌 Plate: ${plate}`);
-      log(`📌 QR Type: ${qrType || 'not specified'}`);
-
-      document.getElementById('loading').style.display = 'block';
-
-      log('🔍 Fetching ticket from Firebase...');
-      const ticketSnapshot = await db.ref(`/tickets/${ticketId}`).once('value');
-      
-      if (!ticketSnapshot.exists()) {
-        log('❌ Ticket not found in database');
-        throw new Error('Invalid ticket');
-      }
-
-      const ticketData = ticketSnapshot.val();
-      log('📦 Ticket Data: ' + JSON.stringify(ticketData));
-      
-      if (ticketData.used) {
-        log('❌ Ticket already used');
-        throw new Error('Ticket already used');
-      }
-
-      const ticketType = ticketData.type || qrType;
-      log(`🎫 Ticket Type: ${ticketType}`);
-
-      if (ticketType === 'walkin') {
-        log('💰 Walk-in ticket - checking payment status...');
-        if (ticketData.status !== 'Paid') {
-          log('❌ Walk-in ticket not paid');
-          throw new Error('Payment required');
-        }
-        log('✅ Walk-in payment verified - GATE CAN OPEN');
-      } else if (ticketType === 'reservation') {
-        log('🚪 Reservation ticket - checking entrance verification...');
-        if (!ticketData.entryVerified) {
-          log('❌ Reservation not checked in at entrance');
-          throw new Error('Please check in at entrance first');
-        }
-        log('✅ Reservation entry verified - GATE CAN OPEN');
-      } else {
-        log('⚠️ No ticket type specified - using smart detection...');
-        
-        if (ticketData.status === 'Paid' && !ticketData.entryVerified) {
-          log('✅ Detected as walk-in (paid, no entry check) - GATE CAN OPEN');
-        } 
-        else if (ticketData.entryVerified) {
-          log('✅ Detected as reservation (entry verified) - GATE CAN OPEN');
-        } 
-        else {
-          log('❌ Ticket not verified');
-          throw new Error('Ticket not verified');
-        }
-      }
-
-      if (ticketData.slot !== slot) {
-        log(`⚠️ Slot mismatch: Ticket says ${ticketData.slot}, QR says ${slot}`);
-        throw new Error('Slot mismatch');
-      }
-
-      if (ticketData.plate !== plate) {
-        log(`⚠️ Plate mismatch: Ticket says ${ticketData.plate}, QR says ${plate}`);
-        throw new Error('Plate mismatch');
-      }
-
-      log('🌐 Calling backend to record exit...');
-
-      const response = await fetch(`${BACKEND}/api/exit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          slot, 
-          plate, 
-          exitTime: new Date().toISOString(), 
-          ticketId 
-        })
-      });
-
-      log('📡 Backend response: ' + response.status);
-
-      if (!response.ok) {
-        const err = await response.json();
-        log('❌ Backend error: ' + (err.error || 'Unknown error'));
-        throw new Error(err.error || 'Backend error');
-      }
-
-      const result = await response.json();
-      log('✅ EXIT SUCCESS!');
-      log('⏱️ Parking Duration: ' + result.duration);
-      log('🚗 Slot freed: ' + result.slot);
-
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('success').style.display = 'block';
-
-      let count = 10;
-      const interval = setInterval(() => {
-        document.getElementById('countdown').textContent = `Closing in ${count--}s`;
-        if (count < 0) {
-          clearInterval(interval);
-          location.reload();
-        }
-      }, 1000);
-
-    } catch (error) {
-      log('❌ ERROR: ' + error.message);
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('error').style.display = 'block';
-      document.getElementById('errMsg').textContent = error.message;
-      setTimeout(() => location.reload(), 7000);
+    function log(msg) {
+      debugEl.innerHTML += '<br>' + msg;
+      debugEl.scrollTop = debugEl.scrollHeight;
+      console.log(msg);
     }
-  }
+    function showManualExit() {
+      document.getElementById('manualExitModal').classList.add('active');
+    }
+    function hideManualExit() {
+      document.getElementById('manualExitModal').classList.remove('active');
+      document.getElementById('exitPlateNumber').value = '';
+    }
 
-  log('🚀 IntelliPark Exit Kiosk - 10 Slot System');
-  log('📍 Valid slots: ' + validSlots.join(', '));
-  log('📷 Starting camera...');
-  
-  // ✅ FIXED: Better camera configuration
-  reader.start(
-    { facingMode: "user" },
-    { 
-      fps: 30, 
-      qrbox: { width: 300, height: 300 },
-      aspectRatio: 1.0  // ✅ Force square ratio
-    },
-    (decodedText) => {
-      if (scanning) {
-        reader.stop().then(() => processQR(decodedText));
+    // Manual exit by plate (walk-in logic accepted)
+    async function processManualExit() {
+      const plate = document.getElementById('exitPlateNumber').value.trim().toUpperCase();
+      if (!plate || plate.length < 3) {
+        log('❌ Invalid plate number entered');
+        alert('Please enter a valid plate number.');
+        return;
       }
-    },
-    () => {}
-  ).catch(err => {
-    log('❌ Camera error: ' + err.message);
-  });
-</script>
+      hideManualExit();
+      scanning = false;
+      document.getElementById('loading').style.display = 'block';
+      try {
+        log(`🔍 Searching for ticket with plate: ${plate}...`);
+        const ticketsSnapshot = await db.ref('/tickets').once('value');
+        const tickets = ticketsSnapshot.val() || {};
+        let matchedTicketId = null;
+        let matchedTicket = null;
+        for (const [tid, ticket] of Object.entries(tickets)) {
+          if (
+            ticket.plate && ticket.plate.trim().toUpperCase() === plate &&
+            ticket.status === 'Paid' &&
+            !ticket.exitVerified // Only allow still-exitable tickets
+          ) {
+            matchedTicket = ticket;
+            matchedTicketId = tid;
+            break;
+          }
+        }
+        if (!matchedTicket) {
+          throw new Error('No active ticket found for this plate');
+        }
+        if (matchedTicket.exitVerified) {
+          throw new Error('Ticket already used for exit');
+        }
+        // Call backend to register exit
+        const response = await fetch(`${BACKEND}/api/exit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slot: matchedTicket.slot,
+            plate: plate,
+            exitTime: new Date().toISOString(),
+            ticketId: matchedTicketId
+          })
+        });
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'Backend error while exiting');
+        }
+        const result = await response.json();
+        log('✅ Exit successful!');
+        log('⏱️ Parking Duration: ' + result.duration);
+        log('🚗 Slot freed: ' + result.slot);
+        await db.ref(`/tickets/${matchedTicketId}`).update({
+          exitVerified: true,
+          exitTime: new Date().toISOString()
+        });
+        await db.ref(`/slots/${matchedTicket.slot}/status`).set('available');
+        await db.ref('/gateControl').set({
+          status: 'open',
+          plate: plate,
+          slot: matchedTicket.slot,
+          ticketId: matchedTicketId,
+          openedAt: new Date().toISOString()
+        });
+        log('🚪 Gate opened for manual exit');
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('success').style.display = 'block';
+        let count = 10;
+        const interval = setInterval(() => {
+          document.getElementById('countdown').textContent = `Closing in ${count--}s`;
+          if (count < 0) {
+            clearInterval(interval);
+            db.ref('/gateControl').set({
+              status: 'closed',
+              plate: plate,
+              slot: matchedTicket.slot,
+              closedAt: new Date().toISOString(),
+              reason: 'auto-close'
+            });
+            log('🔒 Gate auto-closed');
+            location.reload();
+          }
+        }, 1000);
+      } catch (error) {
+        log('❌ ERROR: ' + error.message);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('errMsg').textContent = error.message;
+        setTimeout(() => {
+          document.getElementById('error').style.display = 'none';
+          scanning = true;
+        }, 7000);
+      }
+    }
+
+    // QR exit: allow walk-ins (status: Paid), reservations (entry or payment), just not already exited
+    async function processQR(qrData) {
+      if (!scanning) return;
+      scanning = false;
+      try {
+        log('🔍 QR: ' + qrData.substring(0, 80));
+        let ticketId, slot, plate, qrType;
+        if (qrData.includes('verify?')) {
+          const url = new URL(qrData);
+          ticketId = url.searchParams.get('ticketId');
+          slot = url.searchParams.get('slot');
+          plate = url.searchParams.get('plate');
+          qrType = url.searchParams.get('type');
+          log('📋 URL Format detected');
+        } else if (qrData.includes('|')) {
+          const parts = qrData.split('|');
+          if (parts.length < 3) throw new Error('Invalid QR format');
+          [ticketId, slot, plate] = parts;
+          qrType = null;
+          log('📋 Pipe Format detected');
+        } else {
+          throw new Error('Unsupported QR format');
+        }
+        if (!ticketId || !slot || !plate) {
+          throw new Error('Missing required data');
+        }
+        if (!validSlots.includes(slot)) {
+          log(`❌ Invalid slot: ${slot}`);
+          throw new Error(`Invalid slot: ${slot}`);
+        }
+        log(`📌 TicketID: ${ticketId}`);
+        log(`📌 Slot: ${slot} (Valid ✓)`);
+        log(`📌 Plate: ${plate}`);
+        log(`📌 QR Type: ${qrType || 'not specified'}`);
+        document.getElementById('loading').style.display = 'block';
+        log('🔍 Fetching ticket from Firebase...');
+        const ticketSnapshot = await db.ref(`/tickets/${ticketId}`).once('value');
+        if (!ticketSnapshot.exists()) {
+          log('❌ Ticket not found in database');
+          throw new Error('Invalid ticket');
+        }
+        const ticketData = ticketSnapshot.val();
+        log('📦 Ticket Data: ' + JSON.stringify(ticketData));
+        if (ticketData.exitVerified) {
+          throw new Error('Ticket already used for exit');
+        }
+        const ticketType = ticketData.type || qrType;
+        // ENTRY LOGIC: Walk-ins: only status=Paid required; Reservation: paid+entryVerified
+        let canExit = false;
+        if (ticketType === 'walkin') {
+          if (ticketData.status === 'Paid') canExit = true;
+        } else if (ticketType === 'reservation') {
+          // PAID plus entryVerified for reservations
+          if (ticketData.status === 'Paid' && ticketData.entryVerified === true) canExit = true;
+        } else {
+          // Default: lenient fallback for paid/no exit
+          if (ticketData.status === 'Paid' && !ticketData.exitVerified) canExit = true;
+        }
+        if (!canExit) {
+          log('❌ Not eligible for exit');
+          if (ticketData.type === 'reservation') {
+            if (!ticketData.entryVerified) {
+              throw new Error('Please check in at entrance first');
+            }
+          } else if (ticketData.type === 'walkin') {
+            if (ticketData.status !== 'Paid') {
+              throw new Error('Payment required before exit');
+            }
+            // Don't require entryVerified for walk-in!
+          }
+        }
+        if (ticketData.slot !== slot) {
+          log(`⚠️ Slot mismatch: Ticket says ${ticketData.slot}, QR says ${slot}`);
+          throw new Error('Slot mismatch');
+        }
+        if (ticketData.plate.trim().toUpperCase() !== plate.trim().toUpperCase()) {
+          log(`⚠️ Plate mismatch: Ticket says ${ticketData.plate}, QR/manual says ${plate}`);
+          throw new Error('Plate mismatch');
+        }
+        log('🌐 Calling backend to record exit...');
+        const response = await fetch(`${BACKEND}/api/exit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slot,
+            plate,
+            exitTime: new Date().toISOString(),
+            ticketId
+          })
+        });
+        if (!response.ok) {
+          const err = await response.json();
+          log('❌ Backend error: ' + (err.error || 'Unknown error'));
+          throw new Error(err.error || 'Backend error');
+        }
+        const result = await response.json();
+        log('✅ EXIT SUCCESS!');
+        log('⏱️ Parking Duration: ' + result.duration);
+        log('🚗 Slot freed: ' + result.slot);
+        await db.ref(`/tickets/${ticketId}`).update({
+          exitVerified: true,
+          exitTime: new Date().toISOString()
+        });
+        await db.ref(`/slots/${slot}/status`).set('available');
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('success').style.display = 'block';
+        let count = 10;
+        const interval = setInterval(() => {
+          document.getElementById('countdown').textContent = `Closing in ${count--}s`;
+          if (count < 0) {
+            clearInterval(interval);
+            location.reload();
+          }
+        }, 1000);
+      } catch (error) {
+        log('❌ ERROR: ' + error.message);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('errMsg').textContent = error.message;
+        setTimeout(() => location.reload(), 7000);
+      }
+    }
+
+    log('🚀 IntelliPark Exit Kiosk - 10 Slot System');
+    log('📍 Valid slots: ' + validSlots.join(', '));
+    log('📷 Starting camera...');
+    reader.start(
+      { facingMode: "user" },
+      {
+        fps: 30,
+        qrbox: { width: 300, height: 300 },
+        aspectRatio: 1.0
+      },
+      (decodedText) => {
+        if (scanning) {
+          reader.stop().then(() => processQR(decodedText));
+        }
+      },
+      () => {}
+    ).catch(err => {
+      log('❌ Camera error: ' + err.message);
+    });
+  </script>
 </body>
 </html>

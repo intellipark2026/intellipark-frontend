@@ -7,8 +7,8 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  
   <style>
-
   @keyframes glowText {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -352,7 +352,6 @@
     margin-top: 15px;
   }
 
-  /* ✅ Virtual Keyboard Styles */
   .virtual-keyboard {
     position: fixed;
     bottom: 0;
@@ -417,10 +416,6 @@
     background: rgba(255,77,77,0.5);
   }
 
-  .key.space {
-    min-width: 200px;
-  }
-
   .key.close-keyboard {
     background: rgba(0,255,153,0.2);
     border-color: rgba(0,255,153,0.4);
@@ -432,7 +427,7 @@
   }
 
   #notification {
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -494,7 +489,6 @@
     </div>
   </div>
 
-  <!-- ✅ Manual Entry Modal -->
   <div class="manual-modal" id="manualModal" onclick="event.stopPropagation();">
     <div class="manual-form" onclick="event.stopPropagation();">
       <h2>🔐 Manual Entry</h2>
@@ -521,7 +515,6 @@
     </div>
   </div>
 
-  <!-- ✅ Virtual Keyboard -->
   <div class="virtual-keyboard" id="virtualKeyboard">
     <div class="keyboard-row">
       <div class="key" onclick="addChar('A')">A</div>
@@ -645,7 +638,6 @@
       closeKeyboard();
     }
 
-    // ✅ Virtual Keyboard Functions
     document.addEventListener('DOMContentLoaded', function() {
       const plateInput = document.getElementById('plateNumber');
       
@@ -690,108 +682,166 @@
       activeInput = null;
     }
 
+    // ✅ UPDATED VERIFY FUNCTION WITH gateControl
     async function verifyByPlate() {
-      const plate = document.getElementById('plateNumber').value.trim().toUpperCase();
-      
-      if (!plate) {
-        showNotification('⚠️ Please enter plate number', 'error');
-        return;
-      }
-      
-      if (plate.length < 5) {
-        showNotification('⚠️ Invalid plate number', 'error');
-        return;
-      }
-      
-      console.log('🔐 Searching for plate:', plate);
-      hideManualEntry();
-      showNotification('🔍 Searching reservation...', 'success');
-      
-      try {
-        const ticketsSnapshot = await db.ref('/tickets').once('value');
-        const tickets = ticketsSnapshot.val();
-        
-        let matchedTicket = null;
-        let matchedTicketId = null;
-        
-        if (tickets) {
-          for (const [tid, ticket] of Object.entries(tickets)) {
-            if (ticket.plate.toUpperCase() === plate && 
-                !ticket.used && 
-                !ticket.entryVerified &&
-                ticket.status === 'Paid') {
-              
-              console.log('✅ Found ticket:', tid);
-              matchedTicket = ticket;
-              matchedTicketId = tid;
-              break;
-            }
-          }
-        }
-        
-        if (!matchedTicket) {
-          console.log('🔍 Checking reservations...');
-          const reservationsSnapshot = await db.ref('/reservations').once('value');
-          const reservations = reservationsSnapshot.val();
-          
-          if (reservations) {
-            for (const [slot, reservation] of Object.entries(reservations)) {
-              if (reservation.plate.toUpperCase() === plate && 
-                  reservation.status === 'Paid') {
-                
-                console.log('✅ Found reservation:', slot);
-                
-                const tempTicketId = `TEMP_${Date.now()}`;
-                await db.ref(`/tickets/${tempTicketId}`).set({
-                  ticketId: tempTicketId,
-                  slot: slot,
-                  plate: plate,
-                  vehicle: reservation.vehicle || 'N/A',
-                  name: reservation.name || 'Guest',
-                  timestamp: new Date().toISOString(),
-                  type: 'reservation',
-                  status: 'Paid',
-                  used: false,
-                  entryVerified: true,
-                  entryTime: new Date().toISOString()
-                });
-                
-                showNotification('✅ Welcome! Gate opening...', 'success');
-                
-                setTimeout(() => {
-                  window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(reservation.name || 'Guest')}&plate=${plate}&vehicle=${reservation.vehicle || 'N/A'}&time=${reservation.time || ''}`;
-                }, 2000);
-                
-                return;
-              }
-            }
-          }
-        }
-        
-        if (matchedTicket) {
-          await db.ref(`/tickets/${matchedTicketId}`).update({
-            entryVerified: true,
-            entryTime: new Date().toISOString()
-          });
-          
-          showNotification('✅ Welcome! Gate opening...', 'success');
-          
-          setTimeout(() => {
-            window.location.href = `kiosk-entry-confirmed.html?slot=${matchedTicket.slot}&name=${encodeURIComponent(matchedTicket.name || 'Guest')}&plate=${matchedTicket.plate}&vehicle=${matchedTicket.vehicle}&time=${matchedTicket.reservationTime || ''}`;
-          }, 2000);
-          
-        } else {
-          throw new Error('No paid reservation found for this plate');
-        }
-        
-      } catch (error) {
-        console.error('❌', error.message);
-        showNotification('❌ ' + error.message, 'error');
-        setTimeout(() => {
-          showManualEntry();
-        }, 3000);
+  const plate = document.getElementById('plateNumber').value.trim().toUpperCase();
+  
+  if (!plate || plate.length < 5) {
+    showNotification('⚠️ Invalid plate number', 'error');
+    return;
+  }
+  
+  hideManualEntry();
+  showNotification('🔍 Searching...', 'success');
+  
+  try {
+    const ticketsSnapshot = await db.ref('/tickets').once('value');
+    const tickets = ticketsSnapshot.val() || {};
+    
+    let matchedTicket = null;
+    let matchedTicketId = null;
+    
+    for (const [tid, ticket] of Object.entries(tickets)) {
+      if (
+        ticket.plate && ticket.plate.toUpperCase() === plate &&
+        ticket.status === 'Paid' &&
+        !ticket.used &&               // Only tickets not yet used for entry!
+        !ticket.entryVerified         // Only tickets not yet entered
+      ) {
+        matchedTicket = ticket;
+        matchedTicketId = tid;
+        break;
       }
     }
+
+    
+    if (matchedTicket) {
+      console.log('✅ TICKET FOUND');
+      
+      // Update ticket
+      await db.ref(`/tickets/${matchedTicketId}`).update({
+        entryVerified: true,
+        entryTime: new Date().toISOString(),
+        used: true,
+        plate: plate    // <-- Add this line to keep plate consistent
+      });
+
+
+      
+      console.log('🚪 GATE OPENING...');
+      
+      // ✅ OPEN GATE - Set status to "open"
+      await db.ref('/gateControl').set({
+        status: 'open',
+        plate: plate,
+        slot: matchedTicket.slot,
+        ticketId: matchedTicketId,
+        name: matchedTicket.name,
+        openedAt: new Date().toISOString()
+      });
+      
+      console.log('✅ Gate OPEN command sent to Firebase');
+      
+      showNotification(`✅ Welcome ${matchedTicket.name}!\n\n🚪 Gate opening...`, 'success');
+      
+      // ✅ AUTO-CLOSE - GUARANTEED TO EXECUTE
+      console.log('⏱️  Starting 8-second auto-close timer...');
+      
+      // Store the closure in a variable so it definitely executes
+      const closureTimer = setTimeout(function() {
+        console.log('🔒 GATE AUTO-CLOSING NOW (8 seconds passed)');
+        
+        // ✅ CLOSE GATE - Set status to "closed"
+        db.ref('/gateControl').set({
+          status: 'closed',
+          plate: plate,
+          slot: matchedTicket.slot,
+          closedAt: new Date().toISOString(),
+          reason: 'auto-close'
+        });
+        
+        console.log('✅ Gate CLOSED command sent to Firebase');
+      }, 8000); // 8 seconds in milliseconds
+      
+      // Redirect AFTER we've set the auto-close timer
+      setTimeout(() => {
+        window.location.href = `kiosk-entry-confirmed.html?slot=${matchedTicket.slot}&name=${encodeURIComponent(matchedTicket.name)}&plate=${plate}&vehicle=${matchedTicket.vehicle}&time=${matchedTicket.reservationTime || 'N/A'}`;
+      }, 2000);
+      
+    } else {
+      throw new Error('No paid reservation found for this plate');
+    }
+    
+  } catch (error) {
+    console.error('❌ ERROR:', error.message);
+    showNotification('❌ ' + error.message, 'error');
+    setTimeout(() => {
+      showManualEntry();
+    }, 3000);
+  }
+}
+
+
+
+
+    // ✅ SEND GATE OPEN SIGNAL
+    // ✅ FIXED - Uses SET instead of UPDATE
+// ✅ AUTO-CLOSE VERSION
+    async function sendGateOpenSignal(slot, plate, ticketId, name) {
+      console.log('\n=== SENDING GATE SIGNAL ===');
+      console.log('Slot:', slot);
+      console.log('Plate:', plate);
+      
+      showNotification(`✅ ${name}!\n\n🚪 Gate opening...`, 'success');
+      
+      try {
+        console.log('🚪 Setting gateControl to OPEN');
+        
+        // ✅ SET TO OPEN
+        await db.ref('/gateControl').set({
+          status: 'open',
+          plate: plate,
+          slot: slot,
+          ticketId: ticketId,
+          timestamp: new Date().toISOString(),
+          name: name
+        });
+        
+        console.log('✅ Gate OPEN signal sent!');
+        
+        // ✅ AUTO-CLOSE AFTER 8 SECONDS
+        console.log('⏱️  Auto-close timer started (8 seconds)');
+        
+        setTimeout(async () => {
+          try {
+            console.log('🔒 Auto-closing gate...');
+            
+            await db.ref('/gateControl').set({
+              status: 'closed',
+              plate: plate,
+              slot: slot,
+              timestamp: new Date().toISOString(),
+              autoClosedAt: new Date().toISOString()
+            });
+            
+            console.log('✅ Gate CLOSED signal sent!');
+          } catch (closeErr) {
+            console.error('❌ Auto-close error:', closeErr);
+          }
+        }, 8000); // 8 seconds
+        
+        // Redirect to confirmation
+        setTimeout(() => {
+          window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=N/A&time=${new Date().toLocaleTimeString()}`;
+        }, 2000);
+        
+      } catch (err) {
+        console.error('❌ Firebase error:', err);
+        showNotification('❌ Firebase error', 'error');
+      }
+    }
+
+
 
     function onScanSuccess(decodedText) {
       if (scannedRecently) return;
@@ -875,11 +925,9 @@
                       entryTime: new Date().toISOString()
                     });
 
-                    showNotification("✅ Welcome! Opening gate...", "success");
+                    // ✅ SEND gateControl SIGNAL FOR QR
+                    sendGateOpenSignal(slot, plate, ticketId, name);
                     
-                    setTimeout(() => {
-                      window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
-                    }, 2000);
                   } else {
                     console.error("❌ Reservation mismatch or not paid");
                     showNotification("❌ Invalid reservation", "error");
@@ -896,31 +944,7 @@
               showNotification("❌ Verification failed", "error");
               setTimeout(() => { scannedRecently = false; }, 3000);
             });
-          } else {
-            console.log("⚠️ No ticketId, checking reservation directly...");
-            
-            db.ref(`/reservations/${slot}`).get().then(snapshot => {
-              if (snapshot.exists()) {
-                const reservation = snapshot.val();
-                if (reservation.plate === plate && reservation.status === "Paid") {
-                  showNotification("✅ Verified! Opening gate...", "success");
-                  setTimeout(() => {
-                    window.location.href = `kiosk-entry-confirmed.html?slot=${slot}&name=${encodeURIComponent(name)}&plate=${plate}&vehicle=${vehicle}&time=${time}`;
-                  }, 2000);
-                } else {
-                  showNotification("❌ Invalid reservation", "error");
-                  setTimeout(() => { scannedRecently = false; }, 3000);
-                }
-              } else {
-                showNotification("❌ No reservation found", "error");
-                setTimeout(() => { scannedRecently = false; }, 3000);
-              }
-            });
           }
-        } else {
-          console.error("❌ Invalid QR type:", qrType);
-          showNotification("❌ Invalid QR type", "error");
-          setTimeout(() => { scannedRecently = false; }, 2000);
         }
       } catch (e) {
         console.error("❌ QR parse error:", e);
@@ -932,6 +956,7 @@
     window.onload = () => {
       console.log("🚀 IntelliPark Kiosk Entry - 10 Slot System");
       console.log("📍 Valid slots:", validSlots);
+      console.log("✅ gateControl integration enabled");
       
       const config = {
         fps: 30,

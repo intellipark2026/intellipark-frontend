@@ -21,7 +21,6 @@
         rgba(0, 0, 0, 0.9)
       );
     }
-
     .receipt {
       background: #f8f8f8;
       color: #111;
@@ -33,33 +32,27 @@
       border-top: 8px dashed #aaa;
       border-bottom: 8px dashed #aaa;
     }
-
     .header {
       text-align: center;
       margin-bottom: 20px;
     }
-
     .header h1 {
       font-size: 30px;
       margin: 0;
       letter-spacing: 3px;
     }
-
     .header p {
       font-size: 18px;
       margin: 5px 0;
     }
-
     .line {
       border-bottom: 2px dashed #aaa;
       margin: 20px 0;
     }
-
     .info {
       font-size: 20px;
       line-height: 1.8;
     }
-
     .buttons {
       display: flex;
       flex-direction: column;
@@ -68,7 +61,6 @@
       gap: 15px;
       margin-top: 30px;
     }
-
     .action-button {
       display: inline-block;
       width: 80%;
@@ -83,35 +75,29 @@
       transition: all 0.3s ease-in-out;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     }
-
     .action-button:hover {
       background: #333;
       transform: scale(1.03);
     }
-
     .action-button.disabled {
       background: #666;
       cursor: not-allowed;
       opacity: 0.6;
     }
-
     .loading {
       text-align: center;
       color: #666;
       font-style: italic;
       margin-top: 10px;
     }
-
     .footer {
       text-align: center;
       margin-top: 30px;
       font-size: 16px;
     }
-
     .footer p {
       margin: 6px 0;
     }
-
     .small-text {
       font-size: 14px;
       text-align: center;
@@ -127,168 +113,146 @@
       <p>ENTRANCE RECEIPT</p>
       <p id="date"></p>
     </div>
-
     <div class="line"></div>
-
     <div class="info">
       SLOT: <span id="slotLabel"></span><br>
       VEHICLE: <span id="vehicleLabel"></span><br>
       PLATE NO.: <span id="plateLabel"></span><br>
       CHECK-IN: <span id="checkinTime"></span>
     </div>
-
     <div class="line"></div>
-
     <div class="buttons">
       <a id="payLink" class="action-button disabled">💳 CLICK HERE TO PAY</a>
       <a id="navLink" class="action-button" target="_blank">📍 CLICK FOR DIRECTION</a>
     </div>
-
     <p id="loadingText" class="loading">Generating payment link...</p>
-
     <div class="line"></div>
-
     <div class="footer">
       <p>Thank You for Choosing IntelliPark!</p>
     </div>
-
     <div class="small-text">www.intellipark.io</div>
   </div>
-
   <script>
-  // Get parameters from URL
-  const params = new URLSearchParams(window.location.search);
-  const slot = params.get("slot") || "N/A";
-  const vehicle = params.get("vehicle") || "N/A";
-  let plate = params.get("plate") || "N/A";
+    // Get parameters from URL
+    const params = new URLSearchParams(window.location.search);
+    const slot = params.get("slot") || "N/A";
+    const vehicle = params.get("vehicle") || "N/A";
+    let plate = params.get("plate") || "N/A";
 
-  console.log('🚀 IntelliPark Kiosk Payment');
-  console.log('📋 Received params:', { slot, vehicle, plate });
+    console.log('🚀 IntelliPark Kiosk Payment');
+    console.log('📋 Received params:', { slot, vehicle, plate });
 
-  // ✅ FIX: Ensure plate is in correct format
-  plate = plate.replace(/\s+/g, '').toUpperCase();
-  
-  const plateRegex = /^[A-Z]{3}[0-9]{3}$/;
-  if (!plateRegex.test(plate)) {
-    console.warn(`⚠️ Invalid plate format: ${plate}. Generating walk-in plate...`);
-    const randomNum = Math.floor(100 + Math.random() * 900);
-    plate = `WLK${randomNum}`;
-    console.log(`✅ Generated walk-in plate: ${plate}`);
-  }
-
-  // Display receipt information
-  document.getElementById("slotLabel").textContent = slot.toUpperCase();
-  document.getElementById("vehicleLabel").textContent = vehicle.toUpperCase();
-  document.getElementById("plateLabel").textContent = plate;
-
-  // Show current date/time
-  const now = new Date();
-  const dateOptions = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-  document.getElementById("date").textContent = now.toLocaleDateString('en-US', dateOptions);
-  document.getElementById("checkinTime").textContent = now.toLocaleTimeString();
-
-  // Set navigation link immediately
-  document.getElementById("navLink").href = `https://intellipark-kiosk.web.app/kiosk-navigation.html?slot=${slot}`;
-
-  // ✅ FIX: Calculate amount based on vehicle type
-  const vehicleType = vehicle.toLowerCase();
-  let amount = 50; // Default for car
-  
-  if (vehicleType === 'motorcycle') {
-    amount = 30;
-  } else if (vehicleType === 'car') {
-    amount = 50;
-  }
-  
-  console.log(`💰 Calculated amount: ₱${amount} for ${vehicleType}`);
-
-  // Create payment invoice via backend
-  async function createPaymentInvoice() {
-    try {
-      console.log('🔄 Creating payment invoice...');
-      console.log('📋 Input data:', { slot, vehicle: vehicleType, plate, amount });
-      
-      // Generate email for walk-ins
-      const walkInEmail = `walkin.${plate.toLowerCase()}@intellipark.io`;
-      
-      // ✅ FIXED: Include all required parameters
-      const requestBody = {
-        slot: slot,
-        vehicle: vehicleType === 'motorcycle' ? 'Motorcycle' : 'Car', // Capitalize for backend
-        plate: plate,
-        email: walkInEmail,
-        type: 'walk-in',
-        amount: amount // ✅ CRITICAL: Added amount parameter
-      };
-      
-      console.log('📤 Sending request to backend:', JSON.stringify(requestBody, null, 2));
-
-      const response = await fetch('https://intellipark-backend-ar00.onrender.com/api/create-invoice', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      console.log('📥 Response status:', response.status);
-      console.log('📥 Response ok:', response.ok);
-      
-      const responseText = await response.text();
-      console.log('📥 Response text:', responseText);
-      
-      if (!response.ok) {
-        console.error('❌ Server error:', responseText);
-        throw new Error(`Backend validation error: ${responseText}`);
-      }
-
-      const data = JSON.parse(responseText);
-      console.log('📦 Parsed response:', data);
-      
-      if (data.success && data.invoiceUrl) {
-        // Enable payment button and set the link
-        const payButton = document.getElementById("payLink");
-        payButton.href = data.invoiceUrl;
-        payButton.classList.remove('disabled');
-        payButton.target = "_blank";
-        
-        // Hide loading text
-        document.getElementById("loadingText").style.display = 'none';
-        
-        console.log('✅ Payment link generated:', data.invoiceUrl);
-        console.log('✅ External ID:', data.externalId);
-        console.log('💰 Amount: ₱' + amount);
-      } else {
-        console.error('❌ Invalid response structure:', data);
-        document.getElementById("loadingText").textContent = '❌ Error: Invalid response from server';
-        document.getElementById("loadingText").style.color = 'red';
-      }
-
-    } catch (error) {
-      console.error('❌ Full error:', error);
-      console.error('❌ Error message:', error.message);
-      
-      document.getElementById("loadingText").textContent = `❌ Error: ${error.message}`;
-      document.getElementById("loadingText").style.color = 'red';
-      document.getElementById("loadingText").style.fontSize = '14px';
-      
-      // Add retry button
-      const retryBtn = document.createElement('button');
-      retryBtn.textContent = '🔄 Retry Payment Link';
-      retryBtn.className = 'action-button';
-      retryBtn.style.marginTop = '15px';
-      retryBtn.onclick = () => {
-        document.getElementById("loadingText").textContent = 'Generating payment link...';
-        document.getElementById("loadingText").style.color = '#666';
-        retryBtn.remove();
-        createPaymentInvoice();
-      };
-      document.querySelector('.buttons').appendChild(retryBtn);
+    // ✅ FIX: Ensure plate is in correct format
+    plate = plate.replace(/\s+/g, '').toUpperCase();
+    const plateRegex = /^[A-Z]{3}[0-9]{3}$/;
+    if (!plateRegex.test(plate)) {
+      console.warn(`⚠️ Invalid plate format: ${plate}. Generating walk-in plate...`);
+      const randomNum = Math.floor(100 + Math.random() * 900);
+      plate = `WLK${randomNum}`;
+      console.log(`✅ Generated walk-in plate: ${plate}`);
     }
-  }
 
-  // Create invoice on page load
-  createPaymentInvoice();
-</script>
+    // Display receipt information
+    document.getElementById("slotLabel").textContent = slot.toUpperCase();
+    document.getElementById("vehicleLabel").textContent = vehicle.toUpperCase();
+    document.getElementById("plateLabel").textContent = plate;
+
+    // Show current date/time
+    const now = new Date();
+    const dateOptions = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    document.getElementById("date").textContent = now.toLocaleDateString('en-US', dateOptions);
+    document.getElementById("checkinTime").textContent = now.toLocaleTimeString();
+
+    // Set navigation video link (based on slot number)
+    function getSlotNumber(slotLabel) {
+      const match = slotLabel.match(/\d+$/);
+      return match ? parseInt(match[0], 10) : null;
+    }
+    const slotNum = getSlotNumber(slot);
+    let navVideo;
+    if (slotNum !== null && slotNum >= 1 && slotNum <= 10) {
+      navVideo = `navigate-slot-${slotNum}.mp4`;
+    } else {
+      navVideo = "navigate-slot-1.mp4";
+    }
+    document.getElementById("navLink").href = navVideo;
+    document.getElementById("navLink").target = "_blank";
+
+    // Calculate payment amount
+    const vehicleType = vehicle.toLowerCase();
+    let amount = 50; // Default for car
+    if (vehicleType === 'motorcycle') {
+      amount = 30;
+    } else if (vehicleType === 'car') {
+      amount = 50;
+    }
+    console.log(`💰 Calculated amount: ₱${amount} for ${vehicleType}`);
+
+    // Create payment invoice via backend
+    async function createPaymentInvoice() {
+      try {
+        console.log('🔄 Creating payment invoice...');
+        console.log('📋 Input data:', { slot, vehicle: vehicleType, plate, amount });
+        const walkInEmail = `walkin.${plate.toLowerCase()}@intellipark.io`;
+        const requestBody = {
+          slot: slot,
+          vehicle: vehicleType === 'motorcycle' ? 'Motorcycle' : 'Car',
+          plate: plate,
+          email: walkInEmail,
+          type: 'walk-in',
+          amount: amount
+        };
+        console.log('📤 Sending request to backend:', JSON.stringify(requestBody, null, 2));
+        const response = await fetch('https://intellipark-backend-ar00.onrender.com/api/create-invoice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+        console.log('📥 Response status:', response.status);
+        console.log('📥 Response ok:', response.ok);
+        const responseText = await response.text();
+        console.log('📥 Response text:', responseText);
+        if (!response.ok) {
+          console.error('❌ Server error:', responseText);
+          throw new Error(`Backend validation error: ${responseText}`);
+        }
+        const data = JSON.parse(responseText);
+        console.log('📦 Parsed response:', data);
+        if (data.success && data.invoiceUrl) {
+          const payButton = document.getElementById("payLink");
+          payButton.href = data.invoiceUrl;
+          payButton.classList.remove('disabled');
+          payButton.target = "_blank";
+          document.getElementById("loadingText").style.display = 'none';
+          console.log('✅ Payment link generated:', data.invoiceUrl);
+          console.log('✅ External ID:', data.externalId);
+          console.log('💰 Amount: ₱' + amount);
+        } else {
+          console.error('❌ Invalid response structure:', data);
+          document.getElementById("loadingText").textContent = '❌ Error: Invalid response from server';
+          document.getElementById("loadingText").style.color = 'red';
+        }
+      } catch (error) {
+        console.error('❌ Full error:', error);
+        console.error('❌ Error message:', error.message);
+        document.getElementById("loadingText").textContent = `❌ Error: ${error.message}`;
+        document.getElementById("loadingText").style.color = 'red';
+        document.getElementById("loadingText").style.fontSize = '14px';
+        const retryBtn = document.createElement('button');
+        retryBtn.textContent = '🔄 Retry Payment Link';
+        retryBtn.className = 'action-button';
+        retryBtn.style.marginTop = '15px';
+        retryBtn.onclick = () => {
+          document.getElementById("loadingText").textContent = 'Generating payment link...';
+          document.getElementById("loadingText").style.color = '#666';
+          retryBtn.remove();
+          createPaymentInvoice();
+        };
+        document.querySelector('.buttons').appendChild(retryBtn);
+      }
+    }
+    // Create invoice on page load
+    createPaymentInvoice();
+  </script>
 </body>
 </html>
