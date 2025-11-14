@@ -420,7 +420,7 @@
 
       <div class="form-group">
         <label for="plate">PLATE NUMBER:</label>
-        <input type="text" id="plate" required placeholder="e.g., ABC123" pattern="^[A-Za-z]{3}[0-9]{3}$">
+        <input type="text" id="plate" required placeholder="e.g., 123ABC (Motorcycle) or ABC1234 (Car)" pattern="^[A-Za-z]{3}[0-9]{3}$">
       </div>
 
       <div class="form-group">
@@ -477,17 +477,18 @@
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
-
-  const validSlots = ['slot01', 'slot02', 'slot03', 'slot04', 'slot05', 
-                      'slot06', 'slot07', 'slot08', 'slot09', 'slot10'];
-
   const params = new URLSearchParams(window.location.search);
   const selectedSlot = params.get("slot");
-  
+  const validSlots = ['slot01','slot02','slot03','slot04','slot05','slot06','slot07','slot08','slot09','slot10'];
+
+  console.log("Browsing booking.html for slot: ", selectedSlot); // Add this line!
+
   if (!selectedSlot || !validSlots.includes(selectedSlot)) {
     alert("Invalid or no slot selected. Redirecting...");
     window.location.href = "levels.html";
   }
+
+  
   
   document.getElementById("selectedSlot").textContent = selectedSlot.toUpperCase();
 
@@ -559,11 +560,20 @@
       return;
     }
 
-    const platePattern = /^[A-Za-z]{3}[0-9]{3}$/;
-    if (!platePattern.test(plate)) {
-      alert("Plate format must be ABC123 (3 letters + 3 numbers).");
+    const motorcyclePattern = /^[0-9]{3}[A-Za-z]{3}$/;
+    const carPattern = /^[A-Za-z]{3}[0-9]{4}$/;
+    const vehicleType = vehicleSelect.value;
+
+    const plateUpper = plate.toUpperCase();
+
+    if (vehicleType === "Motorcycle" && !motorcyclePattern.test(plateUpper)) {
+      alert("Motorcycle plate must be in the format 123ABC (3 digits followed by 3 letters).");
+      return;
+    } else if (vehicleType === "Car" && !carPattern.test(plateUpper)) {
+      alert("Car plate must be in the format ABC1234 (3 letters followed by 4 digits).");
       return;
     }
+
 
     const now = normalize(new Date());
     const selectedTime = normalize(new Date());

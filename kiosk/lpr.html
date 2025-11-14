@@ -54,7 +54,7 @@
   </div>
 
 <script>
-  const video = document.getElementById('video');
+const video = document.getElementById('video');
 const loading = document.getElementById('loading');
 const plateResult = document.getElementById('plate-result');
 
@@ -72,6 +72,20 @@ navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
     plateResult.style.color = "red";
     plateResult.textContent = "Could not access webcam.";
 });
+
+function detectVehicleType(plate) {
+    const plateUpper = plate.toUpperCase().trim();
+    const motorcyclePattern = /^[0-9]{3}[A-Z]{3}$/;
+    const carPattern = /^[A-Z]{3}[0-9]{4}$/;
+
+    if (motorcyclePattern.test(plateUpper)) {
+        return "motorcycle";
+    } else if (carPattern.test(plateUpper)) {
+        return "car";
+    } else {
+        return null; // unknown or invalid format
+    }
+}
 
 async function autoScanPlate() {
     loading.style.display = "block";
@@ -102,15 +116,20 @@ async function autoScanPlate() {
 
         if (result.results && result.results.length > 0) {
             const detectedPlate = result.results[0].plate.toUpperCase();
+            const vehicleType = detectVehicleType(detectedPlate);
+
+            if (!vehicleType) {
+                plateResult.style.color = "#ffcc00";
+                plateResult.textContent = "Unrecognized plate format. Please try again.";
+                return;
+            }
+            
             plateResult.style.color = "#00ffd0";
-            plateResult.innerHTML = `Plate Detected: <span style="color: #fff;">${detectedPlate}</span>`;
+            plateResult.innerHTML = `Plate Detected: <span style="color: #fff;">${detectedPlate}</span><br>Vehicle Type: ${vehicleType.toUpperCase()}`;
             clearInterval(scanInterval); // Stop scanning when detected
-            // Get selected vehicle from localStorage/query if needed
-            const params = new URLSearchParams(window.location.search);
-            const vehicle = params.get("vehicle") || localStorage.getItem("vehicle") || "car";
-            // Optionally delay (1s) to show result, then redirect
+
             setTimeout(() => {
-                window.location.href = `kiosk-levels.html?plate=${encodeURIComponent(detectedPlate)}&vehicle=${encodeURIComponent(vehicle)}`;
+                window.location.href = `kiosk-levels.html?plate=${encodeURIComponent(detectedPlate)}&vehicle=${encodeURIComponent(vehicleType)}`;
             }, 1000);
         } else {
             plateResult.style.color = "#ffcc00";
@@ -123,6 +142,7 @@ async function autoScanPlate() {
         plateResult.textContent = "Error scanning license plate.";
     }
 }
+
 // Helper: Convert Base64 dataURL to Blob
 function dataURItoBlob(dataURI) {
     var byteString = atob(dataURI.split(',')[1]);
@@ -133,7 +153,6 @@ function dataURItoBlob(dataURI) {
     }
     return new Blob([ab], { type: 'image/jpeg' });
 }
-
 </script>
 </body>
 </html>

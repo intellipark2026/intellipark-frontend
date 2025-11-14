@@ -172,12 +172,21 @@
       <div class="label">CARS</div>
     </button>
   </div>
-
   <script>
-    function selectVehicle(type) {
-      localStorage.setItem("vehicle", type);
+  // Get plate from URL parameters passed from LPR page
+  const params = new URLSearchParams(window.location.search);
+  const plate = params.get("plate") || null;
+
+  function selectVehicle(type) {
+    if (!plate) {
+      alert("No license plate detected. Please start over.");
       window.location.href = "lpr.html";
+      return;
     }
-  </script>
+
+    // Pass both plate and selected vehicle to levels page
+    window.location.href = `kiosk-levels.html?plate=${encodeURIComponent(plate)}&vehicle=${encodeURIComponent(type)}`;
+  }
+</script>
 </body>
 </html>

@@ -61,12 +61,7 @@
       animation: spin 1s linear infinite; margin: 20px auto;
     }
     @keyframes spin { 100% { transform: rotate(360deg); } }
-    .debug {
-      position: fixed; bottom: 10px; left: 10px; right: 10px;
-      background: rgba(0,0,0,0.95); color: #0f0; padding: 15px;
-      border-radius: 10px; font-family: monospace; font-size: 11px;
-      max-height: 150px; overflow-y: auto; z-index: 9999;
-    }
+
     .manual-exit-btn {
       margin-top: 15px;
       padding: 12px 28px;
@@ -193,18 +188,15 @@
       display: none;
       box-shadow: 0 -5px 30px rgba(0,0,0,0.8);
     }
-
     .virtual-keyboard.active {
       display: block;
     }
-
     .keyboard-row {
       display: flex;
       justify-content: center;
       gap: 10px;
       margin-bottom: 10px;
     }
-
     .key {
       background: rgba(255,255,255,0.1);
       border: 2px solid rgba(255,255,255,0.3);
@@ -219,40 +211,33 @@
       user-select: none;
       font-family: 'Courier New', monospace;
     }
-
     .key:active {
       background: rgba(255,204,0,0.4);
       border-color: #ffcc00;
       transform: scale(0.95);
     }
-
     .key.number {
       background: rgba(0,150,255,0.2);
       border-color: rgba(0,150,255,0.4);
     }
-
     .key.number:active {
       background: rgba(0,150,255,0.5);
     }
-
     .key.backspace {
       background: rgba(255,77,77,0.2);
       border-color: rgba(255,77,77,0.4);
       min-width: 140px;
       font-size: 20px;
     }
-
     .key.backspace:active {
       background: rgba(255,77,77,0.5);
     }
-
     .key.close-keyboard {
       background: rgba(0,255,153,0.2);
       border-color: rgba(0,255,153,0.4);
       min-width: 160px;
       font-size: 20px;
     }
-
     .key.close-keyboard:active {
       background: rgba(0,255,153,0.5);
     }
@@ -360,8 +345,6 @@
     </div>
   </div>
 
-  <div class="debug" id="debug">Ready...</div>
-
   <script>
     const BACKEND = 'https://intellipark-backend-ar00.onrender.com';
     const validSlots = ['slot01', 'slot02', 'slot03', 'slot04', 'slot05', 
@@ -381,13 +364,6 @@
     let scanning = true;
     let activeInput = null;
     const reader = new Html5Qrcode("reader");
-    const debugEl = document.getElementById('debug');
-
-    function log(msg) {
-      debugEl.innerHTML += '<br>' + msg;
-      debugEl.scrollTop = debugEl.scrollHeight;
-      console.log(msg);
-    }
 
     // Virtual Keyboard Functions
     document.addEventListener('DOMContentLoaded', function() {
@@ -436,7 +412,6 @@
 
     function showManualExit() {
       document.getElementById('manualExitModal').classList.add('active');
-      log('🔑 Manual exit opened');
     }
 
     function hideManualExit() {
@@ -449,7 +424,6 @@
     async function processManualExit() {
       const plate = document.getElementById('exitPlateNumber').value.trim().toUpperCase();
       if (!plate || plate.length < 3) {
-        log('❌ Invalid plate number entered');
         alert('Please enter a valid plate number.');
         return;
       }
@@ -457,7 +431,6 @@
       scanning = false;
       document.getElementById('loading').style.display = 'block';
       try {
-        log(`🔍 Searching for ticket with plate: ${plate}...`);
         const ticketsSnapshot = await db.ref('/tickets').once('value');
         const tickets = ticketsSnapshot.val() || {};
         let matchedTicketId = null;
@@ -494,9 +467,6 @@
           throw new Error(err.error || 'Backend error while exiting');
         }
         const result = await response.json();
-        log('✅ Exit successful!');
-        log('⏱️ Parking Duration: ' + result.duration);
-        log('🚗 Slot freed: ' + result.slot);
         await db.ref(`/tickets/${matchedTicketId}`).update({
           exitVerified: true,
           exitTime: new Date().toISOString()
@@ -509,7 +479,6 @@
           ticketId: matchedTicketId,
           openedAt: new Date().toISOString()
         });
-        log('🚪 Gate opened for manual exit');
         document.getElementById('loading').style.display = 'none';
         document.getElementById('success').style.display = 'block';
         let count = 10;
@@ -524,12 +493,10 @@
               closedAt: new Date().toISOString(),
               reason: 'auto-close'
             });
-            log('🔒 Gate auto-closed');
             location.reload();
           }
         }, 1000);
       } catch (error) {
-        log('❌ ERROR: ' + error.message);
         document.getElementById('loading').style.display = 'none';
         document.getElementById('error').style.display = 'block';
         document.getElementById('errMsg').textContent = error.message;
@@ -545,7 +512,6 @@
       if (!scanning) return;
       scanning = false;
       try {
-        log('🔍 QR: ' + qrData.substring(0, 80));
         let ticketId, slot, plate, qrType;
         if (qrData.includes('verify?')) {
           const url = new URL(qrData);
@@ -553,13 +519,11 @@
           slot = url.searchParams.get('slot');
           plate = url.searchParams.get('plate');
           qrType = url.searchParams.get('type');
-          log('📋 URL Format detected');
         } else if (qrData.includes('|')) {
           const parts = qrData.split('|');
           if (parts.length < 3) throw new Error('Invalid QR format');
           [ticketId, slot, plate] = parts;
           qrType = null;
-          log('📋 Pipe Format detected');
         } else {
           throw new Error('Unsupported QR format');
         }
@@ -567,22 +531,14 @@
           throw new Error('Missing required data');
         }
         if (!validSlots.includes(slot)) {
-          log(`❌ Invalid slot: ${slot}`);
           throw new Error(`Invalid slot: ${slot}`);
         }
-        log(`📌 TicketID: ${ticketId}`);
-        log(`📌 Slot: ${slot} (Valid ✓)`);
-        log(`📌 Plate: ${plate}`);
-        log(`📌 QR Type: ${qrType || 'not specified'}`);
         document.getElementById('loading').style.display = 'block';
-        log('🔍 Fetching ticket from Firebase...');
         const ticketSnapshot = await db.ref(`/tickets/${ticketId}`).once('value');
         if (!ticketSnapshot.exists()) {
-          log('❌ Ticket not found in database');
           throw new Error('Invalid ticket');
         }
         const ticketData = ticketSnapshot.val();
-        log('📦 Ticket Data: ' + JSON.stringify(ticketData));
         if (ticketData.exitVerified) {
           throw new Error('Ticket already used for exit');
         }
@@ -596,7 +552,6 @@
           if (ticketData.status === 'Paid' && !ticketData.exitVerified) canExit = true;
         }
         if (!canExit) {
-          log('❌ Not eligible for exit');
           if (ticketData.type === 'reservation') {
             if (!ticketData.entryVerified) {
               throw new Error('Please check in at entrance first');
@@ -608,14 +563,11 @@
           }
         }
         if (ticketData.slot !== slot) {
-          log(`⚠️ Slot mismatch: Ticket says ${ticketData.slot}, QR says ${slot}`);
           throw new Error('Slot mismatch');
         }
         if (ticketData.plate.trim().toUpperCase() !== plate.trim().toUpperCase()) {
-          log(`⚠️ Plate mismatch: Ticket says ${ticketData.plate}, QR/manual says ${plate}`);
           throw new Error('Plate mismatch');
         }
-        log('🌐 Calling backend to record exit...');
         const response = await fetch(`${BACKEND}/api/exit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -628,13 +580,9 @@
         });
         if (!response.ok) {
           const err = await response.json();
-          log('❌ Backend error: ' + (err.error || 'Unknown error'));
           throw new Error(err.error || 'Backend error');
         }
         const result = await response.json();
-        log('✅ EXIT SUCCESS!');
-        log('⏱️ Parking Duration: ' + result.duration);
-        log('🚗 Slot freed: ' + result.slot);
         await db.ref(`/tickets/${ticketId}`).update({
           exitVerified: true,
           exitTime: new Date().toISOString()
@@ -651,7 +599,6 @@
           }
         }, 1000);
       } catch (error) {
-        log('❌ ERROR: ' + error.message);
         document.getElementById('loading').style.display = 'none';
         document.getElementById('error').style.display = 'block';
         document.getElementById('errMsg').textContent = error.message;
@@ -659,9 +606,6 @@
       }
     }
 
-    log('🚀 IntelliPark Exit Kiosk - 10 Slot System');
-    log('📍 Valid slots: ' + validSlots.join(', '));
-    log('📷 Starting camera...');
     reader.start(
       { facingMode: "user" },
       {
@@ -675,9 +619,7 @@
         }
       },
       () => {}
-    ).catch(err => {
-      log('❌ Camera error: ' + err.message);
-    });
+    ).catch(err => {});
   </script>
 </body>
 </html>
