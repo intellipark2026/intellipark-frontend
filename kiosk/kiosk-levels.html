@@ -267,104 +267,85 @@
   }
 
   // ✅ Helper function to generate valid plate number
-  function generateValidPlate() {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const plate = 
-      letters.charAt(Math.floor(Math.random() * 26)) +
-      letters.charAt(Math.floor(Math.random() * 26)) +
-      letters.charAt(Math.floor(Math.random() * 26)) +
-      Math.floor(100 + Math.random() * 900);
-    return plate; // Returns format like "ABC456"
+  // Read vehicle and plate from URL params (instead of generating)
+const params = new URLSearchParams(window.location.search);
+const vehicle = params.get('vehicle') || 'Car';
+const plate = params.get('plate') || null;
+
+async function handleLevelSelect(floorNum) {
+  const slots = floorSlots[floorNum];
+  
+  if (!plate) {
+    alert('No license plate data received, please scan again.');
+    window.location.href = 'lpr.html';
+    return; // stop further processing until valid plate exists
   }
 
-  async function handleLevelSelect(floorNum) {
-    const slots = floorSlots[floorNum];
-    
-    console.log(`🏢 Selected Floor ${floorNum}`);
-    console.log(`📍 Available slots to check:`, slots);
-    
-    // Get vehicle from previous page
-    const vehicle = sessionStorage.getItem("selectedVehicle") || "Car";
-    
-    // Generate valid temporary plate in ABC123 format
-    const plate = generateValidPlate();
-    
-    console.log("🚗 Walk-in booking:", { vehicle, plate, floor: floorNum });
-    
-    // Find first available slot on this floor
-    for (const slotId of slots) {
-      console.log(`🔍 Checking ${slotId}: ${slotStatuses[slotId]}`);
-      
-      if (slotStatuses[slotId] === "Available") {
-        const timestamp = new Date().toISOString();
-        const data = {
+  for (const slotId of slots) {
+    if (slotStatuses[slotId] === "Available") {
+      const timestamp = new Date().toISOString();
+      const data = {
+        name: "WalkIn",
+        email: "walkin@intellipark.io",
+        plate: plate,
+        vehicle: vehicle,
+        time: new Date().toLocaleTimeString(),
+        timestamp: timestamp,
+        type: 'walk-in',
+        reservedVia: 'Kiosk',
+        status: 'Pending'
+      };
+
+      try {
+        await db.ref(`/reservations/${slotId}`).set(data);
+        await db.ref(`/${slotId}`).update({ 
+          status: "Reserved", 
+          reserved: true,
+          reservedBy: `Walk-in ${plate}`,
+          reservationType: 'Kiosk',
+          vehicleType: vehicle,
           name: "WalkIn",
           email: "walkin@intellipark.io",
           plate: plate,
           vehicle: vehicle,
           time: new Date().toLocaleTimeString(),
-          timestamp: timestamp,
-          type: 'walk-in',
-          reservedVia: 'Kiosk',
-          status: 'Pending' // Will be updated to 'Paid' after payment
-        };
-        
-        try {
-          console.log(`📝 Reserving ${slotId}...`);
-          
-          await db.ref(`/reservations/${slotId}`).set(data);
-          await db.ref(`/${slotId}`).update({ 
-            status: "Reserved", 
-            reserved: true,
-            reservedBy: `Walk-in ${plate}`,
-            reservationType: 'Kiosk',
-            vehicleType: vehicle,
-            name: "WalkIn",
-            email: "walkin@intellipark.io",
-            plate: plate,
-            vehicle: vehicle,
-            time: new Date().toLocaleTimeString(),
-            bookedAt: timestamp
-          });
+          bookedAt: timestamp
+        });
 
-          console.log(`✅ Reserved ${slotId} for ${plate}`);
+        console.log(`Reserved ${slotId} for ${plate}`);
 
-          // Auto-release after 5 minutes if not paid
-          setTimeout(async () => {
-            const snap = await db.ref(`/${slotId}/status`).get();
-            if (snap.val() === "Reserved") {
-              const reservationSnap = await db.ref(`/reservations/${slotId}`).get();
-              if (reservationSnap.exists() && reservationSnap.val().status === 'Pending') {
-                await db.ref(`/${slotId}`).update({ 
-                  status: "Available", 
-                  reserved: false,
-                  name: "",
-                  email: "",
-                  plate: "",
-                  vehicle: "",
-                  time: "",
-                  bookedAt: ""
-                });
-                await db.ref(`/reservations/${slotId}`).remove();
-                console.log(`⏰ Auto-released ${slotId} (payment timeout)`);
-              }
+        setTimeout(async () => {
+          const snap = await db.ref(`/${slotId}/status`).get();
+          if (snap.val() === "Reserved") {
+            const reservationSnap = await db.ref(`/reservations/${slotId}`).get();
+            if (reservationSnap.exists() && reservationSnap.val().status === 'Pending') {
+              await db.ref(`/${slotId}`).update({ 
+                status: "Available", 
+                reserved: false,
+                name: "",
+                email: "",
+                plate: "",
+                vehicle: "",
+                time: "",
+                bookedAt: ""
+              });
+              await db.ref(`/reservations/${slotId}`).remove();
+              console.log(`Auto-released ${slotId} (payment timeout)`);
             }
-          }, 300000); // 5 minutes
+          }
+        }, 300000);
 
-          // Redirect to payment page
-          window.location.href = `kiosk-qr.html?slot=${slotId}&vehicle=${encodeURIComponent(vehicle)}&plate=${encodeURIComponent(plate)}`;
-          return;
-        } catch (err) {
-          console.error("❌ Error making reservation:", err);
-          alert("Something went wrong. Please try again.");
-          return;
-        }
+        window.location.href = `kiosk-qr.html?slot=${slotId}&vehicle=${encodeURIComponent(vehicle)}&plate=${encodeURIComponent(plate)}`;
+        return;
+      } catch (err) {
+        alert("Something went wrong. Please try again.");
+        return;
       }
     }
-    
-    console.log(`❌ No available slots on Floor ${floorNum}`);
-    alert(`No available slots on ${floorNum === '1' ? '1st' : '2nd'} Floor!`);
   }
+
+  alert(`No available slots on ${floorNum === '1' ? '1st' : '2nd'} Floor!`);
+}
 </script>
 </body>
 </html>

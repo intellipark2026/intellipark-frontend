@@ -68,8 +68,16 @@
     const slot = params.get("slot") || "A2";
     const vehicle = params.get("vehicle") || "Car";
     const plate = params.get("plate") || "ABC-123";
+    // Assemble a structured payload (for future extensibility, safety, searching)
     const receiptUrl = `https://intellipark-kiosk.web.app/kiosk-receipt.html?slot=${encodeURIComponent(slot)}&vehicle=${encodeURIComponent(vehicle)}&plate=${encodeURIComponent(plate)}`;
-    new QRious({ element: document.getElementById('qrcode'), value: receiptUrl, size: 250 });
+
+    new QRious({ 
+        element: document.getElementById('qrcode'), 
+        value: receiptUrl, 
+        size: 250 
+    });
+
+
     // Auto-return after 60 seconds
     let timeLeft = 60;
     const countdownEl = document.getElementById("countdown");

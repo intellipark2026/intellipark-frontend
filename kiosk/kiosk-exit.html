@@ -113,6 +113,12 @@
       text-align: center;
       font-size: 3vh;
     }
+    .manual-form p {
+      color: #aaa;
+      font-size: 16px;
+      text-align: center;
+      margin-bottom: 25px;
+    }
     .manual-form input {
       width: 100%;
       padding: 18px;
@@ -167,6 +173,89 @@
     .btn-cancel:hover {
       background: rgba(255,77,77,0.3);
     }
+    .manual-form .hint {
+      font-size: 13px;
+      color: #888;
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    /* Virtual Keyboard - MATCHED SIZE FROM ENTRANCE KIOSK */
+    .virtual-keyboard {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(20,20,20,0.98);
+      padding: 15px;
+      border-top: 2px solid rgba(255,204,0,0.5);
+      z-index: 2000;
+      display: none;
+      box-shadow: 0 -5px 30px rgba(0,0,0,0.8);
+    }
+
+    .virtual-keyboard.active {
+      display: block;
+    }
+
+    .keyboard-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .key {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 20px 24px;
+      min-width: 70px;
+      border-radius: 10px;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+      font-family: 'Courier New', monospace;
+    }
+
+    .key:active {
+      background: rgba(255,204,0,0.4);
+      border-color: #ffcc00;
+      transform: scale(0.95);
+    }
+
+    .key.number {
+      background: rgba(0,150,255,0.2);
+      border-color: rgba(0,150,255,0.4);
+    }
+
+    .key.number:active {
+      background: rgba(0,150,255,0.5);
+    }
+
+    .key.backspace {
+      background: rgba(255,77,77,0.2);
+      border-color: rgba(255,77,77,0.4);
+      min-width: 140px;
+      font-size: 20px;
+    }
+
+    .key.backspace:active {
+      background: rgba(255,77,77,0.5);
+    }
+
+    .key.close-keyboard {
+      background: rgba(0,255,153,0.2);
+      border-color: rgba(0,255,153,0.4);
+      min-width: 160px;
+      font-size: 20px;
+    }
+
+    .key.close-keyboard:active {
+      background: rgba(0,255,153,0.5);
+    }
   </style>
 </head>
 <body>
@@ -177,7 +266,7 @@
     <div class="right">
       <div id="reader"></div>
       <div class="text">SCAN QR TO EXIT</div>
-      <button class="manual-exit-btn" onclick="showManualExit();">
+      <button class="manual-exit-btn" onclick="event.stopPropagation(); showManualExit();">
         🔑 Manual Exit (No QR?)
       </button>
       <div class="box loading" id="loading">
@@ -195,6 +284,7 @@
       </div>
     </div>
   </div>
+
   <div class="manual-modal" id="manualExitModal" onclick="event.stopPropagation();">
     <div class="manual-form" onclick="event.stopPropagation();">
       <h2>🔐 Manual Exit</h2>
@@ -202,17 +292,76 @@
       <input type="text" 
              id="exitPlateNumber" 
              placeholder="Plate Number (e.g., ABC123)" 
-             maxlength="7" 
-             oninput="this.value = this.value.toUpperCase();">
+             maxlength="7"
+             onclick="event.stopPropagation();">
       <button onclick="processManualExit()" class="btn-exit">
         ✅ Exit Vehicle
       </button>
       <button onclick="hideManualExit()" class="btn-cancel">
         ❌ Cancel
       </button>
+      <p class="hint">Must match the plate number on your ticket</p>
     </div>
   </div>
+
+  <!-- Virtual Keyboard - MATCHED SIZE -->
+  <div class="virtual-keyboard" id="virtualKeyboard">
+    <div class="keyboard-row">
+      <div class="key" onclick="addChar('A')">A</div>
+      <div class="key" onclick="addChar('B')">B</div>
+      <div class="key" onclick="addChar('C')">C</div>
+      <div class="key" onclick="addChar('D')">D</div>
+      <div class="key" onclick="addChar('E')">E</div>
+      <div class="key" onclick="addChar('F')">F</div>
+      <div class="key" onclick="addChar('G')">G</div>
+    </div>
+    <div class="keyboard-row">
+      <div class="key" onclick="addChar('H')">H</div>
+      <div class="key" onclick="addChar('I')">I</div>
+      <div class="key" onclick="addChar('J')">J</div>
+      <div class="key" onclick="addChar('K')">K</div>
+      <div class="key" onclick="addChar('L')">L</div>
+      <div class="key" onclick="addChar('M')">M</div>
+      <div class="key" onclick="addChar('N')">N</div>
+    </div>
+    <div class="keyboard-row">
+      <div class="key" onclick="addChar('O')">O</div>
+      <div class="key" onclick="addChar('P')">P</div>
+      <div class="key" onclick="addChar('Q')">Q</div>
+      <div class="key" onclick="addChar('R')">R</div>
+      <div class="key" onclick="addChar('S')">S</div>
+      <div class="key" onclick="addChar('T')">T</div>
+    </div>
+    <div class="keyboard-row">
+      <div class="key" onclick="addChar('U')">U</div>
+      <div class="key" onclick="addChar('V')">V</div>
+      <div class="key" onclick="addChar('W')">W</div>
+      <div class="key" onclick="addChar('X')">X</div>
+      <div class="key" onclick="addChar('Y')">Y</div>
+      <div class="key" onclick="addChar('Z')">Z</div>
+    </div>
+    <div class="keyboard-row">
+      <div class="key number" onclick="addChar('0')">0</div>
+      <div class="key number" onclick="addChar('1')">1</div>
+      <div class="key number" onclick="addChar('2')">2</div>
+      <div class="key number" onclick="addChar('3')">3</div>
+      <div class="key number" onclick="addChar('4')">4</div>
+      <div class="key number" onclick="addChar('5')">5</div>
+    </div>
+    <div class="keyboard-row">
+      <div class="key number" onclick="addChar('6')">6</div>
+      <div class="key number" onclick="addChar('7')">7</div>
+      <div class="key number" onclick="addChar('8')">8</div>
+      <div class="key number" onclick="addChar('9')">9</div>
+      <div class="key backspace" onclick="backspace()">⌫ DELETE</div>
+    </div>
+    <div class="keyboard-row">
+      <div class="key close-keyboard" onclick="closeKeyboard()">✓ DONE</div>
+    </div>
+  </div>
+
   <div class="debug" id="debug">Ready...</div>
+
   <script>
     const BACKEND = 'https://intellipark-backend-ar00.onrender.com';
     const validSlots = ['slot01', 'slot02', 'slot03', 'slot04', 'slot05', 
@@ -230,6 +379,7 @@
     const db = firebase.database();
 
     let scanning = true;
+    let activeInput = null;
     const reader = new Html5Qrcode("reader");
     const debugEl = document.getElementById('debug');
 
@@ -238,15 +388,64 @@
       debugEl.scrollTop = debugEl.scrollHeight;
       console.log(msg);
     }
+
+    // Virtual Keyboard Functions
+    document.addEventListener('DOMContentLoaded', function() {
+      const plateInput = document.getElementById('exitPlateNumber');
+      
+      if (plateInput) {
+        plateInput.addEventListener('focus', function() {
+          activeInput = this;
+          document.getElementById('virtualKeyboard').classList.add('active');
+        });
+        
+        plateInput.setAttribute('readonly', 'readonly');
+        plateInput.addEventListener('click', function() {
+          this.removeAttribute('readonly');
+          activeInput = this;
+          document.getElementById('virtualKeyboard').classList.add('active');
+          setTimeout(() => {
+            this.setAttribute('readonly', 'readonly');
+          }, 100);
+        });
+      }
+    });
+
+    function addChar(char) {
+      if (!activeInput) return;
+      
+      const currentValue = activeInput.value;
+      const maxLength = parseInt(activeInput.getAttribute('maxlength')) || 999;
+      
+      if (currentValue.length < maxLength) {
+        activeInput.value = currentValue + char;
+        activeInput.dispatchEvent(new Event('input'));
+      }
+    }
+
+    function backspace() {
+      if (!activeInput) return;
+      activeInput.value = activeInput.value.slice(0, -1);
+      activeInput.dispatchEvent(new Event('input'));
+    }
+
+    function closeKeyboard() {
+      document.getElementById('virtualKeyboard').classList.remove('active');
+      activeInput = null;
+    }
+
     function showManualExit() {
       document.getElementById('manualExitModal').classList.add('active');
+      log('🔑 Manual exit opened');
     }
+
     function hideManualExit() {
       document.getElementById('manualExitModal').classList.remove('active');
       document.getElementById('exitPlateNumber').value = '';
+      closeKeyboard();
     }
 
-    // Manual exit by plate (walk-in logic accepted)
+    // Manual exit by plate
     async function processManualExit() {
       const plate = document.getElementById('exitPlateNumber').value.trim().toUpperCase();
       if (!plate || plate.length < 3) {
@@ -267,7 +466,7 @@
           if (
             ticket.plate && ticket.plate.trim().toUpperCase() === plate &&
             ticket.status === 'Paid' &&
-            !ticket.exitVerified // Only allow still-exitable tickets
+            !ticket.exitVerified
           ) {
             matchedTicket = ticket;
             matchedTicketId = tid;
@@ -280,7 +479,6 @@
         if (matchedTicket.exitVerified) {
           throw new Error('Ticket already used for exit');
         }
-        // Call backend to register exit
         const response = await fetch(`${BACKEND}/api/exit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -342,7 +540,7 @@
       }
     }
 
-    // QR exit: allow walk-ins (status: Paid), reservations (entry or payment), just not already exited
+    // QR exit logic
     async function processQR(qrData) {
       if (!scanning) return;
       scanning = false;
@@ -389,15 +587,12 @@
           throw new Error('Ticket already used for exit');
         }
         const ticketType = ticketData.type || qrType;
-        // ENTRY LOGIC: Walk-ins: only status=Paid required; Reservation: paid+entryVerified
         let canExit = false;
         if (ticketType === 'walkin') {
           if (ticketData.status === 'Paid') canExit = true;
         } else if (ticketType === 'reservation') {
-          // PAID plus entryVerified for reservations
           if (ticketData.status === 'Paid' && ticketData.entryVerified === true) canExit = true;
         } else {
-          // Default: lenient fallback for paid/no exit
           if (ticketData.status === 'Paid' && !ticketData.exitVerified) canExit = true;
         }
         if (!canExit) {
@@ -410,7 +605,6 @@
             if (ticketData.status !== 'Paid') {
               throw new Error('Payment required before exit');
             }
-            // Don't require entryVerified for walk-in!
           }
         }
         if (ticketData.slot !== slot) {

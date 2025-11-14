@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>License Plate Scanning — INTELLIPARK</title>
+<style>
+  body {
+    background: #181818;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  #scanner-box {
+    background: #222;
+    box-shadow: 0 0 60px #00ffd0;
+    border-radius: 18px;
+    width: 500px;
+    margin: 40px auto 0;
+    padding: 32px;
+  }
+  #security-msg {
+    font-weight: bold;
+    color: #ffed80;
+    margin-bottom: 18px;
+  }
+  #loading {
+    font-size: 1.2em;
+    color: #cfc;
+    margin-top: 18px;
+    display: none;
+  }
+  #plate-result {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #00ffd0;
+    margin-top: 22px;
+    display: none;
+  }
+  video {
+    border-radius: 12px;
+    box-shadow: 0 0 25px #00ffd0;
+  }
+</style>
+</head>
+<body>
+  <div id="scanner-box">
+    <div id="security-msg">
+      For your security, your license plate is being scanned.<br>
+      Please position your number plate in front of the camera.
+    </div>
+    <video id="video" width="440" height="260" autoplay playsinline></video>
+    <div id="loading">Scanning license plate for security verification...</div>
+    <div id="plate-result"></div>
+  </div>
+
+<script>
+  const video = document.getElementById('video');
+const loading = document.getElementById('loading');
+const plateResult = document.getElementById('plate-result');
+
+let scanInterval = null;
+
+navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+    video.srcObject = stream;
+
+    video.onloadedmetadata = () => {
+        // Start auto scan every 3 seconds
+        scanInterval = setInterval(autoScanPlate, 3000);
+    };
+}).catch(err => {
+    plateResult.style.display = "block";
+    plateResult.style.color = "red";
+    plateResult.textContent = "Could not access webcam.";
+});
+
+async function autoScanPlate() {
+    loading.style.display = "block";
+    plateResult.style.display = "none";
+
+    try {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL('image/jpeg');
+
+        const response = await fetch("https://api.platerecognizer.com/v1/plate-reader/", {
+            method: "POST",
+            headers: {
+                "Authorization": "Token 65b4a58b83013c660b98e2c3b57c32b1fc68edaa"
+            },
+            body: (() => {
+                const dt = new FormData();
+                dt.append("upload", dataURItoBlob(imageData), "frame.jpg");
+                return dt;
+            })()
+        });
+        const result = await response.json();
+
+        loading.style.display = "none";
+        plateResult.style.display = "block";
+
+        if (result.results && result.results.length > 0) {
+            const detectedPlate = result.results[0].plate.toUpperCase();
+            plateResult.style.color = "#00ffd0";
+            plateResult.innerHTML = `Plate Detected: <span style="color: #fff;">${detectedPlate}</span>`;
+            clearInterval(scanInterval); // Stop scanning when detected
+            // Get selected vehicle from localStorage/query if needed
+            const params = new URLSearchParams(window.location.search);
+            const vehicle = params.get("vehicle") || localStorage.getItem("vehicle") || "car";
+            // Optionally delay (1s) to show result, then redirect
+            setTimeout(() => {
+                window.location.href = `kiosk-levels.html?plate=${encodeURIComponent(detectedPlate)}&vehicle=${encodeURIComponent(vehicle)}`;
+            }, 1000);
+        } else {
+            plateResult.style.color = "#ffcc00";
+            plateResult.textContent = "No plate detected. Please try again or adjust the camera.";
+        }
+    } catch (error) {
+        loading.style.display = "none";
+        plateResult.style.display = "block";
+        plateResult.style.color = "red";
+        plateResult.textContent = "Error scanning license plate.";
+    }
+}
+// Helper: Convert Base64 dataURL to Blob
+function dataURItoBlob(dataURI) {
+    var byteString = atob(dataURI.split(',')[1]);
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: 'image/jpeg' });
+}
+
+</script>
+</body>
+</html>
