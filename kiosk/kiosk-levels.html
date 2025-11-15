@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,8 @@
       margin: 0; padding: 0;
       height: 100vh; width: 100vw;
       background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+        "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       color: white;
       display: flex;
       flex-direction: column;
@@ -174,11 +175,28 @@
       cursor: not-allowed;
       filter: grayscale(1);
     }
+
+    /* New: Home button styling (consistent theme) */
+    .home-btn {
+      margin-top: 12px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 0;
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      font-weight: 700;
+    }
   </style>
 </head>
 
 <body>
   <div class="header">SELECT PARKING LEVEL</div>
+
+  <!-- Return to Homepage Button (new) -->
+  <button id="home-btn" class="home-btn" title="Return to homepage">Return to Homepage</button>
 
   <div class="floors-container">
     <div class="floor-box" id="floor1-box" onclick="handleLevelSelect('1')">
@@ -212,7 +230,7 @@
     messagingSenderId: "126333727252",
     appId: "1:126333727252:web:ffa87b61f5e7b3a2122d01"
   };
-  
+
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
@@ -268,84 +286,92 @@
 
   // ✅ Helper function to generate valid plate number
   // Read vehicle and plate from URL params (instead of generating)
-const params = new URLSearchParams(window.location.search);
-const vehicle = params.get('vehicle') || 'Car';
-const plate = params.get('plate') || null;
+  const params = new URLSearchParams(window.location.search);
+  const vehicle = params.get('vehicle') || 'Car';
+  const plate = params.get('plate') || null;
 
-async function handleLevelSelect(floorNum) {
-  const slots = floorSlots[floorNum];
-  
-  if (!plate) {
-    alert('No license plate data received, please scan again.');
-    window.location.href = 'lpr.html';
-    return; // stop further processing until valid plate exists
-  }
+  async function handleLevelSelect(floorNum) {
+    const slots = floorSlots[floorNum];
+    
+    if (!plate) {
+      alert('No license plate data received, please scan again.');
+      window.location.href = 'lpr.html';
+      return; // stop further processing until valid plate exists
+    }
 
-  for (const slotId of slots) {
-    if (slotStatuses[slotId] === "Available") {
-      const timestamp = new Date().toISOString();
-      const data = {
-        name: "WalkIn",
-        email: "walkin@intellipark.io",
-        plate: plate,
-        vehicle: vehicle,
-        time: new Date().toLocaleTimeString(),
-        timestamp: timestamp,
-        type: 'walk-in',
-        reservedVia: 'Kiosk',
-        status: 'Pending'
-      };
-
-      try {
-        await db.ref(`/reservations/${slotId}`).set(data);
-        await db.ref(`/${slotId}`).update({ 
-          status: "Reserved", 
-          reserved: true,
-          reservedBy: `Walk-in ${plate}`,
-          reservationType: 'Kiosk',
-          vehicleType: vehicle,
+    for (const slotId of slots) {
+      if (slotStatuses[slotId] === "Available") {
+        const timestamp = new Date().toISOString();
+        const data = {
           name: "WalkIn",
           email: "walkin@intellipark.io",
           plate: plate,
           vehicle: vehicle,
           time: new Date().toLocaleTimeString(),
-          bookedAt: timestamp
-        });
+          timestamp: timestamp,
+          type: 'walk-in',
+          reservedVia: 'Kiosk',
+          status: 'Pending'
+        };
 
-        console.log(`Reserved ${slotId} for ${plate}`);
+        try {
+          await db.ref(`/reservations/${slotId}`).set(data);
+          await db.ref(`/${slotId}`).update({ 
+            status: "Reserved", 
+            reserved: true,
+            reservedBy: `Walk-in ${plate}`,
+            reservationType: 'Kiosk',
+            vehicleType: vehicle,
+            name: "WalkIn",
+            email: "walkin@intellipark.io",
+            plate: plate,
+            vehicle: vehicle,
+            time: new Date().toLocaleTimeString(),
+            bookedAt: timestamp
+          });
 
-        setTimeout(async () => {
-          const snap = await db.ref(`/${slotId}/status`).get();
-          if (snap.val() === "Reserved") {
-            const reservationSnap = await db.ref(`/reservations/${slotId}`).get();
-            if (reservationSnap.exists() && reservationSnap.val().status === 'Pending') {
-              await db.ref(`/${slotId}`).update({ 
-                status: "Available", 
-                reserved: false,
-                name: "",
-                email: "",
-                plate: "",
-                vehicle: "",
-                time: "",
-                bookedAt: ""
-              });
-              await db.ref(`/reservations/${slotId}`).remove();
-              console.log(`Auto-released ${slotId} (payment timeout)`);
+          console.log(`Reserved ${slotId} for ${plate}`);
+
+          setTimeout(async () => {
+            const snap = await db.ref(`/${slotId}/status`).get();
+            if (snap.val() === "Reserved") {
+              const reservationSnap = await db.ref(`/reservations/${slotId}`).get();
+              if (reservationSnap.exists() && reservationSnap.val().status === 'Pending') {
+                await db.ref(`/${slotId}`).update({ 
+                  status: "Available", 
+                  reserved: false,
+                  name: "",
+                  email: "",
+                  plate: "",
+                  vehicle: "",
+                  time: "",
+                  bookedAt: ""
+                });
+                await db.ref(`/reservations/${slotId}`).remove();
+                console.log(`Auto-released ${slotId} (payment timeout)`);
+              }
             }
-          }
-        }, 300000);
+          }, 300000);
 
-        window.location.href = `kiosk-qr.html?slot=${slotId}&vehicle=${encodeURIComponent(vehicle)}&plate=${encodeURIComponent(plate)}`;
-        return;
-      } catch (err) {
-        alert("Something went wrong. Please try again.");
-        return;
+          window.location.href = `kiosk-qr.html?slot=${slotId}&vehicle=${encodeURIComponent(vehicle)}&plate=${encodeURIComponent(plate)}`;
+          return;
+        } catch (err) {
+          alert("Something went wrong. Please try again.");
+          return;
+        }
       }
     }
+
+    alert(`No available slots on ${floorNum === '1' ? '1st' : '2nd'} Floor!`);
   }
 
-  alert(`No available slots on ${floorNum === '1' ? '1st' : '2nd'} Floor!`);
-}
-</script>
+  // Wire the homepage button (navigate to kiosk-start.html)
+  const homeBtn = document.getElementById('home-btn');
+  if (homeBtn) {
+    homeBtn.addEventListener('click', () => {
+      window.location.href = 'kiosk-start.html';
+    });
+  }
+  </script>
 </body>
 </html>

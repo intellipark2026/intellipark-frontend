@@ -40,6 +40,18 @@
     border-radius: 12px;
     box-shadow: 0 0 25px #00ffd0;
   }
+  /* Optional: style for the new button to match theme without inline styles */
+  .home-btn {
+    margin-top: 14px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 0;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
 </style>
 </head>
 <body>
@@ -49,6 +61,10 @@
       Please position your number plate in front of the camera.
     </div>
     <video id="video" width="440" height="260" autoplay playsinline></video>
+
+    <!-- New: Return to Homepage button (inline navigation or JS handler) -->
+    <button id="home-btn" class="home-btn">Return to Homepage</button>
+
     <div id="loading">Scanning license plate for security verification...</div>
     <div id="plate-result"></div>
   </div>
@@ -57,6 +73,12 @@
 const video = document.getElementById('video');
 const loading = document.getElementById('loading');
 const plateResult = document.getElementById('plate-result');
+const homeBtn = document.getElementById('home-btn');
+
+// Navigate back to kiosk-start.html when button is clicked
+homeBtn.addEventListener('click', function() {
+  window.location.href = 'kiosk-start.html';
+});
 
 let scanInterval = null;
 

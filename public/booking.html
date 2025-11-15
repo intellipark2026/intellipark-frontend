@@ -105,25 +105,12 @@
       100% { text-shadow:0 0 10px #fff,0 0 20px #fff,0 0 30px #fff,0 0 40px rgba(255,255,255,0.5),0 0 50px rgba(255,255,255,0.4),0 0 60px rgba(255,255,255,0.3);}
     }
 
-    p {
-      font-size: 16px;
-      margin-bottom: 25px;
-      color: #ccc;
-    }
+    p { font-size: 16px; margin-bottom: 25px; color: #ccc; }
 
     /* FORM ELEMENTS */
-    .form-group {
-      text-align: left;
-      margin-bottom: 20px;
-    }
+    .form-group { text-align: left; margin-bottom: 20px; }
 
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: #ddd;
-      font-size: 15px;
-    }
+    label { display: block; font-weight: 600; margin-bottom: 6px; color: #ddd; font-size: 15px; }
 
     input, select {
       width: 100%;
@@ -146,31 +133,7 @@
       backdrop-filter: blur(18px);
     }
 
-    /* SELECT DROPDOWN STYLING */
-    select {
-      cursor: pointer;
-    }
-
-    select option {
-      background: rgba(30, 30, 30, 0.95);
-      color: #fff;
-      padding: 10px;
-    }
-
-    select::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    select::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.05);
-    }
-
-    select::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.2);
-      border-radius: 4px;
-    }
-
-    /* PRICE DISPLAY BOX */
+    /* PRICE DISPLAY */
     .price-display {
       background: rgba(255,255,255,0.1);
       border: 2px solid rgba(255,255,255,0.3);
@@ -181,19 +144,8 @@
       backdrop-filter: blur(12px);
     }
 
-    .price-label {
-      font-size: 12px;
-      color: #aaa;
-      margin-bottom: 5px;
-      letter-spacing: 1px;
-    }
-
-    .price-amount {
-      font-size: 32px;
-      font-weight: 700;
-      color: #fff;
-      text-shadow: 0 0 10px rgba(255,255,255,0.5);
-    }
+    .price-label { font-size: 12px; color: #aaa; margin-bottom: 5px; letter-spacing: 1px; }
+    .price-amount { font-size: 32px; font-weight: 700; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
 
     /* TERMS BOX */
     .terms-box {
@@ -212,27 +164,13 @@
     .terms-box strong { color: #fff; }
 
     /* CHECKBOX */
-    .terms-check {
-      margin-top: 15px;
-    }
-
-    .terms-check label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      color: #ddd;
-      font-weight: 600;
-      cursor: pointer;
-      user-select: none;
-    }
+    .terms-check { margin-top: 15px; }
+    .terms-check label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #ddd; font-weight: 600; cursor: pointer; }
 
     .terms-check input[type="checkbox"] {
       appearance: none;
       -webkit-appearance: none;
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
+      width: 22px; height: 22px; border-radius: 6px;
       border: 2px solid #888;
       background: rgba(255,255,255,0.1);
       cursor: pointer;
@@ -243,156 +181,33 @@
       flex-shrink: 0;
     }
 
-    .terms-check input[type="checkbox"]:checked {
-      border-color: #fff;
-      background: #fff;
-    }
-
+    .terms-check input[type="checkbox"]:checked { border-color: #fff; background: #fff; }
     .terms-check input[type="checkbox"]:checked::after {
-      content: "✔";
-      color: #000;
-      font-size: 14px;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      content: "✔"; color: #000; font-size: 14px;
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
       pointer-events: none;
     }
 
     /* BUTTONS */
-    .submit-btn {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.08);
-      color: #fff;
-      font-weight: 600;
-      font-size: 17px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 15px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-      backdrop-filter: blur(12px);
+    .submit-btn { width: 100%; padding: 14px; border: none; border-radius: 16px;
+      background: rgba(255,255,255,0.08); color: #fff; font-weight: 600; font-size: 17px;
+      cursor: pointer; transition: all 0.3s ease; margin-top: 15px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25); backdrop-filter: blur(12px);
     }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+    .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.35); backdrop-filter: blur(18px); }
 
-    .submit-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .submit-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
-      backdrop-filter: blur(18px);
-    }
-
-    .back-btn {
-      display: inline-block;
-      margin-top: 25px;
-      text-decoration: none;
-      color: #aaa;
-      font-weight: 500;
-      font-size: 15px;
-    }
-
+    .back-btn { display: inline-block; margin-top: 25px; text-decoration: none; color: #aaa; font-weight: 500; font-size: 15px; }
     .back-btn:hover { color: #fff; }
 
-    /* ✅ MOBILE RESPONSIVE IMPROVEMENTS */
+    /* RESPONSIVE */
     @media (max-width: 768px) {
-      .navbar {
-        padding: 12px 20px;
-      }
-
-      .navbar img {
-        height: 35px;
-      }
-
-      .navbar a span {
-        font-size: 16px;
-      }
-
-      .container {
-        padding: 30px 25px;
-        margin-top: 40px;
-      }
-
-      h2 {
-        font-size: 22px;
-      }
-
-      p {
-        font-size: 14px;
-      }
-
-      .price-amount {
-        font-size: 28px;
-      }
-
-      .terms-box {
-        font-size: 12px;
-        padding: 12px;
-      }
-
-      .terms-check label {
-        font-size: 13px;
-      }
-
-      input, select {
-        font-size: 14px;
-        padding: 11px 12px;
-      }
-
-      .submit-btn {
-        font-size: 16px;
-        padding: 13px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        padding: 25px 20px;
-        margin-top: 30px;
-        width: 97%;
-      }
-
-      h2 {
-        font-size: 20px;
-      }
-
-      .navbar {
-        padding: 10px 15px;
-      }
-
-      .navbar img {
-        height: 30px;
-        margin-right: 8px;
-      }
-
-      label {
-        font-size: 14px;
-      }
-
-      .price-display {
-        padding: 12px 15px;
-      }
-
-      .price-amount {
-        font-size: 26px;
-      }
-
-      .terms-box {
-        font-size: 11px;
-        line-height: 1.5;
-      }
-
-      .back-btn {
-        font-size: 14px;
-      }
+      .container { padding: 30px 25px; margin-top: 40px; }
+      h2 { font-size: 22px; }
+      .price-amount { font-size: 28px; }
+      .terms-box { font-size: 12px; padding: 12px; }
     }
   </style>
-
 </head>
 
 <body>
@@ -418,9 +233,14 @@
         <input type="email" id="email" required>
       </div>
 
+      <!-- Plate with broad pattern (accepting multiple styles) -->
       <div class="form-group">
         <label for="plate">PLATE NUMBER:</label>
-        <input type="text" id="plate" required placeholder="e.g., 123ABC (Motorcycle) or ABC1234 (Car)" pattern="^[A-Za-z]{3}[0-9]{3}$">
+        <input type="text"
+               id="plate"
+               required
+               placeholder="e.g., 123ABC (Motorcycle) or ABC1234 (Car)"
+               pattern="([A-Za-z]{3}[-\s]?\d{3,4})|(\d{3}[-\s]?[A-Za-z]{3})">
       </div>
 
       <div class="form-group">
@@ -481,15 +301,13 @@
   const selectedSlot = params.get("slot");
   const validSlots = ['slot01','slot02','slot03','slot04','slot05','slot06','slot07','slot08','slot09','slot10'];
 
-  console.log("Browsing booking.html for slot: ", selectedSlot); // Add this line!
+  console.log("Browsing booking.html for slot: ", selectedSlot);
 
   if (!selectedSlot || !validSlots.includes(selectedSlot)) {
     alert("Invalid or no slot selected. Redirecting...");
     window.location.href = "levels.html";
   }
 
-  
-  
   document.getElementById("selectedSlot").textContent = selectedSlot.toUpperCase();
 
   const form = document.getElementById("bookingForm");
@@ -503,7 +321,6 @@
   let selectedPrice = 0;
   vehicleSelect.addEventListener("change", () => {
     const vehicleType = vehicleSelect.value;
-    
     if (vehicleType === "Motorcycle") {
       selectedPrice = 30;
       priceAmount.textContent = "₱30";
@@ -516,7 +333,6 @@
       selectedPrice = 0;
       priceDisplay.style.display = "none";
     }
-    
     console.log(`Selected: ${vehicleType} - ₱${selectedPrice}`);
   });
 
@@ -560,20 +376,17 @@
       return;
     }
 
-    const motorcyclePattern = /^[0-9]{3}[A-Za-z]{3}$/;
-    const carPattern = /^[A-Za-z]{3}[0-9]{4}$/;
-    const vehicleType = vehicleSelect.value;
+    // Broad JS validation to align with HTML pattern
+    const motorcyclePattern = /^\d{3}[-\s]?[A-Za-z]{3}$/i;
+    const carPattern = /^[A-Za-z]{3}[-\s]?\d{3,4}$/i;
 
-    const plateUpper = plate.toUpperCase();
-
-    if (vehicleType === "Motorcycle" && !motorcyclePattern.test(plateUpper)) {
+    if (vehicle === "Motorcycle" && !motorcyclePattern.test(plate)) {
       alert("Motorcycle plate must be in the format 123ABC (3 digits followed by 3 letters).");
       return;
-    } else if (vehicleType === "Car" && !carPattern.test(plateUpper)) {
-      alert("Car plate must be in the format ABC1234 (3 letters followed by 4 digits).");
+    } else if (vehicle === "Car" && !carPattern.test(plate)) {
+      alert("Car plate must be in the format ABC123 or ABC1234 (3 letters followed by 3 or 4 digits).");
       return;
     }
-
 
     const now = normalize(new Date());
     const selectedTime = normalize(new Date());
@@ -594,7 +407,6 @@
     reserveBtn.textContent = "Processing...";
 
     try {
-      // ✅ Run both operations in parallel for faster execution
       const [slotSnapshot, apiResponse] = await Promise.all([
         db.ref(`/${selectedSlot}`).get(),
         fetch("https://intellipark-backend-ar00.onrender.com/api/create-invoice", {
@@ -612,22 +424,18 @@
         })
       ]);
 
-      // ✅ Check slot validity
       if (!slotSnapshot.exists()) {
         alert(`Slot ${selectedSlot} does not exist in the system.`);
         window.location.replace("levels.html");
         return;
       }
-      
+
       const slotData = slotSnapshot.val();
       if (slotData.status !== "Available") {
         alert(`Sorry, ${selectedSlot.toUpperCase()} is no longer available.`);
         window.location.replace("levels.html");
         return;
       }
-
-      // ✅ Check API response
-      console.log("📥 Response status:", apiResponse.status);
 
       if (!apiResponse.ok) {
         const errorText = await apiResponse.text();
@@ -642,7 +450,7 @@
       
       if (invoiceUrl) {
         console.log("✅ Redirecting to payment:", invoiceUrl);
-        window.location.replace(invoiceUrl); // ✅ Faster redirect
+        window.location.replace(invoiceUrl);
       } else {
         console.error("❌ No invoice URL found in response:", result);
         throw new Error("No invoice URL received from server");
